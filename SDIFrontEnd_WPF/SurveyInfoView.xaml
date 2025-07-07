@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.SurveyInfoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+           
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition> </RowDefinition>
+
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.Row="0">
+            <TextBlock Text="{Binding Survey.SurveyCode}" d:Text="Survey Code" FontSize="16" Margin="10,0,0,0"/>
+            <TextBlock Text="{Binding Survey.Title}" d:Text="Title" FontSize="12" Margin="10,0,0,0"/>
+            <TextBlock Text="{Binding Survey.Cohort}" d:Text="Survey Type" FontSize="12" Margin="10,0,0,0"/>
+            <TextBlock Text="{Binding Survey.Mode}" d:Text="Mode" FontSize="12" Margin="10,00,0,0"/>
+            <TextBlock Text="{Binding Survey.CreationDate, StringFormat=d}" d:Text="Creation Date" FontSize="12" Margin="10,00,0,0"/>
+            
+            <TextBlock>
+                <Run Text="User States: " FontWeight="Bold"/>
+                <Run Text="{Binding UserStates, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock>
+                <Run Text="Screened Products: " FontWeight="Bold"/>
+                <Run Text="{Binding ScreenedProducts, Mode=OneWay}"/>
+            </TextBlock>
+
+            <TextBlock>
+                <Run Text="Languages: " FontWeight="Bold"/>
+                <Run Text="{Binding Languages, Mode=OneWay}"/>
+            </TextBlock>
+        </StackPanel>
+
+        
+    </Grid>
+</UserControl>

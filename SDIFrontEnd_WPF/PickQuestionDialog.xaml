@@ -1,0 +1,54 @@
+﻿<Window x:Class="SDIFrontEnd_WPF.PickQuestionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+        xmlns:lib ="clr-namespace:ITCLib;assembly=ITCLib"
+        mc:Ignorable="d"
+        Title="Select Question" Height="300" Width="500"
+        WindowStartupLocation="CenterOwner">
+    <DockPanel Margin="10">
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MaxWidth="350">
+            <ListBox x:Name="questionList"
+                     ItemsSource="{Binding Questions}"
+                     SelectionMode="Single"
+                     SelectedItem="{Binding SelectedQuestion, Mode=TwoWay}"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel IsItemsHost="True" Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type lib:SurveyQuestion}">
+                        <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Margin="5" Padding="10" Width="250">
+                            <StackPanel>
+                                <TextBlock Text="{Binding SurveyCode}" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding VarName.VarName}" FontSize="14" FontWeight="SemiBold" Margin="0,5,0,0"/>
+                                <TextBlock Text="{Binding VarName.VarLabel}" TextWrapping="Wrap" FontStyle="Italic" Foreground="DarkSlateGray"/>
+
+                                <TextBlock Text="PreA:" FontWeight="Bold" Margin="0,8,0,0"/>
+                                <TextBlock Text="{Binding PreAW.WordingText}" TextWrapping="Wrap"/>
+
+                                <TextBlock Text="LitQ:" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding LitQW.WordingText}" TextWrapping="Wrap"/>
+
+                                <TextBlock Text="Resp Options:" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding RespOptionsS.RespList}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="OK" Width="80" Margin="0,0,10,0" IsDefault="True" Click="Ok_Click"/>
+            <Button Content="Cancel" Width="80" IsCancel="True"/>
+        </StackPanel>
+    </DockPanel>
+</Window>

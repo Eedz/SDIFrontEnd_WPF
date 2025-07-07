@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.SurveyBuilder"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <ListBox Grid.Column="0"
+         ItemsSource="{Binding QuestionList}"
+         SelectedItem="{Binding SelectedQuestion}"
+               
+                 ScrollViewer.VerticalScrollBarVisibility="Visible"
+         >
+        
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <TextBlock Text="{Binding Qnum}" Width="40"/>
+                        <TextBlock Text="{Binding VarName}" Width="100" Margin="10,0"/>
+                        <TextBlock Text="{Binding VarName.VarLabel}" Width="200"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
+            <TextBlock FontWeight="Bold" Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName"/>
+            <TextBlock Text="{Binding CurrentQuestionText}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+            <TextBlock Text="VarLabel:"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.VarLabel}" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Topic:"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.Topic.LabelText}" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Content:"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.Content.LabelText}" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Domain:"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.Domain.LabelText}" Margin="0,0,0,10"/>
+            
+            <TextBlock Text="Product:"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.Product.LabelText}" Margin="0,0,0,10"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

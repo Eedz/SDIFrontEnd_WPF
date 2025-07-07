@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:SDIFrontEnd_WPF">
+    <DataTemplate DataType="{x:Type local:HomeViewModel}">
+        <local:HomeView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:SurveyManagerViewModel}">
+        <local:SurveyManager />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:QuestionSearchViewModel}">
+        <local:QuestionSearch/>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:SurveyBuilderViewModel}">
+        <local:SurveyBuilder />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type local:SurveyViewModel}">
+        <local:SurveyInfoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:SurveyEditorViewModel}">
+        <local:SurveyInfoEditorView />
+    </DataTemplate>
+    
+</ResourceDictionary>
