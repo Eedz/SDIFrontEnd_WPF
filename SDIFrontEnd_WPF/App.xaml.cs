@@ -57,12 +57,14 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IVarNameRepository, VarNameRepository>();
             services.AddSingleton<IWordingRepository, WordingRepository>();
             services.AddSingleton<IReferenceDataRepository, ReferenceDataRepository>();
+            services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<ISurveyService, SurveyService>();
             services.AddSingleton<IPeopleService, PeopleService>();
             services.AddSingleton<ICommentService, CommentService>();
             services.AddSingleton<IVarNameService, VarNameService>();
             services.AddSingleton<IWordingService, WordingService>();
             services.AddSingleton<IReferenceDataService, ReferenceDataService>();
+            services.AddSingleton<IUserService, UserService>();
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             return serviceProvider;
