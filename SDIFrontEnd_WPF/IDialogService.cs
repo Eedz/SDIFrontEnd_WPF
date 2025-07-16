@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using ITCLib;
 using MvvmLib.ViewModels;
 namespace SDIFrontEnd_WPF
@@ -17,7 +18,7 @@ namespace SDIFrontEnd_WPF
         string PromptForText(string message, string title = "Input");
 
         SurveyQuestion PickQuestion(IEnumerable<SurveyQuestion> candidates);
-        bool? ShowDialog(ViewModelBase viewModel);
+        bool? ShowDialog(WorkspaceViewModel viewModel);
     }
 
     public class  DialogService : IDialogService 
@@ -55,16 +56,23 @@ namespace SDIFrontEnd_WPF
             return null;
         }
 
-        public bool? ShowDialog(ViewModelBase viewModel)
+        public bool? ShowDialog(WorkspaceViewModel viewModel)
         {
             var window = new Window
             {
                 Title = viewModel.DisplayName ?? string.Empty,
                 SizeToContent = SizeToContent.WidthAndHeight,
-                Content = viewModel,
+                Content = new ContentControl { Content = viewModel },
                 DataContext = viewModel,
                 Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
+
+            };
+
+            viewModel.RequestClose += (s, args) =>
+            {
+                window.DialogResult = args.DialogResult; // or false based on your logic
+                window.Close();
             };
 
             return window.ShowDialog();
