@@ -1,48 +1,84 @@
-﻿<Window x:Class="SDIFrontEnd_WPF.SurveyInfoEditorView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SDIFrontEnd_WPF"
-        mc:Ignorable="d"
-        Title="SurveyInfoEditorView" Height="450" Width="800">
+﻿<UserControl x:Class="SDIFrontEnd_WPF.SurveyInfoEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             Height="500" Width="400"
+             d:DesignHeight="500" d:DesignWidth="400">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="400"></ColumnDefinition>
 
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Column="0" Grid.Row="0">
-            <TextBox Text="{Binding Survey.SurveyCode}" d:Text="Survey Code" FontSize="16" Margin="10,0,0,0"/>
-            <TextBox Text="{Binding Survey.Title}" d:Text="Title" FontSize="12" Margin="10,0,0,0"/>
-            <TextBox Text="{Binding Survey.Cohort}" d:Text="Survey Type" FontSize="12" Margin="10,0,0,0"/>
-            <TextBox Text="{Binding Survey.Mode}" d:Text="Mode" FontSize="12" Margin="10,00,0,0"/>
-            <TextBox Text="{Binding Survey.CreationDate}" d:Text="Creation Date" FontSize="12" Margin="10,00,0,0"/>
-            <TextBox Text="{Binding Survey.FileName}" d:Text="File Name" FontSize="12" Margin="10,00,0,0"/>
-            <!--<CheckBox IsChecked="{Binding Survey.NCT}" Content="NCT Survey" Margin="10,0,0,0"/> probably don't need this property anymore-->
-            <CheckBox IsChecked="{Binding Survey.ITCSurvey}" Content="ITCSurvey" Margin="10,0,0,0"/>
-        </StackPanel>
 
+        <TextBlock FontSize="18" HorizontalAlignment="Center">
+            <Run Text="Editing " FontWeight="Bold"/>
+            <Run Text="{Binding Survey.SurveyCode}" d:Text="SurveyCode" FontWeight="Bold"/>
+        </TextBlock> 
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Survey Code:" Margin="0,5" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Survey.SurveyCode}" Margin="5"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Title:" Margin="0,5" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Survey.Title}" Margin="5"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="File Name:" Margin="0,5" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Survey.WebName}" Margin="5"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Type:" Margin="0,5" VerticalAlignment="Center"/>
+            <ComboBox Grid.Row="3" Grid.Column="1" SelectedItem ="{Binding Survey.Cohort}" ItemsSource="{Binding Cohorts}" Margin="5"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Mode:" Margin="0,5" VerticalAlignment="Center"/>
+            <ComboBox Grid.Row="4" Grid.Column="1" SelectedItem ="{Binding Survey.Mode}" ItemsSource="{Binding Modes}" Margin="5"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Creation Date:" Margin="0,5" VerticalAlignment="Center"/>
+            <DatePicker Grid.Row="5" Grid.Column="1" SelectedDate="{Binding Survey.CreationDate, StringFormat=d}" Margin="5"/>
+
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="ITC Survey:" Margin="0,5" VerticalAlignment="Center"/>
+            <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Survey.ITCSurvey}" VerticalAlignment="Center" Margin="5"/>
+        </Grid>
+    
+        
+        <!-- User States -->
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
             <StackPanel Margin="5">
                 <TextBlock Text="User States"/>
-                <DataGrid ItemsSource="{Binding Survey.UserStates}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
+                <DataGrid ItemsSource="{Binding UserStatesList}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
                     <DataGrid.Columns>
                         <!-- ComboBox Column -->
                         <DataGridComboBoxColumn Header="State"
-                                SelectedItemBinding="{Binding Type, UpdateSourceTrigger=PropertyChanged}"
-                                ItemsSource="{Binding DataContext.UserStates, RelativeSource={RelativeSource AncestorType=Window}}" />
+                             SelectedItemBinding="{Binding UserStateName, UpdateSourceTrigger=PropertyChanged}"
+                             ItemsSource="{Binding UserStates}" />
 
                         <!-- Delete Button -->
                         <DataGridTemplateColumn Header="">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="X"
-                            Command="{Binding DataContext.DeleteQuestionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                            CommandParameter="{Binding}" />
+                                    <Button Content="X" Command="{Binding DeleteUserStateCommand}"
+                                            CommandParameter="{Binding}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -54,23 +90,22 @@
                     </DataGrid.ItemTemplate>
                 </DataGrid>
             </StackPanel>
-
+            <!-- Screened Products -->
             <StackPanel Margin="5">
                 <TextBlock Text="Screened Products"/>
-                <DataGrid ItemsSource="{Binding Survey.ScreenedProducts}" AutoGenerateColumns="True" CanUserAddRows="True" CanUserDeleteRows="True">
+                <DataGrid ItemsSource="{Binding ScreenedProductsList}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
                     <DataGrid.Columns>
                         <!-- ComboBox Column -->
-                        <DataGridComboBoxColumn Header="State"
-            SelectedItemBinding="{Binding Type, UpdateSourceTrigger=PropertyChanged}"
-            ItemsSource="{Binding DataContext.UserStates, RelativeSource={RelativeSource AncestorType=Window}}" />
+                        <DataGridComboBoxColumn Header="Product"
+                             SelectedItemBinding="{Binding Product, UpdateSourceTrigger=PropertyChanged}"
+                             ItemsSource="{Binding ScreenedProducts}" />
 
                         <!-- Delete Button -->
                         <DataGridTemplateColumn Header="">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="X"
-        Command="{Binding DataContext.DeleteQuestionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-        CommandParameter="{Binding}" />
+                                    <Button Content="X" Command="{Binding DeleteProductCommand}"
+                                            CommandParameter="{Binding}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -82,17 +117,46 @@
                     </DataGrid.ItemTemplate>
                 </DataGrid>
             </StackPanel>
-
+            <!-- Languages -->
             <StackPanel Margin="5">
                 <TextBlock Text="Languages"/>
-                <ItemsControl ItemsSource="{Binding Survey.LanguageList}">
-                    <ItemsControl.ItemTemplate>
+                <DataGrid ItemsSource="{Binding LanguageList}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
+                    <DataGrid.Columns>
+                        <!-- ComboBox Column -->
+                        <DataGridComboBoxColumn Header="Language" 
+                                SelectedItemBinding="{Binding Language, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding Languages}" />
+
+                        <!-- Delete Button -->
+                        <DataGridTemplateColumn Header="">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="X" Command="{Binding DeleteLanguageCommand}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    <DataGrid.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding}" Margin="5"/>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    </DataGrid.ItemTemplate>
+                </DataGrid>
             </StackPanel>
         </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="OK" Command="{Binding CloseCommand}" Width="50" Margin="5">
+                <Button.CommandParameter>
+                    <sys:Boolean>True</sys:Boolean>
+                </Button.CommandParameter>
+            </Button>
+            <Button Content="Cancel" Command="{Binding CloseCommand}" Width="50" Margin="5">
+                <Button.CommandParameter>
+                    <sys:Boolean>False</sys:Boolean>
+                </Button.CommandParameter>
+            </Button>
+        </StackPanel>
     </Grid>
-</Window>
+</UserControl>

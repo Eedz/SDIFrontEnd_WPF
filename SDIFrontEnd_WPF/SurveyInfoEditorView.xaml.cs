@@ -15,9 +15,9 @@ using System.Windows.Shapes;
 namespace SDIFrontEnd_WPF
 {
     /// <summary>
-    /// Interaction logic for SurveyInfoEditorView.xaml
+    /// Interaction logic for SurveyInfoEditor.xaml
     /// </summary>
-    public partial class SurveyInfoEditorView : Window
+    public partial class SurveyInfoEditorView : UserControl
     {
         public SurveyInfoEditorView()
         {
