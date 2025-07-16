@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using ITC_Services;
 using ITCLib;
 using MvvmLib.ViewModels;
@@ -18,6 +17,7 @@ namespace SDIFrontEnd_WPF
         // when an item is selected, the corresponding user control is displayed in the right pane
 
         private readonly IServiceProvider _services; // Assuming you have a service to manage surveys
+        private readonly ISurveyService _surveyService; // Assuming you have a service to manage surveys
         private readonly IUserService _userService;
 
         private UserPrefs CurrentUser;
@@ -32,7 +32,7 @@ namespace SDIFrontEnd_WPF
        SelectedMenuCategory switch
        {
            MenuCategory.Home => new[] { "Home" },
-           MenuCategory.Surveys => new[] { "Survey1", "Survey2", "Survey3" },
+               MenuCategory.Surveys => GetSurveyEditorList(),
            MenuCategory.VarNames => new[] { "Rename", "Prefixes", "Labels" },
            MenuCategory.Search => new[] { "Questions", "Response Sets", "Comments" },
            MenuCategory.Praccing => new[] { "Entry", "Report", "Import", "Sheet", "Form" },
@@ -67,6 +67,7 @@ namespace SDIFrontEnd_WPF
             DisplayName = "Main Window ViewModel";
             ActiveForm = new HomeViewModel(); // Set the initial active form to HomeViewModel
             _services = services;
+            _surveyService = _services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey service cannot be null");
             _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
             CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
         }
@@ -97,6 +98,17 @@ namespace SDIFrontEnd_WPF
                 "Questions" => new QuestionSearchViewModel(),
                 _ => null
             };
+        }
+
+        private string[] GetSurveyEditorList()
+        {
+            var list = Enumerable.Range(1, 3)
+                .Select(i => CurrentUser.GetFilterID("frmSurveyEntry", i))
+                .ToList();
+
+            var surveyList = list.Select(x => _surveyService.GetSurveyById(x).SurveyCode).Distinct().ToArray();
+
+            return surveyList;
         }
     }
 }
