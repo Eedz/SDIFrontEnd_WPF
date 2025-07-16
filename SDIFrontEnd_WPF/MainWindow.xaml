@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SDIFrontEnd_WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="1200" WindowState="Maximized">
+        Title="Survey Development Index" Height="700" Width="1200" WindowState="Maximized">
     <Window.Resources>
         <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="ViewModelDataTemplates.xaml"/>
-
+                
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -46,7 +47,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
-            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1">
+            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" >
                 <ContentControl.Resources>
                     <Style TargetType="ContentControl">
                         <Setter Property="Template">
@@ -76,6 +77,14 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="{Binding IsSurveyCategory, Converter={StaticResource BoolToVis}}">
+                <ComboBox Width="80"
+                  ItemsSource="{Binding AvailableSurveysToAdd}"
+                  SelectedItem="{Binding SelectedNewSurvey, Mode=TwoWay}"
+                  DisplayMemberPath="SurveyCode"
+                   />
+                <Button Content="+" Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" />
+            </StackPanel>
         </StackPanel>
         <Border Grid.Row="2" Grid.ColumnSpan="2" BorderThickness="2" BorderBrush="AliceBlue">
             <StackPanel >
