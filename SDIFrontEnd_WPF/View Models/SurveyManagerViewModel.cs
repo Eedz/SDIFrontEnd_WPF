@@ -140,6 +140,22 @@ namespace SDIFrontEnd_WPF
 
             if (result == true)
             {
+                var deletedStates = CurrentSurvey.UserStates.Except(editorVM.Survey.UserStates).ToList();
+                var deletedProducts = CurrentSurvey.ScreenedProducts.Except(editorVM.Survey.ScreenedProducts).ToList();
+                var deletedLanguages = CurrentSurvey.LanguageList.Except(editorVM.Survey.LanguageList).ToList();
+
+                var addedStates = editorVM.Survey.UserStates.Except(CurrentSurvey.UserStates).ToList();
+                var addedProducts = editorVM.Survey.ScreenedProducts.Except(CurrentSurvey.ScreenedProducts).ToList();
+                var addedLanguages = editorVM.Survey.LanguageList.Except(CurrentSurvey.LanguageList).ToList();
+
+                _surveyService.DeleteSurveyUserStates(deletedStates);
+                _surveyService.DeleteSurveyScreenedProducts(deletedProducts);
+                _surveyService.DeleteSurveyLanguages(deletedLanguages);
+
+                _surveyService.AddSurveyUserStates(addedStates);
+                _surveyService.AddSurveyScreenedProducts(addedProducts);
+                _surveyService.AddSurveyLanguages(addedLanguages);
+
                 // save changes back to the current survey
                 _surveyService.UpdateSurvey(editorVM.Survey);
             }
