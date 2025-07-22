@@ -6,11 +6,29 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:SDIFrontEnd_WPF"
              mc:Ignorable="d" 
-             Height="500" Width="400"
-             d:DesignHeight="500" d:DesignWidth="400">
-    <Grid>
+             Height="550" Width="450"
+             d:DesignHeight="550" d:DesignWidth="450">
+    <UserControl.Resources>
+        <Style TargetType="Border" x:Key="ListBorder">
+            
+            <Setter Property="Background" Value="LightBlue"/>
+            <Setter Property="BorderBrush" Value="DarkBlue"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style TargetType="Border" x:Key="ListItemBorder">
+            <Setter Property="Background" Value="WhiteSmoke"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="ListHeader">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="LightBlue">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
 
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -61,90 +79,106 @@
             <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Survey.ITCSurvey}" VerticalAlignment="Center" Margin="5"/>
         </Grid>
     
-        
-        <!-- User States -->
-        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-            <StackPanel Margin="5">
-                <TextBlock Text="User States"/>
-                <DataGrid ItemsSource="{Binding UserStatesList}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
-                    <DataGrid.Columns>
-                        <!-- ComboBox Column -->
-                        <DataGridComboBoxColumn Header="State"
-                             SelectedItemBinding="{Binding UserStateName, UpdateSourceTrigger=PropertyChanged}"
-                             ItemsSource="{Binding UserStates}" />
-
-                        <!-- Delete Button -->
-                        <DataGridTemplateColumn Header="">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="X" Command="{Binding DeleteUserStateCommand}"
-                                            CommandParameter="{Binding}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                    <DataGrid.ItemTemplate>
+        <!-- Related Data Lists -->        
+        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <!-- User States -->
+            <Border Style="{StaticResource ListBorder}" Width="125">
+            <StackPanel Margin="3">
+                <TextBlock Text="User States" Style="{StaticResource ListHeader}"/>
+                <ItemsControl MinHeight="190" ItemsSource="{Binding UserStatesList}">
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}" Margin="5"/>
-                        </DataTemplate>
-                    </DataGrid.ItemTemplate>
-                </DataGrid>
+                                <Border Style="{StaticResource ListItemBorder}">
+                                    <StackPanel Orientation="Horizontal" Margin="2">
+                                        <TextBlock Width="80" Text="{Binding UserStateName}" ToolTip="{Binding UserStateName}"/>
+                                        <Button Content="X" Foreground="Red" FontWeight="Bold" Width="15"
+                                            Command="{Binding DataContext.DeleteUserStateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" Margin="8,0,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Add new item -->
+                <StackPanel Orientation="Horizontal" Margin="2,8,2,2" HorizontalAlignment="Center">
+
+                    <ComboBox x:Name="NewUserState" ItemsSource="{Binding UserStates}" Width="90"/>
+                        <Button Content="+" Foreground="Green" FontSize="14" FontWeight="Bold" HorizontalContentAlignment="Center"
+                    Command="{Binding AddUserStateCommand}"
+                    CommandParameter="{Binding ElementName=NewUserState, Path=SelectedItem}"
+                    HorizontalAlignment="Left"
+                    Width="15" />
+                </StackPanel>
             </StackPanel>
+            </Border>
+
             <!-- Screened Products -->
-            <StackPanel Margin="5">
-                <TextBlock Text="Screened Products"/>
-                <DataGrid ItemsSource="{Binding ScreenedProductsList}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
-                    <DataGrid.Columns>
-                        <!-- ComboBox Column -->
-                        <DataGridComboBoxColumn Header="Product"
-                             SelectedItemBinding="{Binding Product, UpdateSourceTrigger=PropertyChanged}"
-                             ItemsSource="{Binding ScreenedProducts}" />
+            <Border Style="{StaticResource ListBorder}"  Width="175">
+                <StackPanel Margin="3" >
+                    <TextBlock Text="Screened Products" Style="{StaticResource ListHeader}"/>
+                    <ItemsControl MinHeight="190" ItemsSource="{Binding ScreenedProductsList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource ListItemBorder}">
+                                    <StackPanel Orientation="Horizontal" Margin="2">
 
-                        <!-- Delete Button -->
-                        <DataGridTemplateColumn Header="">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="X" Command="{Binding DeleteProductCommand}"
-                                            CommandParameter="{Binding}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                    <DataGrid.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" Margin="5"/>
-                        </DataTemplate>
-                    </DataGrid.ItemTemplate>
-                </DataGrid>
-            </StackPanel>
+                                        <TextBlock Width="130" Text="{Binding ProductName}" ToolTip="{Binding ProductName}"/>
+                                        <Button Content="X" Foreground="Red" FontWeight="Bold" Width="15"
+                                        Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" Margin="8,0,0,0" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Add new item -->
+                    <StackPanel Orientation="Horizontal" Margin="2,8,2,2" HorizontalAlignment="Center">
+
+                        <ComboBox x:Name="NewProduct" ItemsSource="{Binding ScreenedProducts}" Width="130"/>
+                        <Button Content="+" Foreground="Green" FontSize="14" FontWeight="Bold" HorizontalContentAlignment="Center"
+                            Command="{Binding AddProductCommand}"
+                            CommandParameter="{Binding ElementName=NewProduct, Path=SelectedItem}"
+                            HorizontalAlignment="Left"
+                            Width="15" />   
+                    </StackPanel>
+               
+                </StackPanel>
+            </Border>
             <!-- Languages -->
-            <StackPanel Margin="5">
-                <TextBlock Text="Languages"/>
-                <DataGrid ItemsSource="{Binding LanguageList}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
-                    <DataGrid.Columns>
-                        <!-- ComboBox Column -->
-                        <DataGridComboBoxColumn Header="Language" 
-                                SelectedItemBinding="{Binding Language, UpdateSourceTrigger=PropertyChanged}"
-                                ItemsSource="{Binding Languages}" />
+            <Border Style="{StaticResource ListBorder}"  Width="125">
+                <StackPanel Margin="3">
+                    <TextBlock Text="Languages" Style="{StaticResource ListHeader}"/>
+                    <ItemsControl MinHeight="190" ItemsSource="{Binding LanguageList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource ListItemBorder}">
+                                    <StackPanel Orientation="Horizontal" Margin="2">
+                                        <TextBlock Width="80" Text="{Binding LanguageName}" />
+                                        <Button Content="X" Foreground="Red" FontWeight="Bold" Width="15"
+                                            Command="{Binding DataContext.DeleteLanguageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" Margin="8,0,0,0" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                        <!-- Delete Button -->
-                        <DataGridTemplateColumn Header="">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="X" Command="{Binding DeleteLanguageCommand}"
-                                            CommandParameter="{Binding}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                    <DataGrid.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" Margin="5"/>
-                        </DataTemplate>
-                    </DataGrid.ItemTemplate>
-                </DataGrid>
-            </StackPanel>
+                    <!-- Add new item -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="2,8,2,2" >
+                        <ComboBox x:Name="NewLanguage" ItemsSource="{Binding Languages}" Width="90"/>
+                        <Button Content="+" Foreground="Green" FontSize="14" FontWeight="Bold" HorizontalContentAlignment="Center"
+                            Command="{Binding AddLanguageCommand}"
+                            CommandParameter="{Binding ElementName=NewLanguage, Path=SelectedItem}"
+                            HorizontalAlignment="Left"
+                            Width="15" />
+                    </StackPanel>
+
+                </StackPanel>
+            </Border>
         </StackPanel>
+            
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="OK" Command="{Binding CloseCommand}" Width="50" Margin="5">
