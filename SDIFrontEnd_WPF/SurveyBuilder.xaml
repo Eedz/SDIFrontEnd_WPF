@@ -6,6 +6,11 @@
              xmlns:local="clr-namespace:SDIFrontEnd_WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <local:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -16,11 +21,9 @@
         </Grid.RowDefinitions>
 
         <ListBox Grid.Column="0"
-         ItemsSource="{Binding QuestionList}"
-         SelectedItem="{Binding SelectedQuestion}"
-               
-                 ScrollViewer.VerticalScrollBarVisibility="Visible"
-         >
+            ItemsSource="{Binding QuestionList}"
+            SelectedItem="{Binding SelectedQuestion}"
+            ScrollViewer.VerticalScrollBarVisibility="Visible" >
         
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -34,23 +37,48 @@
         </ListBox>
 
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
-            <TextBlock FontWeight="Bold" Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName"/>
-            <TextBlock Text="{Binding CurrentQuestionText}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+            <TextBlock FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
+                <Run Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName" />
+                <Run Text="--- Q#"/>
+                <Run Text="{Binding SelectedQuestion.Qnum}" d:Text="Qnum" />
+            </TextBlock>
+                
+            <FlowDocumentScrollViewer IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                <FlowDocumentScrollViewer.Document>
+                    <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
+                </FlowDocumentScrollViewer.Document>
+            </FlowDocumentScrollViewer>
 
-            <TextBlock Text="VarLabel:"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.VarLabel}" Margin="0,0,0,10"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="65"></ColumnDefinition>
+                    <ColumnDefinition Width="275"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
 
-            <TextBlock Text="Topic:"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.Topic.LabelText}" Margin="0,0,0,10"/>
+                <TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="14" />
+                <TextBox Grid.Column="1" Grid.Row="0" Width="275" Text="{Binding SelectedQuestion.VarName.VarLabel}" />
 
-            <TextBlock Text="Content:"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.Content.LabelText}" Margin="0,0,0,10"/>
+                <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
+                <ComboBox Grid.Column="1" Grid.Row="1" Width="275" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Topic}" DisplayMemberPath="LabelText"/>
 
-            <TextBlock Text="Domain:"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.Domain.LabelText}" Margin="0,0,0,10"/>
-            
-            <TextBlock Text="Product:"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.Product.LabelText}" Margin="0,0,0,10"/>
+                <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
+                <ComboBox Grid.Column="1" Grid.Row="2" Width="275" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Content}" DisplayMemberPath="LabelText"/>
+
+                <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
+                <ComboBox Grid.Column="1" Grid.Row="3" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Domain}" DisplayMemberPath="LabelText"/>
+
+                <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
+                <ComboBox Grid.Column="1" Grid.Row="4" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Product}" DisplayMemberPath="LabelText"/>
+
+            </Grid>
+
         </StackPanel>
     </Grid>
 </UserControl>

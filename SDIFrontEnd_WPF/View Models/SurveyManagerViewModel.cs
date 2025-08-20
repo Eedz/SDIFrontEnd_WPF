@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 namespace SDIFrontEnd_WPF
 {
-    
+
     public partial class SurveyManagerViewModel : ViewModelBase
     {
         private readonly ISurveyService _surveyService;
@@ -50,7 +50,7 @@ namespace SDIFrontEnd_WPF
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value), "Current survey cannot be null");
-            
+
             DisplayName = "Survey Manager - " + value.SurveyCode;
 
             value.AddQuestions(_surveyService.GetQuestionsForSurvey(value.SID));
@@ -82,7 +82,7 @@ namespace SDIFrontEnd_WPF
                 SurveyQuestion newQuestion;
 
                 if (selectedSource == null)
-                { 
+                {
                     newQuestion = new SurveyQuestion(newVarName);
                     newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
                 }
@@ -93,7 +93,7 @@ namespace SDIFrontEnd_WPF
                     newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
                     newQuestion.Qnum = "0";
                 }
-                    
+
 
                 CurrentSurvey.Questions.Add(newQuestion);
             }
@@ -101,13 +101,13 @@ namespace SDIFrontEnd_WPF
             {
                 var newQuestion = new SurveyQuestion(newVarName);
                 newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-                
-                
+
+
 
                 CurrentSurvey.Questions.Add(newQuestion);
             }
-           
-           // SurveyBuilder.Refresh(); // assumes method to refresh the view
+
+            // SurveyBuilder.Refresh(); // assumes method to refresh the view
         }
 
         [RelayCommand]
@@ -117,13 +117,13 @@ namespace SDIFrontEnd_WPF
             // ask user to save comments
             // delete
             CurrentSurvey.RemoveQuestion(SurveyBuilder.SelectedQuestion);
-            
+
         }
 
         [RelayCommand]
         private void SaveChanges()
         {
-            
+
         }
 
         [RelayCommand]
@@ -133,7 +133,7 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void EditSurveyInfo() 
+        private void EditSurveyInfo()
         {
             var editorVM = new SurveyEditorViewModel(CurrentSurvey.Clone(), _lookupProvider); // clone to avoid editing original directly
 
