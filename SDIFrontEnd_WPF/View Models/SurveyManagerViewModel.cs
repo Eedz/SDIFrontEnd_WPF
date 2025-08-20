@@ -14,10 +14,11 @@ using System.Threading.Tasks;
 namespace SDIFrontEnd_WPF
 {
     
-    public partial class SurveyManagerViewModel :ViewModelBase
+    public partial class SurveyManagerViewModel : ViewModelBase
     {
         private readonly ISurveyService _surveyService;
         private readonly IDialogService _dialogService;
+        private readonly IReferenceDataService _referenceDataService; 
         private readonly LookupProvider _lookupProvider; // Provides access to reference data like modes, user states, etc.
 
         [ObservableProperty]
@@ -37,11 +38,12 @@ namespace SDIFrontEnd_WPF
             _surveyService = services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(services), "Survey service cannot be null");
             _dialogService = services.GetService(typeof(IDialogService)) as IDialogService ?? throw new ArgumentNullException(nameof(services), "Dialog service cannot be null");
             _lookupProvider = services.GetService(typeof(LookupProvider)) as LookupProvider ?? throw new ArgumentNullException(nameof(services), "Lookup provider cannot be null");
+            _referenceDataService = services.GetService(typeof(IReferenceDataService)) as IReferenceDataService ?? throw new ArgumentNullException(nameof(services), "Reference data service cannot be null");
             AllSurveys = _surveyService.GetAllSurveys();
             CurrentSurvey = survey ?? throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
             DisplayName = "Survey Manager - " + CurrentSurvey.SurveyCode;
             SurveyInfo = new SurveyViewModel(CurrentSurvey);
-            SurveyBuilder = new SurveyBuilderViewModel(CurrentSurvey.Questions);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _referenceDataService, CurrentSurvey.Questions);
         }
 
         partial void OnCurrentSurveyChanged(Survey value)
@@ -54,7 +56,7 @@ namespace SDIFrontEnd_WPF
             value.AddQuestions(_surveyService.GetQuestionsForSurvey(value.SID));
 
             SurveyInfo = new SurveyViewModel(value);
-            SurveyBuilder = new SurveyBuilderViewModel(value.Questions);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _referenceDataService, value.Questions);
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
@@ -109,7 +111,8 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void RemoveSurveyQuestion() {
+        private void RemoveSurveyQuestion()
+        {
             // ask user to document
             // ask user to save comments
             // delete
@@ -156,7 +159,7 @@ namespace SDIFrontEnd_WPF
 
                 // save changes back to the current survey
                 //_surveyService.UpdateSurvey(editorVM.Survey);
-                deletedStates.ForEach(x=> CurrentSurvey.UserStates.Remove(x));
+                deletedStates.ForEach(x => CurrentSurvey.UserStates.Remove(x));
                 deletedProducts.ForEach(x => CurrentSurvey.ScreenedProducts.Remove(x));
                 deletedLanguages.ForEach(x => CurrentSurvey.LanguageList.Remove(x));
 
@@ -170,6 +173,37 @@ namespace SDIFrontEnd_WPF
 
             }
 
+        }
+
+        [RelayCommand]
+        private void CopyPreviousWordings()
+        {
+            // get previous question in survey
+            var previousQuestion = SurveyBuilder.QuestionList[SurveyBuilder.QuestionList.IndexOf(SurveyBuilder.SelectedQuestion) - 1];
+                
+            SurveyBuilder.SelectedQuestion.PrePW = new Wording(previousQuestion.PrePW.WordID, WordingType.PreP, previousQuestion.PrePW.WordingText);
+            SurveyBuilder.SelectedQuestion.PreIW = new Wording(previousQuestion.PreIW.WordID, WordingType.PreI, previousQuestion.PreIW.WordingText);
+            SurveyBuilder.SelectedQuestion.PreAW = new Wording(previousQuestion.PreAW.WordID, WordingType.PreA, previousQuestion.PreAW.WordingText);
+
+            SurveyBuilder.SelectedQuestion.PstIW = new Wording(previousQuestion.PstIW.WordID, WordingType.PstI, previousQuestion.PstIW.WordingText);
+            SurveyBuilder.SelectedQuestion.PstPW = new Wording(previousQuestion.PstPW.WordID, WordingType.PstP, previousQuestion.PstPW.WordingText);
+            SurveyBuilder.SelectedQuestion.RespOptionsS = new ResponseSet(previousQuestion.RespOptionsS.RespSetName, ResponseType.RespOptions, previousQuestion.RespOptionsS.RespList);
+            SurveyBuilder.SelectedQuestion.NRCodesS = new ResponseSet(previousQuestion.NRCodesS.RespSetName, ResponseType.NRCodes, previousQuestion.PrePW.WordingText);
+
+            OnPropertyChanged(nameof(SurveyBuilder.SelectedQuestion));
+            OnPropertyChanged(nameof(SurveyBuilder.CurrentQuestionText));
+        }
+
+        [RelayCommand]
+        private void ViewComments()
+        {
+            SurveyBuilder.ViewCommentsCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void ViewTranslations()
+        {
+            SurveyBuilder.ViewTranslationsCommand.Execute(null);
         }
     }
 }
