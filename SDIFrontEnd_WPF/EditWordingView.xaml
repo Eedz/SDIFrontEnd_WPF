@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.EditWordingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <StackPanel>
+            <TextBox></TextBox>
+            <StackPanel>
+                
+                <RadioButton GroupName="EditType" Command="{Binding EditTypeChangeCommand}" CommandParameter="All"></RadioButton>
+                <RadioButton GroupName="EditType" Command="{Binding EditTypeChangeCommand}" CommandParameter="Wave"></RadioButton>
+                
+                <ItemsControl ItemsSource="{Binding WordingUses}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding SurveyCode}" Margin="5"/>
+                                <TextBlock Text="{Binding VarName}" Margin="5"/>
+                                <TextBlock Text="{Binding VarLabel}" Margin="5"/>
+
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
