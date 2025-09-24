@@ -49,15 +49,7 @@ namespace SDIFrontEnd_WPF
             if (value == null)
                 throw new ArgumentNullException(nameof(value), "Current survey cannot be null");
 
-            DisplayName = "Survey Manager - " + value.SurveyCode;
-
-            value.AddQuestions(_surveyService.GetQuestionsForSurvey(value.SID));
-
-            SurveyInfo = new SurveyViewModel(value);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _referenceDataService, value.Questions);
-
-            OnPropertyChanged(nameof(SurveyInfo));
-            OnPropertyChanged(nameof(SurveyBuilder));
+            LoadSurvey(value);
         }
 
         [RelayCommand]
