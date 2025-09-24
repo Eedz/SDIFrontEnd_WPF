@@ -17,12 +17,12 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="150"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -46,8 +46,8 @@
             </ListBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
-            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" >
+        <DockPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
+            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Stretch">
                 <ContentControl.Resources>
                     <Style TargetType="ContentControl">
                         <Setter Property="Template">
@@ -62,7 +62,7 @@
                     </Style>
                 </ContentControl.Resources>
             </ContentControl>
-        </StackPanel>
+        </DockPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="0" Background="LightGray">
             <ListBox Grid.Row="1" Grid.Column="0"
