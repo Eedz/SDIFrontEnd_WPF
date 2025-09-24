@@ -19,6 +19,7 @@ namespace SDIFrontEnd_WPF
         private readonly ISurveyService _surveyService;
         private readonly IDialogService _dialogService;
         private readonly IReferenceDataService _referenceDataService; 
+        private readonly IWordingService _wordingService; // Service for managing question wordings and translations
         private readonly LookupProvider _lookupProvider; // Provides access to reference data like modes, user states, etc.
 
         [ObservableProperty]
@@ -35,11 +36,12 @@ namespace SDIFrontEnd_WPF
             _dialogService = services.GetService(typeof(IDialogService)) as IDialogService ?? throw new ArgumentNullException(nameof(services), "Dialog service cannot be null");
             _lookupProvider = services.GetService(typeof(LookupProvider)) as LookupProvider ?? throw new ArgumentNullException(nameof(services), "Lookup provider cannot be null");
             _referenceDataService = services.GetService(typeof(IReferenceDataService)) as IReferenceDataService ?? throw new ArgumentNullException(nameof(services), "Reference data service cannot be null");
+            _wordingService = services.GetService(typeof(IWordingService)) as IWordingService ?? throw new ArgumentNullException(nameof(services), "Wording service cannot be null");
             AllSurveys = _surveyService.GetAllSurveys();
             CurrentSurvey = survey ?? throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
             DisplayName = "Survey Manager - " + CurrentSurvey.SurveyCode;
             SurveyInfo = new SurveyViewModel(CurrentSurvey);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _referenceDataService, CurrentSurvey.Questions);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, CurrentSurvey);
         }
 
         partial void OnCurrentSurveyChanged(Survey value)
