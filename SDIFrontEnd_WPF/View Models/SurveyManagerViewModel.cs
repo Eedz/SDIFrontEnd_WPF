@@ -29,10 +29,6 @@ namespace SDIFrontEnd_WPF
         public SurveyViewModel SurveyInfo { get; set; } // ViewModel for displaying basic survey information
         public SurveyBuilderViewModel SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
-        public SurveyViewModel? EditSurvey { get; set; } // TODO make this a different viewmodel for editing survey info
-
-
-
         public SurveyManagerViewModel(IServiceProvider services, Survey survey)
         {
             _surveyService = services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(services), "Survey service cannot be null");
