@@ -4,81 +4,221 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SDIFrontEnd_WPF"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:converters ="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             xmlns:mvvmLib ="clr-namespace:MvvmLib;assembly=MvvmLib"
+             mc:Ignorable="d" Height="Auto"
+             d:DesignHeight="450" d:DesignWidth="1200">
     <UserControl.Resources>
         <ResourceDictionary>
-            <local:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
+            <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
+            <converters:QuestionTypeToBrushConverter x:Key="QuestionTypeToBrushConverter"/>
+            <converters:QuestionTypeToFontWeightConverter x:Key="QuestionTypeToFontWeightConverter"/>
+
+            <Style x:Key="QuestionRowStyle" TargetType="DataGridRow">
+                <Setter Property="Foreground" Value="{Binding QuestionType, Converter={StaticResource QuestionTypeToBrushConverter}}"/>
+                <Setter Property="FontWeight" Value="{Binding QuestionType, Converter={StaticResource QuestionTypeToFontWeightConverter}}"/>
+            </Style>
+
+            <DropShadowEffect x:Key="SunkenEffect"
+                  Color="Black"
+                  Direction="270"
+                  BlurRadius="5"
+                  ShadowDepth="1"
+                  Opacity="0.4"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="580"></ColumnDefinition>
+            <ColumnDefinition Width="0.5*"></ColumnDefinition>
+            <ColumnDefinition Width="0.5*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <ListBox Grid.Column="0"
+        <!-- Button menu -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Add Question" Command="{Binding AddSurveyQuestionCommand}" Margin="5"/>
+            <Button Content="Delete Question" Command="{Binding RemoveSurveyQuestionCommand}" Margin="5"/>
+            <Button Content="Copy Previous" Command="{Binding CopyPreviousWordingsCommand}" Margin="5"/>
+            <Button Content="Comments" Command="{Binding ViewCommentsCommand}" Margin="5"/>
+            <Button Content="Translations" Command="{Binding ViewTranslationsCommand}" Margin="5"/>
+            
+        </StackPanel>
+
+        <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SectionCount}" FontSize ="14" d:Text="Current Question's section count"/>
+        
+        <!-- Question List -->
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.RowSpan="2"
             ItemsSource="{Binding QuestionList}"
             SelectedItem="{Binding SelectedQuestion}"
-            ScrollViewer.VerticalScrollBarVisibility="Visible" >
+            ScrollViewer.VerticalScrollBarVisibility="Visible" 
+            AutoGenerateColumns="False" 
+            HeadersVisibility="Column"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            IsReadOnly="True"
+            Margin="5"
+            GridLinesVisibility="None"
+            SelectionUnit="FullRow"
+            mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestions}"
+            mvvmLib:DataGridHelper.ScrollOnSelected="True"
+            RowStyle="{StaticResource QuestionRowStyle}">
         
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="2">
-                        <TextBlock Text="{Binding Qnum}" Width="40"/>
-                        <TextBlock Text="{Binding VarName}" Width="100" Margin="10,0"/>
-                        <TextBlock Text="{Binding VarName.VarLabel}" Width="200"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Qnum" Binding="{Binding Qnum}" Width="60"/>
+                <DataGridTextColumn Header="VarName" Binding="{Binding VarName.VarName}" Width="Auto"/>
+                <DataGridTextColumn Header="VarLabel" Binding="{Binding VarName.VarLabel}" Width="300"/>
+                <DataGridTextColumn Header="RespName" Binding="{Binding RespOptionsS.RespSetName}" Width="Auto"/>
+            </DataGrid.Columns>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10">
-            <TextBlock FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
+            
+        </DataGrid>
+        <!-- Question View -->
+        <DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="5" LastChildFill="True" HorizontalAlignment="Stretch">
+            <!-- VarName/Qnum -->
+            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
                 <Run Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName" />
                 <Run Text="--- Q#"/>
                 <Run Text="{Binding SelectedQuestion.Qnum}" d:Text="Qnum" />
             </TextBlock>
-                
-            <FlowDocumentScrollViewer IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
-                <FlowDocumentScrollViewer.Document>
-                    <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
-                </FlowDocumentScrollViewer.Document>
-            </FlowDocumentScrollViewer>
-
-            <Grid>
+            <!-- Labels -->
+            <Border Margin="0,0,0,5" DockPanel.Dock="Bottom" Background="LightSkyBlue"
+                Effect="{StaticResource SunkenEffect}">
+                <Grid Margin="5" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="65"></ColumnDefinition>
                     <ColumnDefinition Width="275"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                        <RowDefinition ></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="14" />
-                <TextBox Grid.Column="1" Grid.Row="0" Width="275" Text="{Binding SelectedQuestion.VarName.VarLabel}" />
+                    <TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="12" />
+                    <TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding SelectedQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
 
-                <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
-                <ComboBox Grid.Column="1" Grid.Row="1" Width="275" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Topic}" DisplayMemberPath="LabelText"/>
+                    <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Topic}" DisplayMemberPath="LabelText"/>
 
-                <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
-                <ComboBox Grid.Column="1" Grid.Row="2" Width="275" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Content}" DisplayMemberPath="LabelText"/>
+                    <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+                    <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Content}" DisplayMemberPath="LabelText"/>
 
-                <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
-                <ComboBox Grid.Column="1" Grid.Row="3" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Domain}" DisplayMemberPath="LabelText"/>
+                    <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+                    <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Domain}" DisplayMemberPath="LabelText"/>
 
-                <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"/>
-                <ComboBox Grid.Column="1" Grid.Row="4" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Product}" DisplayMemberPath="LabelText"/>
+                    <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+                    <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Product}" DisplayMemberPath="LabelText"/>
 
+                </Grid>
+            </Border>
+            <!-- Question Text -->
+            <Border Background="LightSkyBlue" Effect="{StaticResource SunkenEffect}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition MaxHeight="25"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                        <Button Content="PreP" Command="{Binding OpenPrePCommand}" CommandParameter="{Binding PrePID}" Width="50"/>
+                        <TextBox Text="{Binding PrePID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/> 
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" >
+                        <Button Content="PreI" Command="{Binding OpenPreICommand}" CommandParameter="{Binding PreIID}" Width="50"/>
+                        <TextBox Text="{Binding PreIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="2"  >
+                        <Button Content="PreA" Width="50" Command="{Binding OpenPreACommand}" CommandParameter="{Binding PreAID}"/>
+                        <TextBox Text="{Binding PreAID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="3" >
+                        <Button Content="LitQ" Width="50" Command="{Binding OpenLitQCommand}" CommandParameter="{Binding LitQID}"/>
+                        <TextBox Text="{Binding LitQID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="4" >
+                        <Button Content="ROs" Width="50" Command="{Binding OpenRespOptionsCommand}" CommandParameter="{Binding RespName}"/>
+                        <TextBox Text="{Binding RespName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="5" >
+                        <Button Content="NRs" Width="50" Command="{Binding OpenNRCodesCommand}" CommandParameter="{Binding NRName}"/>
+                        <TextBox Text="{Binding NRName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="6" >
+                        <Button Content="PstI" Width="50" Command="{Binding OpenPstICommand}" CommandParameter="{Binding PstIID}"/>
+                        <TextBox Text="{Binding PstIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="7" >
+                        <Button Content="PstP" Width="50" Command="{Binding OpenPstPCommand}" CommandParameter="{Binding PstPID}"/>
+                        <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+
+                    <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                        <FlowDocumentScrollViewer.Document>
+                            <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
+                        </FlowDocumentScrollViewer.Document>
+                    </FlowDocumentScrollViewer>
             </Grid>
 
+            </Border>
+        </DockPanel>
+        
+        <!-- Images -->
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Command="{Binding PreviousImageCommand}" Content="&lt;&lt;&lt;" Width="50" Margin="5"/>
+            <TextBlock VerticalAlignment="Center">
+                <Run Text="{Binding ImageIndex, Mode=OneWay}" d:Text="0"/>
+                <Run Text=" of "/>
+                <Run Text="{Binding SelectedQuestion.Images.Count, Mode=OneWay}" FontSize="14"  d:Text="0"/> 
+            </TextBlock>
+            <Button Command="{Binding NextImageCommand}" Content="&gt;&gt;&gt;" Width="50" Margin="5"/>
         </StackPanel>
+        <DockPanel Grid.Column="2" Grid.Row="1">
+            
+            <Image Source="{Binding CurrentImage.ImageSource}" Stretch="Fill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            
+        </DockPanel>
+        
+        <!-- Comments -->
+        <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch"
+           VerticalAlignment="Stretch">
+            <ListBox Grid.Row="2" Grid.Column="2"  ItemsSource="{Binding SelectedQuestion.Comments}" HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        
+                        <DockPanel LastChildFill="True" Margin="4">
+                            <TextBlock Text="{Binding Author.Name}"
+                           DockPanel.Dock="Right" Margin="8,0"/>
+                            <TextBlock Text="{Binding NoteType.TypeName}"
+                           DockPanel.Dock="Right" Margin="8,0"/>
+                            <TextBlock Text="{Binding NoteDate, StringFormat={}{0:yyyy-MM-dd}}"
+                           DockPanel.Dock="Right" Margin="8,0"/>
+
+                            <!-- This one stretches and wraps automatically -->
+                            <TextBlock Text="{Binding Notes.NoteText}"
+                           TextWrapping="Wrap"
+                           Margin="4,0"/>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
     </Grid>
 </UserControl>
