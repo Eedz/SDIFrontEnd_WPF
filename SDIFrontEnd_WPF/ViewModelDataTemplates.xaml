@@ -20,5 +20,12 @@
     <DataTemplate DataType="{x:Type local:SurveyEditorViewModel}">
         <local:SurveyInfoEditorView />
     </DataTemplate>
-    
+
+    <DataTemplate DataType="{x:Type local:WordingViewModel}">
+        <local:WordingEntryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:ResponseSetViewModel}">
+        <local:ResponseSetView/>
+    </DataTemplate>
 </ResourceDictionary>
