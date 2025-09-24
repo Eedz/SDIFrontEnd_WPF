@@ -12,7 +12,7 @@
            
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition> </RowDefinition>
+            <RowDefinition Height="*"> </RowDefinition>
 
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="0" Grid.Row="0">
@@ -21,7 +21,8 @@
             <TextBlock Text="{Binding Survey.Cohort}" d:Text="Survey Type" FontSize="12" Margin="10,0,0,0"/>
             <TextBlock Text="{Binding Survey.Mode}" d:Text="Mode" FontSize="12" Margin="10,00,0,0"/>
             <TextBlock Text="{Binding Survey.CreationDate, StringFormat=d}" d:Text="Creation Date" FontSize="12" Margin="10,00,0,0"/>
-            
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="0">
             <TextBlock>
                 <Run Text="User States: " FontWeight="Bold"/>
                 <Run Text="{Binding UserStates, Mode=OneWay}"/>
