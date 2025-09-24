@@ -61,74 +61,18 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void AddSurveyQuestion()
+        private void LoadSurvey(Survey survey)
         {
-            // enter VarName
-            // if exists, ask user if they want to copy wordings or labels
-            string newVarName = _dialogService.PromptForText("Enter VarName", "New Survey Question");
+            DisplayName = "Survey Manager - " + survey.SurveyCode;
 
-            if (string.IsNullOrWhiteSpace(newVarName))
-                return;
+            survey.AddQuestions(_surveyService.GetQuestionsForSurvey(survey.SID));
 
-            var existingQuestions = _surveyService.FindQuestionsByRefVarName(newVarName);
-            SurveyQuestion selectedSource = null;
+            SurveyInfo = new SurveyViewModel(survey);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, survey);
 
-            if (existingQuestions.Count > 0)
-            {
-                selectedSource = _dialogService.PickQuestion(existingQuestions);
-
-                SurveyQuestion newQuestion;
-
-                if (selectedSource == null)
-                {
-                    newQuestion = new SurveyQuestion(newVarName);
-                    newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
+            OnPropertyChanged(nameof(SurveyInfo));
+            OnPropertyChanged(nameof(SurveyBuilder));
                 }
-                else
-                {
-                    newQuestion = selectedSource;
-                    newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-                    newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
-                    newQuestion.Qnum = "0";
-                }
-
-
-                CurrentSurvey.Questions.Add(newQuestion);
-            }
-            else
-            {
-                var newQuestion = new SurveyQuestion(newVarName);
-                newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-
-
-
-                CurrentSurvey.Questions.Add(newQuestion);
-            }
-
-            // SurveyBuilder.Refresh(); // assumes method to refresh the view
-        }
-
-        [RelayCommand]
-        private void RemoveSurveyQuestion()
-        {
-            // ask user to document
-            // ask user to save comments
-            // delete
-            CurrentSurvey.RemoveQuestion(SurveyBuilder.SelectedQuestion);
-
-        }
-
-        [RelayCommand]
-        private void SaveChanges()
-        {
-
-        }
-
-        [RelayCommand]
-        private void LoadSurvey(string surveyCode)
-        {
-
-        }
 
         [RelayCommand]
         private void EditSurveyInfo()
@@ -169,39 +113,8 @@ namespace SDIFrontEnd_WPF
                 SurveyInfo = new SurveyViewModel(editorVM.Survey);
                 OnPropertyChanged(nameof(SurveyInfo));
 
-            }
-
         }
 
-        [RelayCommand]
-        private void CopyPreviousWordings()
-        {
-            // get previous question in survey
-            var previousQuestion = SurveyBuilder.QuestionList[SurveyBuilder.QuestionList.IndexOf(SurveyBuilder.SelectedQuestion) - 1];
-                
-            SurveyBuilder.SelectedQuestion.PrePW = new Wording(previousQuestion.PrePW.WordID, WordingType.PreP, previousQuestion.PrePW.WordingText);
-            SurveyBuilder.SelectedQuestion.PreIW = new Wording(previousQuestion.PreIW.WordID, WordingType.PreI, previousQuestion.PreIW.WordingText);
-            SurveyBuilder.SelectedQuestion.PreAW = new Wording(previousQuestion.PreAW.WordID, WordingType.PreA, previousQuestion.PreAW.WordingText);
-
-            SurveyBuilder.SelectedQuestion.PstIW = new Wording(previousQuestion.PstIW.WordID, WordingType.PstI, previousQuestion.PstIW.WordingText);
-            SurveyBuilder.SelectedQuestion.PstPW = new Wording(previousQuestion.PstPW.WordID, WordingType.PstP, previousQuestion.PstPW.WordingText);
-            SurveyBuilder.SelectedQuestion.RespOptionsS = new ResponseSet(previousQuestion.RespOptionsS.RespSetName, ResponseType.RespOptions, previousQuestion.RespOptionsS.RespList);
-            SurveyBuilder.SelectedQuestion.NRCodesS = new ResponseSet(previousQuestion.NRCodesS.RespSetName, ResponseType.NRCodes, previousQuestion.PrePW.WordingText);
-
-            OnPropertyChanged(nameof(SurveyBuilder.SelectedQuestion));
-            OnPropertyChanged(nameof(SurveyBuilder.CurrentQuestionText));
-        }
-
-        [RelayCommand]
-        private void ViewComments()
-        {
-            SurveyBuilder.ViewCommentsCommand.Execute(null);
-        }
-
-        [RelayCommand]
-        private void ViewTranslations()
-        {
-            SurveyBuilder.ViewTranslationsCommand.Execute(null);
         }
     }
 }
