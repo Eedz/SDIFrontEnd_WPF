@@ -17,6 +17,7 @@ namespace SDIFrontEnd_WPF
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
         private readonly IWordingService _wordingService; // Service for managing question wordings and translations
 
+        public bool NewSet { get; set; }
         public string ResponseType { get; set; } // Type of wording being managed (e.g., PreP, PreI etc.)
         [ObservableProperty]
         private ResponseSet? currentResponse;
@@ -55,6 +56,7 @@ namespace SDIFrontEnd_WPF
             }
 
             Usages = new ObservableCollection<ResponseUsage>(_wordingService.GetResponseUsages(ResponseType, CurrentResponse.RespSetName));
+            NewSet = CurrentResponse.RespSetName == string.Empty;
         }
 
         [RelayCommand]
