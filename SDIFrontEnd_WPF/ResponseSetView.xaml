@@ -15,19 +15,20 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
 
         <TextBlock Text="Response Entry" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="1" Grid.Row="0"/>
         <DockPanel Grid.Row="1">
             <TextBlock VerticalAlignment="Center" Margin="1">
                 <Run d:Text="WordingType" Text="{Binding ResponseType}"/>
-                <Run Text=" #"/>
+                <Run Text=": "/>
                 <Run d:Text="0" Text="{Binding CurrentWording.RespSetName}"/>
             </TextBlock>
 
-            <Button Content="Select Wording" Height="30" Width="400" HorizontalAlignment="Right"/>
+            <Button HorizontalAlignment="Stretch" Content="Select Response" Height="30" Margin="20,5,0,5" Command="{Binding SelectWordingCommand}"/>
 
         </DockPanel>
         <DockPanel Grid.Row="2">
@@ -36,7 +37,7 @@
                      AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="5" Grid.Row="2" />
         </DockPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" Margin="3">
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3, 30, 3, 3">
             <Button Content="Copy to New" Command="{Binding NewWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
             <Button Content="Add" Command="{Binding NewWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
             <Button Content="Delete" Command="{Binding SaveWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
@@ -48,12 +49,18 @@
             <DataGrid Margin="3" ItemsSource="{Binding WordingUsages}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" Width="Auto"/>
-                    <DataGridTextColumn Header="Survey" Binding="{Binding SurveyCode}" Width="*"/>
-                    <DataGridTextColumn Header="W#" Binding="{Binding RespSetName}" Width="2*"/>
-                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" Width="2*"/>
-                    <DataGridTextColumn Header="Locked" Binding="{Binding Locked}" Width="2*"/>
+                    <DataGridTextColumn Header="Survey" Binding="{Binding SurveyCode}" Width="AUto"/>
+                    <DataGridTextColumn Header="W#" Binding="{Binding RespSetName}" Width="70"/>
+                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" Width="*"/>
+                    <DataGridTextColumn Header="Locked" Binding="{Binding Locked}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5" Orientation="Horizontal" >
+            <Button Content="&lt;&lt;&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
+            <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
+            <Button Content="&gt;&gt;&gt;" Command="{Binding NextItemCommand}" Width="50" Margin="5,0"/>
         </StackPanel>
     </Grid>
 </UserControl>
