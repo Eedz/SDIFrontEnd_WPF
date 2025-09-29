@@ -66,13 +66,7 @@ namespace SDIFrontEnd_WPF
         {
             if (!LockedForEditing)
             {
-                // save changes
-                if (string.IsNullOrEmpty(CurrentResponse.RespSetName))
-                    return;
-                //_wordingService.InsertResponseSet(CurrentResponse);
-                else
-
-                    _wordingService.UpdateResponseSet(CurrentResponse);
+                SaveChanges();
             }
             LockedForEditing = !LockedForEditing;
         }
@@ -135,11 +129,14 @@ namespace SDIFrontEnd_WPF
             if (!LockedForEditing || (CurrentResponse != null && CurrentResponse.RespSetName != "0"))
             {
                 if (_dialogService.Confirm("You have unsaved changes. Save first?"))
-                    return;
+                {
+                    SaveChanges();
+                    OnRequestClose(true);
+            }
             }
             else
             {
-                CloseCommand.Execute(true);
+                OnRequestClose(true);
             }
         }
 
@@ -192,6 +189,48 @@ namespace SDIFrontEnd_WPF
                 case "RespOptions": return ITCLib.ResponseType.RespOptions;
                 case "NRCodes": return ITCLib.ResponseType.NRCodes;
                 default: throw new ArgumentException("Invalid Wording Type");
+            }
+        }
+
+        private void SaveChanges()
+        {
+            if (CurrentResponse == null)
+                return;
+            if (string.IsNullOrWhiteSpace(CurrentResponse.RespList))
+            {
+                _dialogService.ShowError("Text cannot be empty.");
+                return;
+            }
+            try
+            {
+                if (string.IsNullOrEmpty(CurrentResponse.RespSetName))
+                {
+                    _dialogService.ShowError("Response Set Name cannot be empty.");
+                    return;
+                }
+                
+                bool taken = Responses.Any(x => x.RespSetName == CurrentResponse.RespSetName);
+
+                if (taken && NewSet)
+                {
+                    _dialogService.ShowError("Response Set Name already taken.");
+                    return;
+                    
+                }else if (taken && !NewSet)
+                {
+                    _wordingService.UpdateResponseSet(CurrentResponse);                    
+                }
+                else
+                {
+                    _wordingService.InsertResponseSet(CurrentResponse);
+                }
+                LockedForEditing = true;
+                // Refresh usages after save
+                Usages = new ObservableCollection<ResponseUsage>(_wordingService.GetResponseUsages(CurrentResponse.FieldType, CurrentResponse.RespSetName));
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Error saving wording: {ex.Message}");
             }
         }
     }
