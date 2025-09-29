@@ -69,7 +69,8 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void EditSurveyInfo()
         {
-            var editorVM = new SurveyEditorViewModel(CurrentSurvey.Clone(), _lookupProvider); // clone to avoid editing original directly
+            var survey = _surveyService.GetSurveyById(CurrentSurvey.SID);
+            var editorVM = new SurveyEditorViewModel(survey, _lookupProvider); 
 
             bool? save = _dialogService.ShowDialog(editorVM);
 
