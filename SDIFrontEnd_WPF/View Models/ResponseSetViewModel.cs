@@ -29,10 +29,11 @@ namespace SDIFrontEnd_WPF
 
         public string ItemPosition => $"{(Responses.IndexOf(CurrentResponse) + 1)} of {Responses.Count}";
 
-        public ResponseSetViewModel(IWordingService wordingService, string type)
+        public ResponseSetViewModel(IWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Wording Manager";
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             ResponseType = type ?? throw new ArgumentNullException(nameof(type));
             switch (type)
             {
@@ -42,7 +43,7 @@ namespace SDIFrontEnd_WPF
             CurrentResponse = Responses.FirstOrDefault();
         }
 
-        public ResponseSetViewModel(IWordingService wordingService, string type, string wordID) : this(wordingService, type)
+        public ResponseSetViewModel(IWordingService wordingService, IDialogService dialogService, string type, string wordID) : this(wordingService, dialogService, type)
         {
             CurrentResponse = Responses.FirstOrDefault(w => w.RespSetName == wordID);
         }
