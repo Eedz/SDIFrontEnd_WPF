@@ -38,7 +38,7 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-
+        
         <!-- Button menu -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Add Question" Command="{Binding AddSurveyQuestionCommand}" Margin="5"/>
@@ -67,7 +67,7 @@
             mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestions}"
             mvvmLib:DataGridHelper.ScrollOnSelected="True"
             RowStyle="{StaticResource QuestionRowStyle}">
-        
+
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Qnum" Binding="{Binding Qnum}" Width="60"/>
                 <DataGridTextColumn Header="VarName" Binding="{Binding VarName.VarName}" Width="Auto"/>
@@ -89,17 +89,17 @@
             <Border Margin="0,0,0,5" DockPanel.Dock="Bottom" Background="LightSkyBlue"
                 Effect="{StaticResource SunkenEffect}">
                 <Grid Margin="5" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="65"></ColumnDefinition>
-                    <ColumnDefinition Width="275"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="65"></ColumnDefinition>
+                        <ColumnDefinition Width="275"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
                         <RowDefinition ></RowDefinition>
                         <RowDefinition ></RowDefinition>
                         <RowDefinition ></RowDefinition>
                         <RowDefinition ></RowDefinition>
                         <RowDefinition ></RowDefinition>
-                </Grid.RowDefinitions>
+                    </Grid.RowDefinitions>
 
                     <TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="12" />
                     <TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding SelectedQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
@@ -174,8 +174,8 @@
                             <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
                         </FlowDocumentScrollViewer.Document>
                     </FlowDocumentScrollViewer>
-            </Grid>
-
+                </Grid>
+                
             </Border>
         </DockPanel>
         
