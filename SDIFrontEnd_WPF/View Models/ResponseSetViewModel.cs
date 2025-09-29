@@ -22,7 +22,8 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private ResponseSet? currentResponse;
         public ObservableCollection<ResponseSet> Responses { get; set; } = new ObservableCollection<ResponseSet>(); // Collection of wordings for the UI
-        public ObservableCollection<ResponseUsage> Usages { get; set; } = new ObservableCollection<ResponseUsage>(); // Collection of wordings for the UI
+        [ObservableProperty]
+        private ObservableCollection<ResponseUsage> usages = new ObservableCollection<ResponseUsage>(); // Collection of wordings for the UI
 
         [ObservableProperty]
         private bool lockedForEditing = true; // Flag indicating if the wording is locked for editing
