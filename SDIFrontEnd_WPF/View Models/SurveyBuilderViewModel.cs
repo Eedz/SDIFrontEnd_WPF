@@ -421,7 +421,7 @@ namespace SDIFrontEnd_WPF
 
         private void OpenWordings(string type, int wordID)
         {
-            WordingViewModel wordingVM = new WordingViewModel(_wordingService, type, wordID);
+            WordingViewModel wordingVM = new WordingViewModel(_wordingService, _dialogService, type, wordID);
             bool? result = _dialogService.ShowDialog(wordingVM);
 
             if (result.Value)
@@ -434,7 +434,7 @@ namespace SDIFrontEnd_WPF
         
         private void OpenResponses(string type, string setname)
         {
-            ResponseSetViewModel wordingVM = new ResponseSetViewModel(_wordingService, type, setname);
+            ResponseSetViewModel wordingVM = new ResponseSetViewModel(_wordingService, _dialogService, type, setname);
             _dialogService.ShowDialog(wordingVM);
         }
 
