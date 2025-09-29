@@ -20,6 +20,7 @@ namespace SDIFrontEnd_WPF
         public bool NewSet { get; set; }
         public string ResponseType { get; set; } // Type of wording being managed (e.g., PreP, PreI etc.)
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ItemPosition))]
         private ResponseSet? currentResponse;
         public ObservableCollection<ResponseSet> Responses { get; set; } = new ObservableCollection<ResponseSet>(); // Collection of wordings for the UI
         [ObservableProperty]
@@ -81,6 +82,7 @@ namespace SDIFrontEnd_WPF
                 RespList = respSet.RespList
             };
             Responses.Add(newWording);
+            CurrentResponse = newWording;
         }
 
         [RelayCommand]
@@ -93,13 +95,23 @@ namespace SDIFrontEnd_WPF
                 RespList = string.Empty
             };
             Responses.Add(newWording);
+            CurrentResponse = newWording;
         }
 
         [RelayCommand]
         private void DeleteWording(ResponseSet wording)
         {
-            //if (wording.WordID != 0)
-            //    _wordingService.DeleteWording(wording);
+            if (wording.RespSetName == "0")
+            {
+                _dialogService.ShowError("Cannot delete response set '0'.");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(wording.RespSetName))
+            {
+                _wordingService.DeleteResponseSet(wording.RespSetName, ResponseType);
+            }
+           
             Responses.Remove(wording);
             CurrentResponse = Responses.FirstOrDefault();
         }
@@ -162,7 +174,7 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void NextImage()
+        private void NextItem()
         {
             if (Responses == null)
                 return;
