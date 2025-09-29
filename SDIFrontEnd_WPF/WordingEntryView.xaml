@@ -52,13 +52,13 @@
         <!-- Wording Usage list -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
             <Label Content="This wording appears in the following places" FontWeight="Bold" HorizontalAlignment="Center" Margin="10"/>
-            <DataGrid Margin="3" ItemsSource="{Binding Usages}">
+            <DataGrid Margin="3" ItemsSource="{Binding Usages}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" Width="Auto"/>
-                    <DataGridTextColumn Header="Survey" Binding="{Binding SurveyCode}" Width="*"/>
-                    <DataGridTextColumn Header="W#" Binding="{Binding WordID}" Width="2*"/>
-                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" Width="2*"/>
-                    <DataGridTextColumn Header="Locked" Binding="{Binding Locked}" Width="2*"/>
+                    <DataGridTextColumn Header="Survey" Binding="{Binding SurveyCode}" Width="Auto"/>
+                    <DataGridTextColumn Header="W#" Binding="{Binding WordID}" Width="70"/>
+                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" Width="*"/>
+                    <DataGridCheckBoxColumn Header="Locked" Binding="{Binding Locked}" Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
         </StackPanel>
