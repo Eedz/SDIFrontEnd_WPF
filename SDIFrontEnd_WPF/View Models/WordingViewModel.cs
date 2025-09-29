@@ -9,7 +9,6 @@ using ITCLib;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Drawing;
 
 namespace SDIFrontEnd_WPF
 {
@@ -23,33 +22,35 @@ namespace SDIFrontEnd_WPF
         [NotifyPropertyChangedFor(nameof(ItemPosition))]
         private Wording? currentWording; // The currently selected wording 
         public ObservableCollection<Wording> Wordings { get; set; } = new ObservableCollection<Wording>(); // Collection of wordings for the UI
-        public ObservableCollection<WordingUsage> Usages { get; set; } = new ObservableCollection<WordingUsage>(); // Collection of wordings for the UI
+        [ObservableProperty]
+        private ObservableCollection<WordingUsage> usages = new ObservableCollection<WordingUsage>(); // Collection of wordings for the UI
 
         [ObservableProperty]
         private bool lockedForEditing = true; // Flag indicating if the wording is locked for editing
 
         public string ItemPosition => $"{(Wordings.IndexOf(CurrentWording) + 1)} of {Wordings.Count}";
 
-        public WordingViewModel(IWordingService wordingService, string type)
+        public WordingViewModel(IWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Wording Manager";
+            
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             WordingType = type ?? throw new ArgumentNullException(nameof(type));
             switch (type)
             {
                 case "PreP": Wordings = new ObservableCollection<Wording>( _wordingService.GetAllPreP()); break;
-                case "PreI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreP()); break;
-                case "PreA": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreP()); break;
-                case "LitQ": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreP()); break;
-                case "PstI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreP()); break;
-                case "PstP": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreP()); break;
+                case "PreI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreI()); break;
+                case "PreA": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreA()); break;
+                case "LitQ": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllLitQ()); break;
+                case "PstI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPstI()); break;
+                case "PstP": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPstP()); break;
             }
             
             CurrentWording = Wordings.FirstOrDefault();
-            
         }
 
-        public WordingViewModel(IWordingService wordingService, string type, int wordID) : this(wordingService, type)
+        public WordingViewModel(IWordingService wordingService, IDialogService dialogService, string type, int wordID) : this(wordingService, dialogService, type)
         {
             CurrentWording = Wordings.FirstOrDefault(w => w.WordID == wordID);
         }
@@ -70,12 +71,7 @@ namespace SDIFrontEnd_WPF
         {
             if (!LockedForEditing)
             {
-                // save changes
-                if (CurrentWording.WordID == 0)
-                    _wordingService.InsertWording(CurrentWording);
-                else
-
-                    _wordingService.UpdateWording(CurrentWording);
+                SaveChanges();
             }
             LockedForEditing = !LockedForEditing;
         }
@@ -85,11 +81,12 @@ namespace SDIFrontEnd_WPF
         {
             Wording newWording = new Wording
             {
-                WordID = 0,
+                WordID = -1,
                 Type = wording.Type,
                 WordingText = wording.WordingText
             };
             Wordings.Add(newWording);
+            CurrentWording = newWording;
         }
 
         [RelayCommand]
@@ -97,18 +94,28 @@ namespace SDIFrontEnd_WPF
         {
             Wording newWording = new Wording
             {
-                WordID = 0,
+                WordID = -1,
                 Type = GetWordingType(),
                 WordingText = string.Empty
             };
             Wordings.Add(newWording);
+            CurrentWording = newWording;
         }
 
         [RelayCommand]
         private void DeleteWording(Wording wording)
         {
-            //if (wording.WordID != 0)
-            //    _wordingService.DeleteWording(wording);
+            if (wording.WordID == 0)
+            {
+                _dialogService.ShowError("Cannot delete wording '0'.");
+                return;
+            }
+
+            if (wording.WordID > 0)
+            {
+                _wordingService.DeleteWording(wording.WordID, wording.FieldType);
+            }           
+               
             Wordings.Remove(wording);
             CurrentWording = Wordings.FirstOrDefault();
         }
@@ -138,11 +145,14 @@ namespace SDIFrontEnd_WPF
             if (!LockedForEditing || (CurrentWording != null && CurrentWording.WordID == 0))
             {
                 if (_dialogService.Confirm("You have unsaved changes. Save first?"))
-                    return;
+                {
+                    SaveChanges();
+                    OnRequestClose(true);
+            }
             }
             else
             {
-                CloseCommand.Execute(true);
+                OnRequestClose(true);
             }
         }
 
@@ -168,7 +178,7 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void NextImage()
+        private void NextItem()
         {
             if (Wordings == null)
                 return;
@@ -199,6 +209,37 @@ namespace SDIFrontEnd_WPF
                 case "PstI": return ITCLib.WordingType.PstI;
                 case "PstP": return ITCLib.WordingType.PstP;
                 default: throw new ArgumentException("Invalid Wording Type");
+            }
+        }
+
+        private void SaveChanges()
+        {
+            if (CurrentWording == null)
+                return;
+            if (string.IsNullOrWhiteSpace(CurrentWording.WordingText))
+            {
+                _dialogService.ShowError("Wording text cannot be empty.");
+                return;
+            }
+            try
+            {
+                if (CurrentWording.WordID == -1)
+                {
+                    // New wording
+                    int newId = _wordingService.InsertWording(CurrentWording);
+                }
+                else
+                {
+                    // Existing wording
+                    _wordingService.UpdateWording(CurrentWording);
+                }
+                LockedForEditing = true;
+                // Refresh usages after save
+                Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(CurrentWording));
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Error saving wording: {ex.Message}");
             }
         }
     }
