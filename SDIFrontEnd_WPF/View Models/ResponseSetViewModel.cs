@@ -33,7 +33,8 @@ namespace SDIFrontEnd_WPF
 
         public ResponseSetViewModel(IWordingService wordingService, IDialogService dialogService, string type)
         {
-            DisplayName = "Wording Manager";
+            DisplayName = "Response Set Manager";
+
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             ResponseType = type ?? throw new ArgumentNullException(nameof(type));
