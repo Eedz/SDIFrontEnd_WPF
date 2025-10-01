@@ -1,35 +1,54 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using ITC_Services;
+using ITCLib;
+using Microsoft.Data.SqlClient;
+using MvvmLib.Converters;
+using MvvmLib.ViewModels;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MvvmLib.ViewModels;
-using ITC_Services;
-using ITCLib;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using System.Windows.Documents;
+using System.Windows.Markup;
 
 namespace SDIFrontEnd_WPF
 {
+    // TODO lock/unlock for editing (done)
+    // TODO clipboard
+    // TODO rich text editor for wording text (done)
+    // TODO breaks missing in text
+    // TODO reset state on move
     public partial class WordingViewModel : WorkspaceViewModel
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
         private readonly IWordingService _wordingService; // Service for managing question wordings and translations
 
-        public string WordingType { get; set; } // Type of wording being managed (e.g., PreP, PreI etc.)
+        public string WordingType { get; set; } // type of wording being managed (e.g., PreP, PreI etc.)
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ItemPosition))]
-        private Wording? currentWording; // The currently selected wording 
-        public ObservableCollection<Wording> Wordings { get; set; } = new ObservableCollection<Wording>(); // Collection of wordings for the UI
+        private Wording? currentWording; // currently selected wording 
+        public ObservableCollection<Wording> Wordings { get; set; } = new ObservableCollection<Wording>();
         [ObservableProperty]
-        private ObservableCollection<WordingUsage> usages = new ObservableCollection<WordingUsage>(); // Collection of wordings for the UI
+        private ObservableCollection<WordingUsage> usages = new ObservableCollection<WordingUsage>(); 
 
         [ObservableProperty]
         private bool lockedForEditing = true; // Flag indicating if the wording is locked for editing
 
         public string ItemPosition => $"{(Wordings.IndexOf(CurrentWording) + 1)} of {Wordings.Count}";
 
+        private FlowDocument wordingText;
+        public FlowDocument WordingText
+        {
+            get => wordingText;
+            set
+            {
+                SetProperty(ref wordingText, value);
+                CurrentWording.WordingText = HtmlUtils.ConvertFlowDocumentToHtml(value);
+            }
+        }
         public WordingViewModel(IWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Wording Manager";
@@ -57,13 +76,13 @@ namespace SDIFrontEnd_WPF
 
         partial void OnCurrentWordingChanged(Wording? value)
         {
-            if (value.WordID == 0)
+            if (value == null || value.WordID == 0)
             {
                 Usages.Clear();
                 return;
             }
-
-            Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(CurrentWording));
+            WordingText = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(value.WordingText, true));
+            Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(value));
         }
 
         [RelayCommand]
@@ -86,6 +105,7 @@ namespace SDIFrontEnd_WPF
                 WordingText = wording.WordingText
             };
             Wordings.Add(newWording);
+            LockedForEditing = false;
             CurrentWording = newWording;
         }
 
@@ -99,25 +119,40 @@ namespace SDIFrontEnd_WPF
                 WordingText = string.Empty
             };
             Wordings.Add(newWording);
+            LockedForEditing = false;
             CurrentWording = newWording;
         }
 
         [RelayCommand]
         private void DeleteWording(Wording wording)
         {
-            if (wording.WordID == 0)
+            if (wording.WordID == 0) // reserved
             {
                 _dialogService.ShowError("Cannot delete wording '0'.");
                 return;
             }
 
-            if (wording.WordID > 0)
+            if (Usages.Count > 0) // in use
             {
-                _wordingService.DeleteWording(wording.WordID, wording.FieldType);
+                _dialogService.ShowError("Cannot delete wording that is in use.");
+                return;
+            }
+
+            if (wording.WordID == -1) // new unsaved wording
+            {
+                Wordings.Remove(wording);
+                CurrentWording = Wordings.LastOrDefault();
+                return;
             }           
                
+            if (wording.WordID > 0)
+            {
+                PreviousItem();
+                if (_wordingService.DeleteWording(wording.WordID, wording.FieldType) == 1)
+                {
             Wordings.Remove(wording);
-            CurrentWording = Wordings.FirstOrDefault();
+                }
+            }           
         }
 
         [RelayCommand]
@@ -233,9 +268,13 @@ namespace SDIFrontEnd_WPF
                     // Existing wording
                     _wordingService.UpdateWording(CurrentWording);
                 }
-                LockedForEditing = true;
+                
                 // Refresh usages after save
                 Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(CurrentWording));
+            }
+            catch(SqlException sqle)
+            {
+
             }
             catch (Exception ex)
             {
