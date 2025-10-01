@@ -424,12 +424,15 @@ namespace SDIFrontEnd_WPF
             WordingViewModel wordingVM = new WordingViewModel(_wordingService, _dialogService, type, wordID);
             bool? result = _dialogService.ShowDialog(wordingVM);
 
-            //if (result.Value)
-            //{
+            if (result.Value) // if closed with OK
+            {
                 // apply wording to current question
                 SetWording(type, wordingVM.CurrentWording);
-            //}
-            
+            }
+            else
+            {
+                UpdateWording(type);
+            }
         }
 
         
@@ -468,6 +471,36 @@ namespace SDIFrontEnd_WPF
                 case "PstP":
                     SelectedQuestion.PstPW = wording;
                     PstPID = wording.WordID;
+                    break;
+                default:
+                    break;
+            }
+            OnPropertyChanged(nameof(CurrentQuestionText));
+        }
+
+        private void UpdateWording(string type)
+        {
+            if (SelectedQuestion == null)
+                return;
+            switch (type)
+            {
+                case "PreP":
+                    SelectedQuestion.PrePW = _wordingService.GetPrePById(SelectedQuestion.PrePW.WordID);
+                    break;
+                case "PreI":
+                    SelectedQuestion.PreIW = _wordingService.GetPreIById(SelectedQuestion.PreIW.WordID);
+                    break;
+                case "PreA":
+                    SelectedQuestion.PreAW = _wordingService.GetPreAById(SelectedQuestion.PreAW.WordID);
+                    break;
+                case "LitQ":
+                    SelectedQuestion.LitQW = _wordingService.GetLitQById(SelectedQuestion.LitQW.WordID);
+                    break;
+                case "PstI":
+                    SelectedQuestion.PstIW = _wordingService.GetPstIById(SelectedQuestion.PstIW.WordID);
+                    break;
+                case "PstP":
+                    SelectedQuestion.PstPW = _wordingService.GetPstPById(SelectedQuestion.PstPW.WordID);
                     break;
                 default:
                     break;
