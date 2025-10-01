@@ -42,6 +42,9 @@ namespace SDIFrontEnd_WPF
         static ServiceProvider AddServices()
         {
             IServiceCollection services = new ServiceCollection();
+            
+            services.AddAutoMapper(typeof(MappingProfile));
+
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IDialogService, DialogService>();
 

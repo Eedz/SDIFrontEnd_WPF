@@ -424,11 +424,12 @@ namespace SDIFrontEnd_WPF
             WordingViewModel wordingVM = new WordingViewModel(_wordingService, _dialogService, type, wordID);
             bool? result = _dialogService.ShowDialog(wordingVM);
 
-            if (result.Value)
-            {
+            //if (result.Value)
+            //{
                 // apply wording to current question
                 SetWording(type, wordingVM.CurrentWording);
-            }
+            //}
+            
         }
 
         

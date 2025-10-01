@@ -1,9 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using ITC_Services;
 using ITCLib;
-using Microsoft.Extensions.DependencyInjection;
 using MvvmLib.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -64,7 +62,7 @@ namespace SDIFrontEnd_WPF
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
-                }
+        }
 
         [RelayCommand]
         private void EditSurveyInfo()
@@ -106,7 +104,7 @@ namespace SDIFrontEnd_WPF
                 SurveyInfo = new SurveyViewModel(editorVM.Survey);
                 OnPropertyChanged(nameof(SurveyInfo));
 
-        }
+            }
 
         }
     }

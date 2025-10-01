@@ -83,8 +83,8 @@ namespace SDIFrontEnd_WPF
             // get user's filter matching the index
            // int surveyId = CurrentUser.GetFilterID("frmSurveyEntry", index);
             Survey survey = await _surveyService.GetSurveyByIdAsync(surveyId);
-            var questions = _surveyService.GetQuestionsForSurvey(surveyId);
-            survey.AddQuestions(questions);
+            //var questions = _surveyService.GetQuestionsForSurvey(surveyId);
+            //survey.AddQuestions(questions);
             return new SurveyManagerViewModel(_services, survey);
         }
 

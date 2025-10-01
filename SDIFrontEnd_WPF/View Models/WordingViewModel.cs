@@ -65,7 +65,7 @@ namespace SDIFrontEnd_WPF
                 case "PstI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPstI()); break;
                 case "PstP": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPstP()); break;
             }
-            
+
             CurrentWording = Wordings.FirstOrDefault();
         }
 
@@ -143,14 +143,14 @@ namespace SDIFrontEnd_WPF
                 Wordings.Remove(wording);
                 CurrentWording = Wordings.LastOrDefault();
                 return;
-            }           
-               
+            }
+
             if (wording.WordID > 0)
             {
                 PreviousItem();
                 if (_wordingService.DeleteWording(wording.WordID, wording.FieldType) == 1)
                 {
-            Wordings.Remove(wording);
+                    Wordings.Remove(wording);
                 }
             }           
         }
@@ -183,7 +183,7 @@ namespace SDIFrontEnd_WPF
                 {
                     SaveChanges();
                     OnRequestClose(true);
-            }
+                }
             }
             else
             {

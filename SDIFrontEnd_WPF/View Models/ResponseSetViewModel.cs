@@ -108,7 +108,7 @@ namespace SDIFrontEnd_WPF
                 return;
             }
 
-            if (!string.IsNullOrEmpty(wording.RespSetName))
+            if (!string.IsNullOrEmpty(wording.RespSetName) && Usages.Count==0)
             {
                 _wordingService.DeleteResponseSet(wording.RespSetName, ResponseType);
             }
@@ -145,7 +145,7 @@ namespace SDIFrontEnd_WPF
                 {
                     SaveChanges();
                     OnRequestClose(true);
-            }
+                }
             }
             else
             {

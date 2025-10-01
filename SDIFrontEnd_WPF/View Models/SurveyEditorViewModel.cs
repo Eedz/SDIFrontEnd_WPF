@@ -75,6 +75,7 @@ namespace SDIFrontEnd_WPF
             _survey.ScreenedProducts.Add(new SurveyScreenedProduct { SurvID = _survey.SID, Product = product });
             OnPropertyChanged(nameof(ScreenedProductsList));
         }
+
         [RelayCommand]
         private void AddLanguage(Language language)
         {

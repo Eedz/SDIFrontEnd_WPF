@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36127.28 d17.14
+VisualStudioVersion = 17.14.36127.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDIFrontEnd_WPF", "SDIFrontEnd_WPF\SDIFrontEnd_WPF.csproj", "{04565EB5-442D-40F7-BD31-91B17D3FA641}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCLib", "..\ITCLib\ITCLib\ITCLib.csproj", "{1F878409-8602-4DC3-A0CB-45CCCC21289E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITC_DataAccess_EF", "..\ITC_DataAccess_EF\ITC_DataAccess_EF\ITC_DataAccess_EF.csproj", "{B0E9405E-FFA7-723A-DC5E-7240294A0741}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{1F878409-8602-4DC3-A0CB-45CCCC21289E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F878409-8602-4DC3-A0CB-45CCCC21289E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F878409-8602-4DC3-A0CB-45CCCC21289E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
