@@ -83,6 +83,7 @@ namespace SDIFrontEnd_WPF
             }
             WordingText = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(value.WordingText, true));
             Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(value));
+            LockedForEditing = true;
         }
 
         [RelayCommand]
@@ -135,6 +136,11 @@ namespace SDIFrontEnd_WPF
             if (Usages.Count > 0) // in use
             {
                 _dialogService.ShowError("Cannot delete wording that is in use.");
+                return;
+            }
+
+            if (_dialogService.Confirm($"Are you sure you want to delete {wording.FieldType}#{wording.WordID}? This action cannot be undone." ) == false)
+            {
                 return;
             }
 
@@ -231,6 +237,24 @@ namespace SDIFrontEnd_WPF
             {
                 CurrentWording = Wordings.First();
             }
+        }
+
+        [RelayCommand]
+        private void FirstItem()
+        {
+            if (Wordings == null)
+                return;
+           
+            CurrentWording = Wordings.FirstOrDefault();
+        }
+
+        [RelayCommand]
+        private void LastItem()
+        {
+            if (Wordings == null)
+                return;
+            
+            CurrentWording = Wordings.LastOrDefault();
         }
 
         private ITCLib.WordingType GetWordingType()
