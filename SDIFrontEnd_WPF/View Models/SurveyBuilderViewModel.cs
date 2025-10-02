@@ -22,13 +22,16 @@ namespace SDIFrontEnd_WPF
 
         private readonly Survey CurrentSurvey;
         private readonly ObservableCollection<SurveyQuestion> _questionList;
+        public ObservableCollection<SurveyQuestion> QuestionList => _questionList;
 
         public List<TopicLabel> TopicLabels { get; set; }
         public List<ContentLabel> ContentLabels { get; set; }
         public List<DomainLabel> DomainLabels { get; set; }
         public List<ProductLabel> ProductLabels { get; set; }
 
-        public ObservableCollection<SurveyQuestion> QuestionList => _questionList;
+        public ObservableCollection<SurveyQuestion> Added = new ObservableCollection<SurveyQuestion>();
+        public ObservableCollection<SurveyQuestion> Removed = new ObservableCollection<SurveyQuestion>();
+        public ObservableCollection<SurveyQuestion> Modified = new ObservableCollection<SurveyQuestion>();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CurrentQuestionText))]
@@ -120,69 +123,96 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(TranslationVM));
         }
 
-        partial void OnPrePIDChanged(int value)
+        partial void OnPrePIDChanged(int oldValue, int newValue)
         {
-            if (SelectedQuestion?.PrePW.WordID == value)
+            if (SelectedQuestion?.PrePW.WordID == newValue)
                 return;
 
-            Wording found = _wordingService.GetAllPreP().FirstOrDefault(x => x.WordID == value);
+            Wording found = _wordingService.GetAllPreP().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
+            {
                 SelectedQuestion.PrePW = found;
-
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+                prePID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnPreIIDChanged(int value)
+        partial void OnPreIIDChanged(int oldValue, int newValue)
         {
-            if (SelectedQuestion?.PreIW.WordID == value)
+            if (SelectedQuestion?.PreIW.WordID == newValue)
                 return;
 
-            Wording found = _wordingService.GetAllPreI().FirstOrDefault(x => x.WordID == value);
+            Wording found = _wordingService.GetAllPreI().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
+            {
                 SelectedQuestion.PreIW = found;
-
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+                preIID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnPreAIDChanged(int value)
+        partial void OnPreAIDChanged(int oldValue, int newValue)
         {
-            if (SelectedQuestion?.PreAW.WordID == value)
+            if (SelectedQuestion?.PreAW.WordID == newValue)
                 return;
 
-            Wording found = _wordingService.GetAllPreA().FirstOrDefault(x => x.WordID == value);
+            Wording found = _wordingService.GetAllPreA().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
+            {
                 SelectedQuestion.PreAW = found;
-
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+                preAID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnLitQIDChanged(int value)
+        partial void OnLitQIDChanged(int oldValue, int newValue)
         {
-            if (SelectedQuestion?.LitQW.WordID == value)
+            if (SelectedQuestion?.LitQW.WordID == newValue)
                 return;
-            Wording found = _wordingService.GetAllLitQ().FirstOrDefault(x => x.WordID == value);
+            Wording found = _wordingService.GetAllLitQ().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
+            {
                 SelectedQuestion.LitQW = found;
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+                litQID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnPstIIDChanged(int value)
+        partial void OnPstIIDChanged(int oldValue, int newValue)
         {
-            if (SelectedQuestion?.PstIW.WordID == value)
+            if (SelectedQuestion?.PstIW.WordID == newValue)
                 return;
-            Wording found = _wordingService.GetAllPstI().FirstOrDefault(x => x.WordID == value);
+            Wording found = _wordingService.GetAllPstI().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
+            {
                 SelectedQuestion.PstIW = found;
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+                pstIID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnPstPIDChanged(int value)
+        partial void OnPstPIDChanged(int oldValue, int newValue)
         {
-            if (SelectedQuestion?.PstPW.WordID == value)
+            if (SelectedQuestion?.PstPW.WordID == newValue)
                 return;
-            Wording found = _wordingService.GetAllPstP().FirstOrDefault(x => x.WordID == value);
+            Wording? found = _wordingService.GetAllPstP().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
+            {
                 SelectedQuestion.PstPW = found;
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+                pstPID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -192,7 +222,14 @@ namespace SDIFrontEnd_WPF
                 return;
             ResponseSet found = _wordingService.GetAllResponseSets().FirstOrDefault(x => x.RespSetName == value);
             if (found != null)
+            {
                 SelectedQuestion.RespOptionsS = found;
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+            }
+            else
+            {
+
+            }
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -202,20 +239,15 @@ namespace SDIFrontEnd_WPF
                 return;
             ResponseSet found = _wordingService.GetAllNonResponseSets().FirstOrDefault(x => x.RespSetName == value);
             if (found != null)
+            {
                 SelectedQuestion.NRCodesS = found;
-            OnPropertyChanged(nameof(CurrentQuestionText));
+                if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
         }
-
-        [RelayCommand]
-        private void EditWording(WordingType wordingType)
+            else
         {
-            // open wording editor dialog
 
         }
-
-        [RelayCommand]
-        private void EditResponseSet(ResponseSet responseSet) 
-        { 
+                OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
         [RelayCommand]
@@ -233,6 +265,8 @@ namespace SDIFrontEnd_WPF
                 _dialogService.ShowMessage("No comments available for this question.", "Comments");
                 return;
             }
+
+
         }
 
         [RelayCommand]
@@ -286,8 +320,8 @@ namespace SDIFrontEnd_WPF
                     newQuestion.Qnum = "0";
                 }
 
-
-                CurrentSurvey.Questions.Add(newQuestion);
+                CurrentSurvey.AddQuestion(newQuestion, true);
+                Added.Add(newQuestion);
             }
             else
             {
@@ -295,6 +329,7 @@ namespace SDIFrontEnd_WPF
                 newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
 
                 CurrentSurvey.Questions.Add(newQuestion);
+                Added.Add(newQuestion);
             }
 
             // SurveyBuilder.Refresh(); // assumes method to refresh the view
@@ -306,14 +341,29 @@ namespace SDIFrontEnd_WPF
             // ask user to document
             // ask user to save comments
             // remove from survey
-            CurrentSurvey.RemoveQuestion(SelectedQuestion);
 
+            Removed.Add(SelectedQuestion);
         }
 
         [RelayCommand]
         private void SaveChanges()
         {
-
+            foreach (var question in Removed)
+            {
+                _surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName);
+                QuestionList.Remove(question);
+            }
+            Removed.Clear();
+            foreach (var question in Added)
+            {
+               _surveyService.AddQuestion(question);
+            }
+            Added.Clear();
+            foreach(var question in Modified)
+            {
+                _surveyService.UpdateQuestion(question);
+            }
+            Modified.Clear();
         }
 
         [RelayCommand]
