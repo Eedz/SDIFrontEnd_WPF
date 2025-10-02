@@ -47,6 +47,8 @@ namespace SDIFrontEnd_WPF
 
         public string CurrentQuestionText => SelectedQuestion.GetQuestionTextHTML() ?? string.Empty;
 
+        public TranslationViewModel TranslationVM;
+
         public string SectionCount
         {
             get
@@ -112,6 +114,10 @@ namespace SDIFrontEnd_WPF
             RespName = SelectedQuestion.RespOptionsS.RespSetName;
             NRName = SelectedQuestion.NRCodesS.RespSetName;
 
+            if (TranslationVM == null) return;
+                
+            TranslationVM.UpdateTranslations(SelectedQuestion);
+            OnPropertyChanged(nameof(TranslationVM));
         }
 
         partial void OnPrePIDChanged(int value)
@@ -243,9 +249,9 @@ namespace SDIFrontEnd_WPF
                 _dialogService.ShowMessage("No translations available for this question.", "Translations");
                 return;
             }
-            // Assuming you have a dialog to show translations
-            //var translationDialog = new TranslationDialog(translations);
-            //translationDialog.ShowDialog();
+            // show translation window
+            TranslationVM = new TranslationViewModel(SelectedQuestion);
+            _dialogService.ShowWindow(TranslationVM);
         }
 
         [RelayCommand]
