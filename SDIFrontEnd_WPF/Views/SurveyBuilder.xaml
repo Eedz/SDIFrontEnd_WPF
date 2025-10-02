@@ -85,6 +85,11 @@
                 <Run Text="--- Q#"/>
                 <Run Text="{Binding SelectedQuestion.Qnum}" d:Text="Qnum" />
             </TextBlock>
+            <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" FontSize="12" Text="AltQ#: " />
+                <TextBox Text="{Binding SelectedQuestion.AltQnum}" d:Text="AltQ#" Width="70" DockPanel.Dock="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+            </StackPanel>
+          
             <!-- Labels -->
             <Border Margin="0,0,0,5" DockPanel.Dock="Bottom" Background="LightSkyBlue"
                 Effect="{StaticResource SunkenEffect}">
@@ -118,7 +123,7 @@
 
                 </Grid>
             </Border>
-            <!-- Question Text -->
+            <!-- Question Details -->
             <Border Background="LightSkyBlue" Effect="{StaticResource SunkenEffect}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -168,7 +173,19 @@
                         <Button Content="PstP" Width="50" Command="{Binding OpenPstPCommand}" CommandParameter="{Binding PstPID}"/>
                         <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
                     </StackPanel>
-
+                    
+                    <!-- # comments, translations -->
+                    <StackPanel Grid.Row="8">
+                        <TextBlock>
+                            <Run  d:Text="0" Text="{Binding SelectedQuestion.Comments.Count, Mode=OneWay}" />
+                            <Run  Text=" comments."/>
+                        </TextBlock>
+                        <TextBlock>
+                            <Run  d:Text="0" Text="{Binding SelectedQuestion.Translations.Count, Mode=OneWay}" />
+                            <Run  Text=" translations."/>
+                        </TextBlock>
+                    </StackPanel>
+                    <!-- question text -->
                     <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
                         <FlowDocumentScrollViewer.Document>
                             <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
