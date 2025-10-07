@@ -520,6 +520,86 @@ namespace SDIFrontEnd_WPF
             OpenResponses("NRCodes", respSetName);
         }
 
+        [RelayCommand]
+        private void ToggleQuestion(SurveyQuestionRecord question)
+        {
+            if (CurrentSurvey.Locked)
+            {
+                _dialogService.ShowMessage("Cannot modify locked surveys.");
+                return;
+            }
+
+           
+            if (question == null)
+                return;
+
+            if (question.Item.QuestionType == QuestionType.Heading || question.Item.QuestionType == QuestionType.Subheading)
+            {
+                return;
+            }
+
+            // if current q is standalone, make it a series using the previous whole qnum + a letter
+            // if current q is in a series, make it a standalone by using the next qnum value, and increment each subsequent qnum by 1
+
+            string newQnum = question.Item.Qnum;
+
+            if (question.Item.QuestionType == QuestionType.Standalone)
+            {
+                // make it a series question
+                var previousQuestion = QuestionList.Where(x => x.GetQnumValue() < question.Item.GetQnumValue()).LastOrDefault();
+
+                if (previousQuestion == null)
+                    return;
+
+                var previousQnum = previousQuestion?.GetQnumValue() ?? -1;              
+
+                if (previousQnum == -1)
+                {
+                    _dialogService.ShowError("Cannot convert to series question as there is no previous question to base the qnum on.", "Toggle Error");
+                    return;
+                }
+
+                if (previousQuestion.QuestionType == QuestionType.Heading || previousQuestion.QuestionType == QuestionType.Subheading)
+                    return;
+
+                newQnum = previousQnum.ToString("000");
+
+                if (previousQuestion.QuestionType == QuestionType.Series)
+                {
+                    var previousSuffix = previousQuestion.GetQnum().Substring(3, 1);
+                    newQnum += (char)(previousSuffix[0] + 1);
+                }
+                else if (previousQuestion.QuestionType == QuestionType.Heading || previousQuestion.QuestionType == QuestionType.Subheading)
+                {
+                   // question.Item.Qnum = (previousQnum + 1).ToString("000") + "a";
+
+                }
+                else
+                {
+                    newQnum += "b";
+                }
+            }
+            else
+            {
+                // make it a standalone question
+                var nextQnum = QuestionList.Where(x => x.GetQnumValue() > question.Item.GetQnumValue()).FirstOrDefault()?.GetQnumValue() ?? 0;
+                if (nextQnum == 0)
+                {
+                    // no next question, so just increment current by 1
+                    newQnum = (question.Item.GetQnumValue() + 1).ToString();
+                }
+                else
+                {
+                    newQnum = nextQnum.ToString();
+                }
+                
+            }
+            question.Item.Qnum = newQnum;
+            // renumber the rest of the questions
+            CurrentSurvey.Renumber(0);
+            
+        }
+
         private void OpenWordings(string type, int wordID)
         {
             WordingViewModel wordingVM = new WordingViewModel(_wordingService, _dialogService, type, wordID);
@@ -540,7 +620,17 @@ namespace SDIFrontEnd_WPF
         private void OpenResponses(string type, string setname)
         {
             ResponseSetViewModel wordingVM = new ResponseSetViewModel(_wordingService, _dialogService, type, setname);
-            _dialogService.ShowDialog(wordingVM);
+            bool? result = _dialogService.ShowDialog(wordingVM);
+
+            if (result.Value) // if closed with OK
+            {
+                // apply wording to current question
+                //SetResponse(type, wordingVM.CurrentWording);
+            }
+            else
+            {
+                //UpdateResponse(type);
+            }
         }
 
         private void SetWording(string type, Wording? wording)
