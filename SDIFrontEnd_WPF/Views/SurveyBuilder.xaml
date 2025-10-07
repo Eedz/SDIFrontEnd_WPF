@@ -13,23 +13,21 @@
             <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
             <converters:QuestionTypeToBrushConverter x:Key="QuestionTypeToBrushConverter"/>
             <converters:QuestionTypeToFontWeightConverter x:Key="QuestionTypeToFontWeightConverter"/>
+            <converters:QuestionStatusToBackgroundConverter x:Key="QuestionStatusToBackgroundConverter"/>
 
             <Style x:Key="QuestionRowStyle" TargetType="DataGridRow">
-                <Setter Property="Foreground" Value="{Binding QuestionType, Converter={StaticResource QuestionTypeToBrushConverter}}"/>
-                <Setter Property="FontWeight" Value="{Binding QuestionType, Converter={StaticResource QuestionTypeToFontWeightConverter}}"/>
+                <Setter Property="Foreground" Value="{Binding Item.QuestionType, Converter={StaticResource QuestionTypeToBrushConverter}}"/>
+                <Setter Property="FontWeight" Value="{Binding Item.QuestionType, Converter={StaticResource QuestionTypeToFontWeightConverter}}"/>
+            </Style>
+            <Style x:Key="QuestionRowColor" TargetType="DataGridRow" BasedOn="{StaticResource QuestionRowStyle}">
+                <Setter Property="Background" Value="{Binding QuestionStatus, Converter={StaticResource QuestionStatusToBackgroundConverter}}"/>
             </Style>
 
-            <DropShadowEffect x:Key="SunkenEffect"
-                  Color="Black"
-                  Direction="270"
-                  BlurRadius="5"
-                  ShadowDepth="1"
-                  Opacity="0.4"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="580"></ColumnDefinition>
+            <ColumnDefinition Width="560"></ColumnDefinition>
             <ColumnDefinition Width="0.5*"></ColumnDefinition>
             <ColumnDefinition Width="0.5*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -41,6 +39,7 @@
         
         <!-- Button menu -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Save Changes" Command="{Binding SaveChangesCommand}" Margin="5,0,20,0"/> 
             <Button Content="Add Question" Command="{Binding AddSurveyQuestionCommand}" Margin="5"/>
             <Button Content="Delete Question" Command="{Binding RemoveSurveyQuestionCommand}" Margin="5"/>
             <Button Content="Copy Previous" Command="{Binding CopyPreviousWordingsCommand}" Margin="5"/>
@@ -53,8 +52,8 @@
         
         <!-- Question List -->
         <DataGrid Grid.Row="1" Grid.Column="0" Grid.RowSpan="2"
-            ItemsSource="{Binding QuestionList}"
-            SelectedItem="{Binding SelectedQuestion}"
+            ItemsSource="{Binding RecordList}"
+            SelectedItem="{Binding SelectedQuestionRecord}"
             ScrollViewer.VerticalScrollBarVisibility="Visible" 
             AutoGenerateColumns="False" 
             HeadersVisibility="Column"
@@ -66,13 +65,14 @@
             SelectionUnit="FullRow"
             mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestions}"
             mvvmLib:DataGridHelper.ScrollOnSelected="True"
-            RowStyle="{StaticResource QuestionRowStyle}">
+            mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
+            RowStyle="{StaticResource QuestionRowColor}">
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Qnum" Binding="{Binding Qnum}" Width="60"/>
-                <DataGridTextColumn Header="VarName" Binding="{Binding VarName.VarName}" Width="Auto"/>
-                <DataGridTextColumn Header="VarLabel" Binding="{Binding VarName.VarLabel}" Width="300"/>
-                <DataGridTextColumn Header="RespName" Binding="{Binding RespOptionsS.RespSetName}" Width="Auto"/>
+                <DataGridTextColumn Header="Qnum" Binding="{Binding Item.Qnum}" Width="60"/>
+                <DataGridTextColumn Header="VarName" Binding="{Binding Item.VarName.VarName}" Width="Auto"/>
+                <DataGridTextColumn Header="VarLabel" Binding="{Binding Item.VarName.VarLabel}" Width="300"/>
+                <DataGridTextColumn Header="RespName" Binding="{Binding Item.RespOptionsS.RespSetName}" Width="Auto"/>
             </DataGrid.Columns>
 
             
@@ -206,15 +206,17 @@
             </TextBlock>
             <Button Command="{Binding NextImageCommand}" Content="&gt;&gt;&gt;" Width="50" Margin="5"/>
         </StackPanel>
-        <DockPanel Grid.Column="2" Grid.Row="1">
+        <DockPanel Margin="5" Grid.Column="2" Grid.Row="1" Effect="{StaticResource SunkenEffect}">
             
-            <Image Source="{Binding CurrentImage.ImageSource}" Stretch="Fill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Image Source="{Binding CurrentImage.ImageSource}" Stretch="UniformToFill"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
             
         </DockPanel>
         
         <!-- Comments -->
-        <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch"
-           VerticalAlignment="Stretch">
+        <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" Effect="{StaticResource SunkenEffect}">
+            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,5">
+                <Run Text="Comments"/>
+            </TextBlock>
             <ListBox Grid.Row="2" Grid.Column="2"  ItemsSource="{Binding SelectedQuestion.Comments}" HorizontalContentAlignment="Stretch"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
