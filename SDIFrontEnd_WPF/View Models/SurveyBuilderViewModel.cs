@@ -29,8 +29,10 @@ namespace SDIFrontEnd_WPF
         private readonly IWordingService _wordingService;
 
         private readonly Survey CurrentSurvey;
-        private readonly ObservableCollection<SurveyQuestion> _questionList;
-        public ObservableCollection<SurveyQuestion> QuestionList => _questionList;
+        private readonly ObservableCollection<SurveyQuestionRecord> _recordList;
+        public ObservableCollection<SurveyQuestionRecord> RecordList => _recordList;
+
+        public ObservableCollection<SurveyQuestion> QuestionList => new ObservableCollection<SurveyQuestion>(RecordList.Select(r=>r.Item));
 
         public List<TopicLabel> TopicLabels { get; set; }
         public List<ContentLabel> ContentLabels { get; set; }
@@ -44,21 +46,24 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CurrentQuestionText))]
         [NotifyPropertyChangedFor(nameof(SectionCount))]
+        [NotifyPropertyChangedFor(nameof(SelectedQuestion))]
+        private SurveyQuestionRecord? selectedQuestionRecord;
+
+        [ObservableProperty]
         private SurveyQuestion? selectedQuestion;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ImageIndex))]
         private SurveyImage? currentImage;
 
-        
         public int? ImageIndex => SelectedQuestion?.Images.IndexOf(CurrentImage) + 1 ?? 0;
 
         [ObservableProperty]
         private ObservableCollection<SurveyQuestion>? selectedQuestions;
 
-        public string CurrentQuestionText => SelectedQuestion.GetQuestionTextHTML() ?? string.Empty;
+        public string CurrentQuestionText => SelectedQuestion?.GetQuestionTextHTML() ?? string.Empty;
 
-        public TranslationViewModel TranslationVM;
+        public TranslationViewModel? TranslationVM;
 
         public string SectionCount
         {
@@ -85,9 +90,9 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private int pstPID;
         [ObservableProperty]
-        private string respName;
+        private string? respName;
         [ObservableProperty]
-        private string nRName;
+        private string? nRName;
 
         public SurveyBuilderViewModel(IDialogService dialogService, ISurveyService surveyService, IReferenceDataService referenceData, IWordingService wordingService, Survey survey)
         {
@@ -98,32 +103,34 @@ namespace SDIFrontEnd_WPF
             if (survey == null) throw new ArgumentNullException(nameof(survey), "Questions cannot be null");
 
             CurrentSurvey = survey;
-            _questionList = new ObservableCollection<SurveyQuestion>(survey.Questions);
+            _recordList = new ObservableCollection<SurveyQuestionRecord>(survey.Questions.Select(x=> new SurveyQuestionRecord(x)));
 
             TopicLabels= _referenceDataService.GetTopicLabels() ?? new List<TopicLabel>();
             ContentLabels= _referenceDataService.GetContentLabels() ?? new List<ContentLabel>();
             DomainLabels= _referenceDataService.GetDomainLabels() ?? new List<DomainLabel>();
             ProductLabels= _referenceDataService.GetProductLabels() ?? new List<ProductLabel>();
 
-            SelectedQuestion = _questionList.FirstOrDefault() ?? new SurveyQuestion ("Default", "0000" );
+            SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000") );
            
         }
 
-        partial void OnSelectedQuestionChanged(SurveyQuestion? value)
+        partial void OnSelectedQuestionRecordChanged(SurveyQuestionRecord? value)
         {
             if (value == null)
                 return;
 
-            CurrentImage = value?.Images.FirstOrDefault();
+            SurveyQuestion question = value.Item;
+            SelectedQuestion = question;
+            CurrentImage = value?.Item.Images.FirstOrDefault();
 
-            PrePID = SelectedQuestion.PrePW.WordID;
-            PreIID = SelectedQuestion.PreIW.WordID;
-            PreAID = SelectedQuestion.PreAW.WordID;
-            LitQID = SelectedQuestion.LitQW.WordID;
-            PstIID = SelectedQuestion.PstIW.WordID;
-            PstPID = SelectedQuestion.PstPW.WordID;
-            RespName = SelectedQuestion.RespOptionsS.RespSetName;
-            NRName = SelectedQuestion.NRCodesS.RespSetName;
+            PrePID = question.PrePW.WordID;
+            PreIID = question.PreIW.WordID;
+            PreAID = question.PreAW.WordID;
+            LitQID = question.LitQW.WordID;
+            PstIID = question.PstIW.WordID;
+            PstPID = question.PstPW.WordID;
+            RespName = question.RespOptionsS.RespSetName;
+            NRName = question.NRCodesS.RespSetName;
 
             if (TranslationVM == null) return;
                 
@@ -131,12 +138,29 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(TranslationVM));
         }
 
+        partial void OnSelectedQuestionChanged(SurveyQuestion? value)
+        {
+            if (value == null)
+                return;
+            var record = _recordList.FirstOrDefault(r => r.Item == value);
+            if (record != null && record != SelectedQuestionRecord)
+                SelectedQuestionRecord = record;
+        }
+
+        void ModifyPreP(Wording prep, SurveyQuestion question)
+        {
+            question.PrePW = prep;
+            SurveyQuestionRecord record = new SurveyQuestionRecord(question);
+            if (!Modified.Contains(question)) Modified.Add(question);
+            OnPropertyChanged(nameof(CurrentQuestionText));
+        }
+
         partial void OnPrePIDChanged(int oldValue, int newValue)
         {
             if (SelectedQuestion?.PrePW.WordID == newValue)
                 return;
 
-            Wording found = _wordingService.GetAllPreP().FirstOrDefault(x => x.WordID == newValue);
+            Wording? found = _wordingService.GetAllPreP().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
             {
                 SelectedQuestion.PrePW = found;
@@ -152,7 +176,7 @@ namespace SDIFrontEnd_WPF
             if (SelectedQuestion?.PreIW.WordID == newValue)
                 return;
 
-            Wording found = _wordingService.GetAllPreI().FirstOrDefault(x => x.WordID == newValue);
+            Wording? found = _wordingService.GetAllPreI().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
             {
                 SelectedQuestion.PreIW = found;
@@ -168,7 +192,7 @@ namespace SDIFrontEnd_WPF
             if (SelectedQuestion?.PreAW.WordID == newValue)
                 return;
 
-            Wording found = _wordingService.GetAllPreA().FirstOrDefault(x => x.WordID == newValue);
+            Wording? found = _wordingService.GetAllPreA().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
             {
                 SelectedQuestion.PreAW = found;
@@ -183,7 +207,7 @@ namespace SDIFrontEnd_WPF
         {
             if (SelectedQuestion?.LitQW.WordID == newValue)
                 return;
-            Wording found = _wordingService.GetAllLitQ().FirstOrDefault(x => x.WordID == newValue);
+            Wording? found = _wordingService.GetAllLitQ().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
             {
                 SelectedQuestion.LitQW = found;
@@ -198,7 +222,7 @@ namespace SDIFrontEnd_WPF
         {
             if (SelectedQuestion?.PstIW.WordID == newValue)
                 return;
-            Wording found = _wordingService.GetAllPstI().FirstOrDefault(x => x.WordID == newValue);
+            Wording? found = _wordingService.GetAllPstI().FirstOrDefault(x => x.WordID == newValue);
             if (found != null)
             {
                 SelectedQuestion.PstIW = found;
@@ -224,11 +248,11 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnRespNameChanged(string value)
+        partial void OnRespNameChanged(string? value)
         {
             if (SelectedQuestion?.RespOptionsS.RespSetName == value)
                 return;
-            ResponseSet found = _wordingService.GetAllResponseSets().FirstOrDefault(x => x.RespSetName == value);
+            ResponseSet? found = _wordingService.GetAllResponseSets().FirstOrDefault(x => x.RespSetName == value);
             if (found != null)
             {
                 SelectedQuestion.RespOptionsS = found;
@@ -241,11 +265,13 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnNRNameChanged(string value)
+        partial void OnNRNameChanged(string? value)
         {
+            if (SelectedQuestion == null) 
+                return;
             if (SelectedQuestion?.NRCodesS.RespSetName == value)
                 return;
-            ResponseSet found = _wordingService.GetAllNonResponseSets().FirstOrDefault(x => x.RespSetName == value);
+            ResponseSet? found = _wordingService.GetAllNonResponseSets().FirstOrDefault(x => x.RespSetName == value);
             if (found != null)
             {
                 SelectedQuestion.NRCodesS = found;
@@ -282,7 +308,7 @@ namespace SDIFrontEnd_WPF
         {
             if (SelectedQuestion == null)
             {
-                _dialogService.ShowError("No question selected for translation.", "Translation Error");
+                _dialogService.ShowError("No question selected.", "Translation Error");
                 return;
             }
             var translations = SelectedQuestion.Translations;
@@ -358,8 +384,11 @@ namespace SDIFrontEnd_WPF
         {
             foreach (var question in Removed)
             {
-                _surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName);
-                QuestionList.Remove(question);
+                if (_surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName) == 0)
+                { 
+                    var record = _recordList.FirstOrDefault(r => r.Item == question);
+                    if (record!=null) RecordList.Remove(record);
+            }
             }
             Removed.Clear();
             foreach (var question in Added)
@@ -377,13 +406,21 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void CopyPreviousWordings()
         {
+            if (SelectedQuestion == null)                 return;
+
             // get previous question in survey
-            var previousQuestion = QuestionList[QuestionList.IndexOf(SelectedQuestion) - 1];
+            var previousQuestion = QuestionList.Where(x=>x.GetQnumValue() < SelectedQuestion.GetQnumValue()).LastOrDefault();
+
+            if (previousQuestion == null)
+            {
+                _dialogService.ShowError("No previous question found in the survey.", "Copy Wordings Error");
+                return;
+            }
 
             SelectedQuestion.PrePW = new Wording(previousQuestion.PrePW.WordID, WordingType.PreP, previousQuestion.PrePW.WordingText);
             SelectedQuestion.PreIW = new Wording(previousQuestion.PreIW.WordID, WordingType.PreI, previousQuestion.PreIW.WordingText);
             SelectedQuestion.PreAW = new Wording(previousQuestion.PreAW.WordID, WordingType.PreA, previousQuestion.PreAW.WordingText);
-
+            // do not copy LitQ as it is unique to the question
             SelectedQuestion.PstIW = new Wording(previousQuestion.PstIW.WordID, WordingType.PstI, previousQuestion.PstIW.WordingText);
             SelectedQuestion.PstPW = new Wording(previousQuestion.PstPW.WordID, WordingType.PstP, previousQuestion.PstPW.WordingText);
             SelectedQuestion.RespOptionsS = new ResponseSet(previousQuestion.RespOptionsS.RespSetName, ResponseType.RespOptions, previousQuestion.RespOptionsS.RespList);
