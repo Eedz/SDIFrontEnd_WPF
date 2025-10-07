@@ -13,6 +13,14 @@ using System.Text;
 using System.Threading.Tasks;
 namespace SDIFrontEnd_WPF
 {
+    // TODO add comment
+    // TODO save changes
+    // TODO view translation (done)
+    // TODO undo invalid respname/nrname
+    // TODO toggling series/standalone (done)
+    // TODO add/remove images
+    // TODO add translation shortcut
+    // TODO color rows on status (added/removed/modified)
     public partial class SurveyBuilderViewModel : ViewModelBase
     {
         private readonly IDialogService _dialogService;
