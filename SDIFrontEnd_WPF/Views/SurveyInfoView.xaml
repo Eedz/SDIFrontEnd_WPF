@@ -12,8 +12,7 @@
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"> </RowDefinition>
-
+            <RowDefinition ></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="0" Grid.Row="0">
             <TextBlock Text="{Binding Survey.SurveyCode}" d:Text="Survey Code" FontSize="16" Margin="10,0,0,0"/>

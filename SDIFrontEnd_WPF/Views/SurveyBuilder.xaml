@@ -22,7 +22,7 @@
             <Style x:Key="QuestionRowColor" TargetType="DataGridRow" BasedOn="{StaticResource QuestionRowStyle}">
                 <Setter Property="Background" Value="{Binding QuestionStatus, Converter={StaticResource QuestionStatusToBackgroundConverter}}"/>
             </Style>
-
+           
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -67,7 +67,7 @@
             mvvmLib:DataGridHelper.ScrollOnSelected="True"
             mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
             RowStyle="{StaticResource QuestionRowColor}">
-
+            
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Qnum" Binding="{Binding Item.Qnum}" Width="60"/>
                 <DataGridTextColumn Header="VarName" Binding="{Binding Item.VarName.VarName}" Width="Auto"/>

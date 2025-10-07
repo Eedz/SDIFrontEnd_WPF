@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:SDIFrontEnd_WPF">
+                    xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+                    xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views">
     <DataTemplate DataType="{x:Type local:HomeViewModel}">
         <local:HomeView />
     </DataTemplate>
@@ -27,5 +28,9 @@
 
     <DataTemplate DataType="{x:Type local:ResponseSetViewModel}">
         <local:ResponseSetView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:TranslationViewModel}">
+        <views:TranslationView/>
     </DataTemplate>
 </ResourceDictionary>

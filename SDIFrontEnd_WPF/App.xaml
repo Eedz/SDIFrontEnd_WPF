@@ -70,6 +70,15 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <DropShadowEffect x:Key="SunkenEffect"
+                  Color="Black"
+                  Direction="270"
+                  BlurRadius="5"
+                  ShadowDepth="1"
+                  Opacity="0.4"/>
+
+            
         </ResourceDictionary>
         
     </Application.Resources>

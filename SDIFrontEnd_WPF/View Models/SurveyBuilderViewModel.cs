@@ -55,7 +55,7 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ImageIndex))]
         private SurveyImage? currentImage;
-
+      
         public int? ImageIndex => SelectedQuestion?.Images.IndexOf(CurrentImage) + 1 ?? 0;
 
         [ObservableProperty]
@@ -111,7 +111,7 @@ namespace SDIFrontEnd_WPF
             ProductLabels= _referenceDataService.GetProductLabels() ?? new List<ProductLabel>();
 
             SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000") );
-           
+            
         }
 
         partial void OnSelectedQuestionRecordChanged(SurveyQuestionRecord? value)
@@ -133,7 +133,7 @@ namespace SDIFrontEnd_WPF
             NRName = question.NRCodesS.RespSetName;
 
             if (TranslationVM == null) return;
-                
+            
             TranslationVM.UpdateTranslations(SelectedQuestion);
             OnPropertyChanged(nameof(TranslationVM));
         }
@@ -262,7 +262,7 @@ namespace SDIFrontEnd_WPF
             {
 
             }
-            OnPropertyChanged(nameof(CurrentQuestionText));
+                OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
         partial void OnNRNameChanged(string? value)
@@ -276,11 +276,11 @@ namespace SDIFrontEnd_WPF
             {
                 SelectedQuestion.NRCodesS = found;
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
-        }
+            }
             else
-        {
+            {
 
-        }
+            }
                 OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -365,8 +365,7 @@ namespace SDIFrontEnd_WPF
                 CurrentSurvey.Questions.Add(newQuestion);
                 Added.Add(newQuestion);
             }
-
-            // SurveyBuilder.Refresh(); // assumes method to refresh the view
+           
         }
 
         [RelayCommand]
@@ -375,7 +374,7 @@ namespace SDIFrontEnd_WPF
             // ask user to document
             // ask user to save comments
             // remove from survey
-
+            
             Removed.Add(SelectedQuestion);
         }
 
@@ -388,7 +387,7 @@ namespace SDIFrontEnd_WPF
                 { 
                     var record = _recordList.FirstOrDefault(r => r.Item == question);
                     if (record!=null) RecordList.Remove(record);
-            }
+                }
             }
             Removed.Clear();
             foreach (var question in Added)
@@ -572,7 +571,7 @@ namespace SDIFrontEnd_WPF
                 else if (previousQuestion.QuestionType == QuestionType.Heading || previousQuestion.QuestionType == QuestionType.Subheading)
                 {
                    // question.Item.Qnum = (previousQnum + 1).ToString("000") + "a";
-
+                    
                 }
                 else
                 {

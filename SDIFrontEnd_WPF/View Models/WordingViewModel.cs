@@ -20,7 +20,7 @@ namespace SDIFrontEnd_WPF
     // TODO clipboard
     // TODO rich text editor for wording text (done)
     // TODO breaks missing in text
-    // TODO reset state on move
+    // TODO reset state on move (done)
     public partial class WordingViewModel : WorkspaceViewModel
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user

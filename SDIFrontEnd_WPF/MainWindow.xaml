@@ -48,19 +48,7 @@
 
         <DockPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
             <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Stretch">
-                <ContentControl.Resources>
-                    <Style TargetType="ContentControl">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ContentControl">
-                                    <Border BorderBrush="Black" BorderThickness="1" Padding="5">
-                                        <ContentPresenter/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ContentControl.Resources>
+                
             </ContentControl>
         </DockPanel>
 

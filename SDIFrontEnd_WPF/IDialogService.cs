@@ -20,6 +20,7 @@ namespace SDIFrontEnd_WPF
 
         SurveyQuestion PickQuestion(IEnumerable<SurveyQuestion> candidates);
         bool? ShowDialog(WorkspaceViewModel viewModel);
+        void ShowWindow(WorkspaceViewModel viewModel);
     }
 
     public class  DialogService : IDialogService 
@@ -100,6 +101,51 @@ namespace SDIFrontEnd_WPF
             //};
 
             return window.ShowDialog();
+        }
+
+        public void ShowWindow(WorkspaceViewModel viewModel)
+        {
+            var window = new Window
+            {
+                Title = viewModel.DisplayName ?? string.Empty,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                Content = new ContentControl { Content = viewModel },
+                DataContext = viewModel,
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+
+            };
+
+            // Keep a strong reference to the handler so we can unsubscribe
+            EventHandler<DialogResultEventArgs>? handler = null;
+
+            handler = (s, args) =>
+            {
+                // Detach to break the ViewModel → Window reference chain
+                viewModel.RequestClose -= handler;
+
+                // If you use a custom EventArgs with a DialogResult
+                window.DialogResult = args.DialogResult;
+                window.Close();
+            };
+
+            viewModel.RequestClose += handler;
+
+            // Clean up after the dialog closes (no matter how it closes)
+            window.Closed += (s, e) =>
+            {
+                // Dispose if the VM implements IDisposable
+                if (viewModel is IDisposable disposable)
+                    disposable.Dispose();
+            };
+
+            //viewModel.RequestClose += (s, args) =>
+            //{
+            //    window.DialogResult = args.DialogResult; // or false based on your logic
+            //    window.Close();
+            //};
+
+            window.Show();
         }
     }
 }

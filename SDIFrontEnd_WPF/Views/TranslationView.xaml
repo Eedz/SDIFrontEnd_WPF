@@ -8,7 +8,7 @@
              xmlns:mvvm="clr-namespace:MvvmLib;assembly=MvvmLib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Width="400" Height="600">
+             d:DesignHeight="450" d:DesignWidth="800" Width="400" Height="600" Background="AliceBlue">
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
@@ -41,13 +41,15 @@
             <Button DockPanel.Dock="Right" Content="Save" Width="35" Command="{Binding SaveCommand}"/>
         </DockPanel>
 
-        <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" >
-            <TextBlock Text="{Binding EnglishPreP}" />
-        </DockPanel>
+        <Border Margin="5" Grid.Row="1" Effect="{StaticResource SunkenEffect}" Background="White">
+            <DockPanel HorizontalAlignment="Stretch" >
+                <TextBlock Margin="3" Text="{Binding EnglishPreP}" />
+            </DockPanel>
+        </Border>
 
-        <DockPanel Grid.Row="2" HorizontalAlignment="Stretch" >
+        <DockPanel Grid.Row="2" HorizontalAlignment="Stretch" Effect="{StaticResource SunkenEffect}" Margin="5">
             
-            <RichTextBox Margin="3,0,0,0" 
+            <RichTextBox Margin="0" 
                 VerticalScrollBarVisibility="Visible" AcceptsTab="True" IsDocumentEnabled="True"
                 mvvm:RichTextBoxHelper.Document="{Binding CurrentTranslationText, Mode=TwoWay}" >
                 <xctk:RichTextBoxFormatBarManager.FormatBar>
@@ -56,8 +58,8 @@
             </RichTextBox>
         </DockPanel>
 
-        <DockPanel Grid.Row="3" HorizontalAlignment="Stretch" >
-            <TextBlock Text="{Binding EnglishPstP}" />
+        <DockPanel Margin="5" Grid.Row="3" HorizontalAlignment="Stretch" Background="White" Effect="{StaticResource SunkenEffect}">
+            <TextBlock Margin="3" Text="{Binding EnglishPstP}" />
         </DockPanel>
 
         <!-- Navigation buttons -->

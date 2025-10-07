@@ -19,9 +19,9 @@ namespace SDIFrontEnd_WPF
             string? content = RichTextBoxHelper.ConvertFlowDocumentToXaml(flowDocument);
             // convert XAML to HTML
             string html = MarkupConverter.Core.HtmlFromXamlConverter.ConvertXamlToHtml(content, false);
-            html = HtmlUtils.ConvertHtmlTagsToLowerCase(html); // make tags lower case
             // convert HTML tags to lowercase
             html = ConvertHtmlTagsToLowerCase(html);
+
             return html;
         }
 
