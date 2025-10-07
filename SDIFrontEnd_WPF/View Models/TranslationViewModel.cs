@@ -13,6 +13,8 @@ using System.Windows.Markup;
 
 namespace SDIFrontEnd_WPF
 {
+    // TODO Save command
+    // TODO colors
     public partial class TranslationViewModel : WorkspaceViewModel
     {
 
