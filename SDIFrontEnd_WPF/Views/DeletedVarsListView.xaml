@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.DeletedVarsListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Width="800" Height="600" Background="BlanchedAlmond">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Deleted Variables" FontSize="26" HorizontalAlignment="Center" Margin="5"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="Go To Var:" VerticalAlignment="Center" Margin="5"/>
+            <ComboBox ItemsSource="{Binding Questions}" DisplayMemberPath="VarName"/>
+            
+        </StackPanel>
+        <!-- Details -->
+        <Border Grid.Row="2">
+            <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedQuestion}">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock d:Text="VarName" Text="{Binding VarName}"/>
+                    <TextBlock d:Text="VarLabel" Text="{Binding VarLabel}" Width="200"/>
+                    <TextBlock d:Text="01/01/2001" Text="{Binding DeleteDate}"/>
+                    <TextBlock d:Text="Deleted By Eddie B" Text="{Binding DeletedBy}"/> 
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel}"/>
+                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel}"/>
+                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <!-- Comments -->
+        <Border Grid.Row="3">
+            <StackPanel>
+                <TextBlock Text="Comments:"/>
+                <!--<views:CommentsListView ItemsSource="{Binding Comments}"/>-->
+            </StackPanel>
+        </Border>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            <Button Content="&lt;&lt;&lt;" Command="{Binding FirstItemCommand}" Width="50" Margin="5,0"/>
+            <Button Content="&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
+            <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
+            <Button Content="&gt;" Command="{Binding NextItemCommand}" Width="50" Margin="5,0"/>
+            <Button Content="&gt;&gt;&gt;" Command="{Binding LastItemCommand}" Width="50" Margin="5,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
