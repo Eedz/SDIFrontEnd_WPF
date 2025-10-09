@@ -13,14 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 namespace SDIFrontEnd_WPF
 {
-    // TODO add comment
-    // TODO save changes
-    // TODO view translation (done)
-    // TODO undo invalid respname/nrname
-    // TODO toggling series/standalone (done)
-    // TODO add/remove images
-    // TODO add translation shortcut
-    // TODO color rows on status (added/removed/modified)
     public partial class SurveyBuilderViewModel : ViewModelBase
     {
         private readonly IDialogService _dialogService;
@@ -47,6 +39,7 @@ namespace SDIFrontEnd_WPF
         [NotifyPropertyChangedFor(nameof(CurrentQuestionText))]
         [NotifyPropertyChangedFor(nameof(SectionCount))]
         [NotifyPropertyChangedFor(nameof(SelectedQuestion))]
+        [NotifyPropertyChangedFor(nameof(ItemPosition))]
         private SurveyQuestionRecord? selectedQuestionRecord;
 
         [ObservableProperty]
@@ -56,14 +49,17 @@ namespace SDIFrontEnd_WPF
         [NotifyPropertyChangedFor(nameof(ImageIndex))]
         private SurveyImage? currentImage;
       
-        public int? ImageIndex => SelectedQuestion?.Images.IndexOf(CurrentImage) + 1 ?? 0;
+        public string? ImageIndex => $"{(SelectedQuestion?.Images.IndexOf(CurrentImage) + 1)} of {SelectedQuestion?.Images.Count}";
+        public string? ItemPosition => $"{(QuestionList.IndexOf(SelectedQuestion) + 1)} of {QuestionList?.Count}";
 
         [ObservableProperty]
         private ObservableCollection<SurveyQuestion>? selectedQuestions;
 
         public string CurrentQuestionText => SelectedQuestion?.GetQuestionTextHTML() ?? string.Empty;
 
+        // other windows
         public TranslationViewModel? TranslationVM;
+        public RelatedQuestionsViewModel? RelatedQsVM;
 
         public string SectionCount
         {
@@ -114,6 +110,10 @@ namespace SDIFrontEnd_WPF
             
         }
 
+        /// <summary>
+        /// Update the form when the selected question record changes.
+        /// </summary>
+        /// <param name="value"></param>
         partial void OnSelectedQuestionRecordChanged(SurveyQuestionRecord? value)
         {
             if (value == null)
@@ -123,6 +123,7 @@ namespace SDIFrontEnd_WPF
             SelectedQuestion = question;
             CurrentImage = value?.Item.Images.FirstOrDefault();
 
+            // update wordings and response sets
             PrePID = question.PrePW.WordID;
             PreIID = question.PreIW.WordID;
             PreAID = question.PreAW.WordID;
@@ -132,10 +133,23 @@ namespace SDIFrontEnd_WPF
             RespName = question.RespOptionsS.RespSetName;
             NRName = question.NRCodesS.RespSetName;
 
-            if (TranslationVM == null) return;
+            // update translation window
+            if (TranslationVM != null)
+            {
+
+                TranslationVM.UpdateTranslations(SelectedQuestion);
+                OnPropertyChanged(nameof(TranslationVM));
+            }
+            // update related questions window
+            if (RelatedQsVM != null)
+            {
+                var relatedQuestions = _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
+                relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
+                
+                RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
+                OnPropertyChanged(nameof(RelatedQsVM));
+            }
             
-            TranslationVM.UpdateTranslations(SelectedQuestion);
-            OnPropertyChanged(nameof(TranslationVM));
         }
 
         partial void OnSelectedQuestionChanged(SurveyQuestion? value)
@@ -143,7 +157,7 @@ namespace SDIFrontEnd_WPF
             if (value == null)
                 return;
             var record = _recordList.FirstOrDefault(r => r.Item == value);
-            if (record != null && record != SelectedQuestionRecord)
+            if (record != null && record.Item.ID != SelectedQuestionRecord.Item.ID)
                 SelectedQuestionRecord = record;
         }
 
@@ -285,22 +299,13 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void ViewComments()
+        private void AddComment()
         {
             if (SelectedQuestion == null)
             {
                 _dialogService.ShowError("No question selected for comments.", "Comments Error");
                 return;
             }
-
-            var comments = SelectedQuestion.Comments;
-            if (comments == null || !comments.Any())
-            {
-                _dialogService.ShowMessage("No comments available for this question.", "Comments");
-                return;
-            }
-
-
         }
 
         [RelayCommand]
@@ -323,6 +328,27 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
+        private void AddTranslation()
+        {
+            if (SelectedQuestion == null)
+            {
+                _dialogService.ShowError("No question selected.", "Translation Error");
+                return;
+            }
+            // show translation window
+            TranslationVM = new TranslationViewModel(SelectedQuestion);
+            bool? result = _dialogService.ShowDialog(TranslationVM);
+            if (result.Value) // if closed with OK
+            {
+                // save translation
+                foreach (var translation in SelectedQuestion.Translations)
+                {
+                   // _wordingService.AddTranslation(translation);
+                }
+            }
+        }
+
+        [RelayCommand]
         private void AddSurveyQuestion()
         {
             // enter VarName
@@ -334,7 +360,8 @@ namespace SDIFrontEnd_WPF
 
             var existingQuestions = _surveyService.FindQuestionsByRefVarName(newVarName);
             SurveyQuestion selectedSource = null;
-
+            string newQnum = SelectedQuestion.Qnum;
+            int position = QuestionList.IndexOf(SelectedQuestion);
             if (existingQuestions.Count > 0)
             {
                 selectedSource = _dialogService.PickQuestion(existingQuestions);
@@ -351,51 +378,123 @@ namespace SDIFrontEnd_WPF
                     newQuestion = selectedSource;
                     newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
                     newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
-                    newQuestion.Qnum = "0";
+                    
                 }
-
-                CurrentSurvey.AddQuestion(newQuestion, true);
+                newQuestion.Qnum = newQnum;
+                CurrentSurvey.AddQuestion(newQuestion, position, true);
                 Added.Add(newQuestion);
+                RecordList.Add(new SurveyQuestionRecord(newQuestion));
             }
             else
             {
                 var newQuestion = new SurveyQuestion(newVarName);
                 newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-
-                CurrentSurvey.Questions.Add(newQuestion);
+                newQuestion.Qnum = newQnum;
+                CurrentSurvey.AddQuestion(newQuestion, position, true);
                 Added.Add(newQuestion);
+                RecordList.Insert(position, new SurveyQuestionRecord(newQuestion));
             }
-           
+            OnPropertyChanged(nameof(RecordList));
+        }
+
+        [RelayCommand]
+        private void AddSeries()
+        {
+
         }
 
         [RelayCommand]
         private void RemoveSurveyQuestion()
         {
             // ask user to document
-            // ask user to save comments
-            // remove from survey
+            
+            // save comments
+            // add to removed list
             
             Removed.Add(SelectedQuestion);
+            SelectedQuestionRecord.Deleted = true;
         }
 
         [RelayCommand]
         private void SaveChanges()
         {
+
+            if (_dialogService.PromptForText("One or more questions are being deleted. Type 'DELETE' to confirm.", "Confirm Deletes") != "DELETE")
+            {
+                _dialogService.ShowMessage("Failed to confirm deletes. Changes have not been saved.");
+                return; 
+            }
+            else
+            {
+                ProcessDeletes();
+            }
+
+            ProcessAdditions();
+
+            ProcessModifications();
+        }
+
+        [RelayCommand]
+        private void ViewRelatedQuestions()
+        {
+            if (SelectedQuestion == null)
+            {
+                _dialogService.ShowError("No question selected.", "Related Questions Error");
+                return;
+            }
+            var relatedQuestions = _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
+            relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
+            if (relatedQuestions == null || !relatedQuestions.Any())
+            {
+                _dialogService.ShowMessage("No related questions found.", "Related Questions");
+                return;
+            }
+            // show related questions window
+            RelatedQsVM = new RelatedQuestionsViewModel(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
+            _dialogService.ShowWindow(RelatedQsVM);
+        }
+
+        [RelayCommand]
+        private void ViewDeletedVars()
+        {
+            var deletes = _surveyService.GetDeletedQuestions(CurrentSurvey.SurveyCode);
+            // show related questions window
+            DeletedQuestionsViewModel deletedVM = new DeletedQuestionsViewModel(deletes);
+            _dialogService.ShowWindow(deletedVM);
+        }
+
+        private void ProcessDeletes()
+        {
+            if (_dialogService.Confirm("Do you want to document these deletes?"))
+            {
+                //_dialogService.ShowDialog(new DocumentDeletesViewModel(_dialogService, Removed));
+            }
+
+            // transfer comments
+
             foreach (var question in Removed)
             {
                 if (_surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName) == 0)
-                { 
+                {
                     var record = _recordList.FirstOrDefault(r => r.Item == question);
-                    if (record!=null) RecordList.Remove(record);
+                    if (record != null) RecordList.Remove(record);
                 }
             }
             Removed.Clear();
+        }
+
+        private void ProcessAdditions()
+        {
             foreach (var question in Added)
             {
-               _surveyService.AddQuestion(question);
+                _surveyService.AddQuestion(question);
             }
             Added.Clear();
-            foreach(var question in Modified)
+        }
+
+        private void ProcessModifications()
+        {
+            foreach (var question in Modified)
             {
                 _surveyService.UpdateQuestion(question);
             }
@@ -468,6 +567,66 @@ namespace SDIFrontEnd_WPF
             {
                 CurrentImage = SelectedQuestion.Images.First();
             }
+        }
+
+        [RelayCommand]
+        private void PreviousItem()
+        {
+            if (QuestionList == null)
+                return;
+            if (SelectedQuestion == null)
+            {
+                SelectedQuestion = QuestionList.FirstOrDefault();
+                return;
+            }
+            int currentIndex = QuestionList.IndexOf(SelectedQuestion);
+            if (currentIndex > 0)
+            {
+                SelectedQuestion = QuestionList[currentIndex - 1];
+            }
+            else
+            {
+                SelectedQuestion = QuestionList.Last();
+            }
+        }
+
+        [RelayCommand]
+        private void NextItem()
+        {
+            if (QuestionList == null)
+                return;
+            if (SelectedQuestion == null)
+            {
+                SelectedQuestion = QuestionList.First();
+                return;
+            }
+            int currentIndex = QuestionList.IndexOf(SelectedQuestion);
+            if (currentIndex < QuestionList.Count - 1)
+            {
+                SelectedQuestion = QuestionList[currentIndex + 1];
+            }
+            else
+            {
+                SelectedQuestion = QuestionList.First();
+            }
+        }
+
+        [RelayCommand]
+        private void FirstItem()
+        {
+            if (QuestionList == null)
+                return;
+
+            SelectedQuestion = QuestionList.FirstOrDefault();
+        }
+
+        [RelayCommand]
+        private void LastItem()
+        {
+            if (QuestionList == null)
+                return;
+
+            SelectedQuestion = QuestionList.LastOrDefault();
         }
 
         [RelayCommand]
