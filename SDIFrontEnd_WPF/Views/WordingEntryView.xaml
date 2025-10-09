@@ -81,12 +81,13 @@
         </DockPanel>
         
         <!-- Navigation buttons -->
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5" Orientation="Horizontal" >
-            <Button Content="&lt;&lt;&lt;" Command="{Binding FirstItemCommand}" Width="50" Margin="5,0"/>
-            <Button Content="&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
-            <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
-            <Button Content="&gt;" Command="{Binding NextItemCommand}" Width="50" Margin="5,0"/>
-            <Button Content="&gt;&gt;&gt;" Command="{Binding LastItemCommand}" Width="50" Margin="5,0"/>
-        </StackPanel>
+        <local:NavigationBar Grid.Row="5" Grid.ColumnSpan="2"
+            FirstItemCommand="{Binding FirstItemCommand}"
+            PreviousItemCommand="{Binding PreviousItemCommand}"
+            NextItemCommand="{Binding NextItemCommand}"
+            LastItemCommand="{Binding LastItemCommand}"
+            ItemPosition="{Binding ItemPosition}"
+                             />
+        
     </Grid>
 </UserControl>
