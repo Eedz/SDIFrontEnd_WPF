@@ -25,6 +25,12 @@
                 <ComboBox ItemsSource="{Binding AllSurveys}" SelectedItem="{Binding CurrentSurvey}" DisplayMemberPath="SurveyCode" Margin="2,0,0,0" Width="90"/>
                 <Button Content="Edit" Command="{Binding EditSurveyInfoCommand}" Width="30" HorizontalAlignment="Right" Margin="5,0"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Import Questions" Margin="5,1"/>
+                <Button Content="Import Translations" Margin="5,1"/>
+                <Button Content="Checks" Visibility="Hidden"/>
+
+            </StackPanel>
             <Border Background="White" Effect="{StaticResource SunkenEffect}" Width="500" HorizontalAlignment="Left">
                 <ContentControl Content="{Binding SurveyInfo}" Margin="0,5"  />
 
