@@ -32,21 +32,34 @@
             <ColumnDefinition Width="0.5*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         
         <!-- Button menu -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="Save Changes" Command="{Binding SaveChangesCommand}" Margin="5,0,20,0"/> 
-            <Button Content="Add Question" Command="{Binding AddSurveyQuestionCommand}" Margin="5"/>
-            <Button Content="Delete Question" Command="{Binding RemoveSurveyQuestionCommand}" Margin="5"/>
-            <Button Content="Copy Previous" Command="{Binding CopyPreviousWordingsCommand}" Margin="5"/>
-            <Button Content="Comments" Command="{Binding ViewCommentsCommand}" Margin="5"/>
-            <Button Content="Translations" Command="{Binding ViewTranslationsCommand}" Margin="5"/>
-            
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Button Content="Save" Command="{Binding SaveChangesCommand}" Margin="5,0,20,0" VerticalAlignment="Center"/>
+            <StackPanel  Orientation="Vertical" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="Add" Command="{Binding AddSurveyQuestionCommand}" Margin="5,0"/>
+                    <Button Content="Add Series" Command="{Binding AddSeriesCommand}" Margin="5,0"/>
+                    <Button Content="Delete" Command="{Binding RemoveSurveyQuestionCommand}" Margin="5,0"/>
+                    <Button Content="Copy Prev" Command="{Binding CopyPreviousWordingsCommand}" Margin="5,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="+" Command="{Binding AddTranslationCommand}" Margin="5,0,0,0"/>
+                    <Button Content="Translations" Command="{Binding ViewTranslationsCommand}" Margin="0,0,5,0"/>
+                    <Button Content="Deleted Vars" Command="{Binding ViewDeletedVarsCommand}" Margin="5,0"/>
+                    <Button Content="Related Qs" Command="{Binding ViewRelatedQuestionsCommand}" Margin="5,0"/>
+                </StackPanel>
+                <!--<Button Content="Comments" Command="{Binding ViewCommentsCommand}" Margin="5"/>-->
+
+
+            </StackPanel>
         </StackPanel>
+        
 
         <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SectionCount}" FontSize ="14" d:Text="Current Question's section count"/>
         
@@ -79,6 +92,12 @@
         </DataGrid>
         <!-- Question View -->
         <DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="5" LastChildFill="True" HorizontalAlignment="Stretch">
+            <local:NavigationBar DockPanel.Dock="Bottom" 
+                                 FirstItemCommand="{Binding FirstItemCommand}"
+                                 PreviousItemCommand="{Binding PreviousItemCommand}"
+                                 ItemPosition="{Binding ItemPosition}"
+                                 NextItemCommand="{Binding NextItemCommand}"
+                                 LastItemCommand="{Binding LastItemCommand}"/>
             <!-- VarName/Qnum -->
             <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
                 <Run Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName" />
@@ -191,21 +210,21 @@
                             <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
                         </FlowDocumentScrollViewer.Document>
                     </FlowDocumentScrollViewer>
+                    
                 </Grid>
                 
             </Border>
+            
         </DockPanel>
         
         <!-- Images -->
-        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Command="{Binding PreviousImageCommand}" Content="&lt;&lt;&lt;" Width="50" Margin="5"/>
-            <TextBlock VerticalAlignment="Center">
-                <Run Text="{Binding ImageIndex, Mode=OneWay}" d:Text="0"/>
-                <Run Text=" of "/>
-                <Run Text="{Binding SelectedQuestion.Images.Count, Mode=OneWay}" FontSize="14"  d:Text="0"/> 
-            </TextBlock>
-            <Button Command="{Binding NextImageCommand}" Content="&gt;&gt;&gt;" Width="50" Margin="5"/>
-        </StackPanel>
+        <local:NavigationBar Grid.Row="0" Grid.Column="2" Height="30"
+                             FirstItemCommand="{Binding FirstImageCommand}"
+                             PreviousItemCommand="{Binding PreviousImageCommand}"
+                             ItemPosition="{Binding ImageIndex}"
+                             NextItemCommand="{Binding NextImageCommand}"
+                             LastItemCommand="{Binding LastImageCommand}" />
+
         <DockPanel Margin="5" Grid.Column="2" Grid.Row="1" Effect="{StaticResource SunkenEffect}">
             
             <Image Source="{Binding CurrentImage.ImageSource}" Stretch="UniformToFill"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
@@ -216,6 +235,7 @@
         <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" Effect="{StaticResource SunkenEffect}">
             <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,5">
                 <Run Text="Comments"/>
+                <Button Content="+" Command="{Binding AddCommentCommand}" Margin="10,0"/>
             </TextBlock>
             <ListBox Grid.Row="2" Grid.Column="2"  ItemsSource="{Binding SelectedQuestion.Comments}" HorizontalContentAlignment="Stretch"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
