@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:SDIFrontEnd_WPF"
              xmlns:converters ="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
              xmlns:mvvmLib ="clr-namespace:MvvmLib;assembly=MvvmLib"
+             xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
              mc:Ignorable="d" Height="Auto"
              d:DesignHeight="450" d:DesignWidth="1200">
     <UserControl.Resources>
@@ -54,9 +55,19 @@
                     <Button Content="Deleted Vars" Command="{Binding ViewDeletedVarsCommand}" Margin="5,0"/>
                     <Button Content="Related Qs" Command="{Binding ViewRelatedQuestionsCommand}" Margin="5,0"/>
                 </StackPanel>
-                <!--<Button Content="Comments" Command="{Binding ViewCommentsCommand}" Margin="5"/>-->
 
-
+            </StackPanel>
+            <StackPanel>
+                <TextBlock>
+                    <Run Text="Added: "/>
+                    <Run d:Text="Added: 0" Text="{Binding Added.Count, Mode=OneWay}"/>
+                    <LineBreak/>
+                    <Run Text="Modified: "/>
+                    <Run d:Text="Modified: 0" Text="{Binding Modified.Count, Mode=OneWay}"/>
+                    <LineBreak/>
+                    <Run Text="Deleted: "/>
+                    <Run d:Text="Deleted: 0" Text="{Binding Removed.Count, Mode=OneWay}"/>
+                </TextBlock>
             </StackPanel>
         </StackPanel>
         
@@ -68,6 +79,7 @@
             ItemsSource="{Binding RecordList}"
             SelectedItem="{Binding SelectedQuestionRecord}"
             ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                  VirtualizingStackPanel.IsVirtualizing="True"
             AutoGenerateColumns="False" 
             HeadersVisibility="Column"
             CanUserAddRows="False"
@@ -237,27 +249,8 @@
                 <Run Text="Comments"/>
                 <Button Content="+" Command="{Binding AddCommentCommand}" Margin="10,0"/>
             </TextBlock>
-            <ListBox Grid.Row="2" Grid.Column="2"  ItemsSource="{Binding SelectedQuestion.Comments}" HorizontalContentAlignment="Stretch"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        
-                        <DockPanel LastChildFill="True" Margin="4">
-                            <TextBlock Text="{Binding Author.Name}"
-                           DockPanel.Dock="Right" Margin="8,0"/>
-                            <TextBlock Text="{Binding NoteType.TypeName}"
-                           DockPanel.Dock="Right" Margin="8,0"/>
-                            <TextBlock Text="{Binding NoteDate, StringFormat={}{0:yyyy-MM-dd}}"
-                           DockPanel.Dock="Right" Margin="8,0"/>
-
-                            <!-- This one stretches and wraps automatically -->
-                            <TextBlock Text="{Binding Notes.NoteText}"
-                           TextWrapping="Wrap"
-                           Margin="4,0"/>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <views:CommentsListView Comments="{Binding SelectedQuestion.Comments}"/>
+            
         </DockPanel>
     </Grid>
 </UserControl>
