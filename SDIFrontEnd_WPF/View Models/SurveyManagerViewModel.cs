@@ -19,6 +19,8 @@ namespace SDIFrontEnd_WPF
         private readonly IReferenceDataService _referenceDataService; 
         private readonly IWordingService _wordingService; // Service for managing question wordings and translations
         private readonly LookupProvider _lookupProvider; // Provides access to reference data like modes, user states, etc.
+        private readonly IPeopleService _peopleService; // Service for managing people data
+        private readonly ICommentService _commentService; // Service for managing comments
 
         [ObservableProperty]
         private Survey currentSurvey; // The currently selected survey being managed
@@ -35,11 +37,13 @@ namespace SDIFrontEnd_WPF
             _lookupProvider = services.GetService(typeof(LookupProvider)) as LookupProvider ?? throw new ArgumentNullException(nameof(services), "Lookup provider cannot be null");
             _referenceDataService = services.GetService(typeof(IReferenceDataService)) as IReferenceDataService ?? throw new ArgumentNullException(nameof(services), "Reference data service cannot be null");
             _wordingService = services.GetService(typeof(IWordingService)) as IWordingService ?? throw new ArgumentNullException(nameof(services), "Wording service cannot be null");
+            _peopleService = services.GetService(typeof(IPeopleService)) as IPeopleService ?? throw new ArgumentNullException(nameof(services), "People service cannot be null");
+            _commentService = services.GetService(typeof(ICommentService)) as ICommentService ?? throw new ArgumentNullException(nameof(services), "Comment service cannot be null");
             AllSurveys = _surveyService.GetAllSurveys();
             CurrentSurvey = survey ?? throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
             DisplayName = "Survey Manager - " + CurrentSurvey.SurveyCode;
             SurveyInfo = new SurveyViewModel(CurrentSurvey);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, CurrentSurvey);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, _peopleService, _commentService, CurrentSurvey);
         }
 
         partial void OnCurrentSurveyChanged(Survey value)
@@ -58,7 +62,7 @@ namespace SDIFrontEnd_WPF
             survey.AddQuestions(_surveyService.GetQuestionsForSurvey(survey.SID));
 
             SurveyInfo = new SurveyViewModel(survey);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, survey);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, _peopleService, _commentService, survey);
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
