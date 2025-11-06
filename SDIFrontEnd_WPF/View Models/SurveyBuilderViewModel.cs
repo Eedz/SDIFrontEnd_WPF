@@ -1,16 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.ExtendedProperties;
-using ITC_DataAccess_EF;
 using ITC_Services;
 using ITCLib;
 using MvvmLib.ViewModels;
-using System;
-using System.Collections.Generic;
+using SDIFrontEnd_WPF.ViewModels;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 namespace SDIFrontEnd_WPF
 {
     public partial class SurveyBuilderViewModel : ViewModelBase
@@ -19,6 +13,8 @@ namespace SDIFrontEnd_WPF
         private readonly ISurveyService _surveyService;
         private readonly IReferenceDataService _referenceDataService;
         private readonly IWordingService _wordingService;
+        private readonly ICommentService _commentService;
+        private readonly IPeopleService _peopleService;
 
         private readonly Survey CurrentSurvey;
         private readonly ObservableCollection<SurveyQuestionRecord> _recordList;
@@ -31,9 +27,9 @@ namespace SDIFrontEnd_WPF
         public List<DomainLabel> DomainLabels { get; set; }
         public List<ProductLabel> ProductLabels { get; set; }
 
-        public ObservableCollection<SurveyQuestion> Added = new ObservableCollection<SurveyQuestion>();
-        public ObservableCollection<SurveyQuestion> Removed = new ObservableCollection<SurveyQuestion>();
-        public ObservableCollection<SurveyQuestion> Modified = new ObservableCollection<SurveyQuestion>();
+        public ObservableCollection<SurveyQuestion> Added { get; } = new ObservableCollection<SurveyQuestion>();
+        public ObservableCollection<SurveyQuestion> Removed { get; } = new ObservableCollection<SurveyQuestion>();
+        public ObservableCollection<SurveyQuestion> Modified { get; } = new ObservableCollection<SurveyQuestion>();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CurrentQuestionText))]
@@ -43,7 +39,10 @@ namespace SDIFrontEnd_WPF
         private SurveyQuestionRecord? selectedQuestionRecord;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Comments))]
         private SurveyQuestion? selectedQuestion;
+
+        public ObservableCollection<QuestionComment> Comments => new ObservableCollection<QuestionComment>(SelectedQuestion?.Comments ?? new List<QuestionComment>());
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ImageIndex))]
@@ -90,12 +89,15 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private string? nRName;
 
-        public SurveyBuilderViewModel(IDialogService dialogService, ISurveyService surveyService, IReferenceDataService referenceData, IWordingService wordingService, Survey survey)
+        public SurveyBuilderViewModel(IDialogService dialogService, ISurveyService surveyService, IReferenceDataService referenceData, IWordingService wordingService, 
+            IPeopleService peopleService, ICommentService commentService, Survey survey)
         {
             _dialogService = dialogService;
             _surveyService = surveyService ?? throw new ArgumentNullException(nameof(surveyService), "Survey service cannot be null.");
             _referenceDataService = referenceData ?? throw new ArgumentNullException(nameof(referenceData), "Reference data service cannot be null.");
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService), "Wording service cannot be null.");
+            _peopleService = peopleService ?? throw new ArgumentNullException(nameof(peopleService), "People service cannot be null.");
+            _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService), "Comment service cannot be null.");
             if (survey == null) throw new ArgumentNullException(nameof(survey), "Questions cannot be null");
 
             CurrentSurvey = survey;
@@ -306,6 +308,16 @@ namespace SDIFrontEnd_WPF
                 _dialogService.ShowError("No question selected for comments.", "Comments Error");
                 return;
             }
+
+            QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _commentService, SelectedQuestion);
+
+            bool? result = _dialogService.ShowDialog(vm);
+            if (result.Value)
+            {
+                SelectedQuestion.Comments.Add(vm.NewComment);
+                OnPropertyChanged(nameof(SelectedQuestion));
+                
+        }
         }
 
         [RelayCommand]
@@ -375,19 +387,19 @@ namespace SDIFrontEnd_WPF
                 }
                 else
                 {
-                    newQuestion = selectedSource;
+                    newQuestion = new SurveyQuestion(selectedSource.VarName.VarName);
                     newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
                     newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
-                    
                 }
                 newQuestion.Qnum = newQnum;
                 CurrentSurvey.AddQuestion(newQuestion, position, true);
                 Added.Add(newQuestion);
-                RecordList.Add(new SurveyQuestionRecord(newQuestion));
+                RecordList.Insert(position, new SurveyQuestionRecord(newQuestion));
             }
             else
             {
-                var newQuestion = new SurveyQuestion(newVarName);
+                SurveyQuestion newQuestion = new SurveyQuestion(newVarName);
+                newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
                 newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
                 newQuestion.Qnum = newQnum;
                 CurrentSurvey.AddQuestion(newQuestion, position, true);
@@ -400,17 +412,40 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void AddSeries()
         {
+            if (SelectedQuestion.QnumSuffix != string.Empty)
+            {
+                _dialogService.ShowError("Series can only be added after standalone questions.", "Add Series Error");
+                return;
+            }
 
+            // open SeriesBuilder viewmodel in new window
+            // get list of questions to add 
+            SeriesBuilderViewModel vm = new SeriesBuilderViewModel(_referenceDataService, _wordingService);
+            bool? result = _dialogService.ShowDialog(vm);
+
+            if (result.Value)
+            {
+                string newQnum = SelectedQuestion.Qnum;
+                int position = QuestionList.IndexOf(SelectedQuestion);
+                foreach (SurveyQuestion q in vm.NewQuestions)
+                {
+                    q.SurveyCode = CurrentSurvey.SurveyCode;
+                    q.Qnum = $"{newQnum}{q.QnumSuffix}";
+
+                    CurrentSurvey.AddQuestion(q, position, true);
+                    Added.Add(q);
+                    RecordList.Insert(position, new SurveyQuestionRecord(q));
+                    position++;
+        }
+
+                
+                OnPropertyChanged(nameof(RecordList));
+            }
         }
 
         [RelayCommand]
         private void RemoveSurveyQuestion()
         {
-            // ask user to document
-            
-            // save comments
-            // add to removed list
-            
             Removed.Add(SelectedQuestion);
             SelectedQuestionRecord.Deleted = true;
         }
@@ -419,6 +454,7 @@ namespace SDIFrontEnd_WPF
         private void SaveChanges()
         {
 
+            if (this.Removed.Count>0)
             if (_dialogService.PromptForText("One or more questions are being deleted. Type 'DELETE' to confirm.", "Confirm Deletes") != "DELETE")
             {
                 _dialogService.ShowMessage("Failed to confirm deletes. Changes have not been saved.");
@@ -432,6 +468,8 @@ namespace SDIFrontEnd_WPF
             ProcessAdditions();
 
             ProcessModifications();
+
+            OnPropertyChanged(nameof(RecordList));
         }
 
         [RelayCommand]
@@ -463,6 +501,7 @@ namespace SDIFrontEnd_WPF
             _dialogService.ShowWindow(deletedVM);
         }
 
+        // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
         private void ProcessDeletes()
         {
             if (_dialogService.Confirm("Do you want to document these deletes?"))
@@ -474,9 +513,10 @@ namespace SDIFrontEnd_WPF
 
             foreach (var question in Removed)
             {
-                if (_surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName) == 0)
+                if (_surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName) == -1)
                 {
                     var record = _recordList.FirstOrDefault(r => r.Item == question);
+                    CurrentSurvey.RemoveQuestion(question, true);
                     if (record != null) RecordList.Remove(record);
                 }
             }
@@ -485,8 +525,14 @@ namespace SDIFrontEnd_WPF
 
         private void ProcessAdditions()
         {
+            var vars = Added.Select(q => q.VarName).ToList();
+            foreach(VariableName v in vars)
+            {
+                _surveyService.InsertVariable(v);
+            }
             foreach (var question in Added)
             {
+                
                 _surveyService.AddQuestion(question);
             }
             Added.Clear();
@@ -494,10 +540,21 @@ namespace SDIFrontEnd_WPF
 
         private void ProcessModifications()
         {
-            foreach (var question in Modified)
+            foreach (var question in RecordList.Where(x => x.ShouldSave))
             {
-                _surveyService.UpdateQuestion(question);
+                if (question.DirtyQnum) 
+                    if (_surveyService.UpdateQnum(question.Item)==-1)
+                        question.DirtyQnum =  false;
+
+                //if (question.DirtyLabels)
+                //  if (_surveyService.UpdateLabels))==-1)
+                //      question.DirtyLabels = false;   
+
+                if (question.Dirty) 
+                    if(_surveyService.UpdateQuestion(question.Item)==0)
+                        question.Dirty = false ;
             }
+            
             Modified.Clear();
         }
 
@@ -526,6 +583,14 @@ namespace SDIFrontEnd_WPF
 
             OnPropertyChanged(nameof(SelectedQuestion));
             OnPropertyChanged(nameof(CurrentQuestionText));
+        }
+
+        [RelayCommand]
+        private void FirstImage()
+        {
+            if (SelectedQuestion == null || SelectedQuestion.Images == null || !SelectedQuestion.Images.Any())
+                return;
+            CurrentImage = SelectedQuestion.Images.First();
         }
 
         [RelayCommand]
@@ -567,6 +632,14 @@ namespace SDIFrontEnd_WPF
             {
                 CurrentImage = SelectedQuestion.Images.First();
             }
+        }
+
+        [RelayCommand]
+        private void LastImage()
+        {
+            if (SelectedQuestion == null || SelectedQuestion.Images == null || !SelectedQuestion.Images.Any())
+                return;
+            CurrentImage = SelectedQuestion.Images.Last();
         }
 
         [RelayCommand]
