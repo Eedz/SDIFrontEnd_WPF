@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:SDIFrontEnd_WPF"
-                    xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views">
+                    xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
+                    xmlns:viewmodels="clr-namespace:SDIFrontEnd_WPF.ViewModels">
     <DataTemplate DataType="{x:Type local:HomeViewModel}">
         <local:HomeView />
     </DataTemplate>
@@ -40,5 +41,13 @@
 
     <DataTemplate DataType="{x:Type local:DeletedQuestionsViewModel}">
         <views:DeletedVarsListView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuickCommentEntryViewModel}">
+        <views:QuickCommentEntryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:SeriesBuilderViewModel}">
+        <views:SeriesBuilder/>
     </DataTemplate>
 </ResourceDictionary>
