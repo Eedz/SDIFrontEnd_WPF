@@ -88,7 +88,7 @@
             Margin="5"
             GridLinesVisibility="None"
             SelectionUnit="FullRow"
-            mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestions}"
+            mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestionRecords}"
             mvvmLib:DataGridHelper.ScrollOnSelected="True"
             mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
             RowStyle="{StaticResource QuestionRowColor}">
