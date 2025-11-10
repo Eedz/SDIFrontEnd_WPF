@@ -38,9 +38,14 @@ namespace SDIFrontEnd_WPF
         [NotifyPropertyChangedFor(nameof(ItemPosition))]
         private SurveyQuestionRecord? selectedQuestionRecord;
 
+        public ObservableCollection<SurveyQuestionRecord> SelectedQuestionRecords { get; set; }
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(Comments))]
         private SurveyQuestion? selectedQuestion;
+
+        [ObservableProperty]
+        private ObservableCollection<SurveyQuestion>? selectedQuestions;
 
         public ObservableCollection<QuestionComment> Comments => new ObservableCollection<QuestionComment>(SelectedQuestion?.Comments ?? new List<QuestionComment>());
 
@@ -51,8 +56,7 @@ namespace SDIFrontEnd_WPF
         public string? ImageIndex => $"{(SelectedQuestion?.Images.IndexOf(CurrentImage) + 1)} of {SelectedQuestion?.Images.Count}";
         public string? ItemPosition => $"{(QuestionList.IndexOf(SelectedQuestion) + 1)} of {QuestionList?.Count}";
 
-        [ObservableProperty]
-        private ObservableCollection<SurveyQuestion>? selectedQuestions;
+
 
         public string CurrentQuestionText => SelectedQuestion?.GetQuestionTextHTML() ?? string.Empty;
 
@@ -109,7 +113,8 @@ namespace SDIFrontEnd_WPF
             ProductLabels= _referenceDataService.GetProductLabels() ?? new List<ProductLabel>();
 
             SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000") );
-            
+            SelectedQuestionRecords = new ObservableCollection<SurveyQuestionRecord>();
+            SelectedQuestions = new ObservableCollection<SurveyQuestion>();
         }
 
         /// <summary>
@@ -264,39 +269,41 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnRespNameChanged(string? value)
+        partial void OnRespNameChanged(string? oldValue, string? newValue)
         {
-            if (SelectedQuestion?.RespOptionsS.RespSetName == value)
+            if (SelectedQuestion == null)
                 return;
-            ResponseSet? found = _wordingService.GetAllResponseSets().FirstOrDefault(x => x.RespSetName == value);
+            if (SelectedQuestion?.RespOptionsS.RespSetName == newValue)
+                return;
+
+            ResponseSet? found = _wordingService.GetAllResponseSets().FirstOrDefault(x => x.RespSetName == newValue);
             if (found != null)
             {
                 SelectedQuestion.RespOptionsS = found;
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-            {
+                RespName = oldValue;
 
-            }
                 OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnNRNameChanged(string? value)
+        partial void OnNRNameChanged(string? oldValue, string? newValue)
         {
             if (SelectedQuestion == null) 
                 return;
-            if (SelectedQuestion?.NRCodesS.RespSetName == value)
+            if (SelectedQuestion?.NRCodesS.RespSetName == newValue)
                 return;
-            ResponseSet? found = _wordingService.GetAllNonResponseSets().FirstOrDefault(x => x.RespSetName == value);
+
+            ResponseSet? found = _wordingService.GetAllNonResponseSets().FirstOrDefault(x => x.RespSetName == newValue);
             if (found != null)
             {
                 SelectedQuestion.NRCodesS = found;
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-            {
+                NRName = oldValue;
 
-            }
                 OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
