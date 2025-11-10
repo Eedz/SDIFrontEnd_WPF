@@ -476,9 +476,10 @@ namespace SDIFrontEnd_WPF
                 ProcessDeletes();
             }
 
-            ProcessAdditions();
-
-            ProcessModifications();
+            foreach (var r in RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord))
+            {
+                _surveyService.SaveQuestion(r);
+            }
 
             OnPropertyChanged(nameof(RecordList));
         }
@@ -512,62 +513,7 @@ namespace SDIFrontEnd_WPF
             _dialogService.ShowWindow(deletedVM);
         }
 
-        // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
-        private void ProcessDeletes()
-        {
-            if (_dialogService.Confirm("Do you want to document these deletes?"))
-            {
-                //_dialogService.ShowDialog(new DocumentDeletesViewModel(_dialogService, Removed));
-            }
-
-            // transfer comments
-
-            foreach (var question in Removed)
-            {
-                if (_surveyService.RemoveQuestion(CurrentSurvey.SurveyCode, question.VarName.VarName) == -1)
-                {
-                    var record = _recordList.FirstOrDefault(r => r.Item == question);
-                    CurrentSurvey.RemoveQuestion(question, true);
-                    if (record != null) RecordList.Remove(record);
-                }
-            }
-            Removed.Clear();
-        }
-
-        private void ProcessAdditions()
-        {
-            var vars = Added.Select(q => q.VarName).ToList();
-            foreach(VariableName v in vars)
-            {
-                _surveyService.InsertVariable(v);
-            }
-            foreach (var question in Added)
-            {
-                
-                _surveyService.AddQuestion(question);
-            }
-            Added.Clear();
-        }
-
-        private void ProcessModifications()
-        {
-            foreach (var question in RecordList.Where(x => x.ShouldSave))
-            {
-                if (question.DirtyQnum) 
-                    if (_surveyService.UpdateQnum(question.Item)==-1)
-                        question.DirtyQnum =  false;
-
-                //if (question.DirtyLabels)
-                //  if (_surveyService.UpdateLabels))==-1)
-                //      question.DirtyLabels = false;   
-
-                if (question.Dirty) 
-                    if(_surveyService.UpdateQuestion(question.Item)==0)
-                        question.Dirty = false ;
-            }
             
-            Modified.Clear();
-        }
 
         [RelayCommand]
         private void CopyPreviousWordings()
@@ -596,6 +542,8 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
+
+        #region Navigation Commands
         [RelayCommand]
         private void FirstImage()
         {
@@ -712,7 +660,9 @@ namespace SDIFrontEnd_WPF
 
             SelectedQuestion = QuestionList.LastOrDefault();
         }
+        #endregion
 
+        #region Wording Commands
         [RelayCommand]
         private void OpenPreP(int wordID)
         {
@@ -755,12 +705,12 @@ namespace SDIFrontEnd_WPF
             OpenResponses("RespOptions", respSetName);
         }
 
-
         [RelayCommand]
         private void OpenNRCodes(string respSetName)
         {
             OpenResponses("NRCodes", respSetName);
         }
+        #endregion
 
         [RelayCommand]
         private void ToggleQuestion(SurveyQuestionRecord question)
@@ -840,6 +790,26 @@ namespace SDIFrontEnd_WPF
             // renumber the rest of the questions
             CurrentSurvey.Renumber(0);
             
+        }
+
+        // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
+        private void ProcessDeletes()
+        {
+            if (_dialogService.Confirm("Do you want to document these deletes?"))
+            {
+                //_dialogService.ShowDialog(new DocumentDeletesViewModel(_dialogService, Removed));
+            }
+
+            foreach (var question in Removed)
+            {
+                // transfer comments
+                _commentService.BackupComments(question.ID);
+                CurrentSurvey.RemoveQuestion(question, true);
+
+                RecordList.Remove(RecordList.First(x=>x.Item == question));
+            }
+                
+            Removed.Clear();
         }
 
         private void OpenWordings(string type, int wordID)
