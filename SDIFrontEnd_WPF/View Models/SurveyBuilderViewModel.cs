@@ -453,8 +453,12 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void RemoveSurveyQuestion()
         {
-            Removed.Add(SelectedQuestion);
-            SelectedQuestionRecord.Deleted = true;
+            if (SelectedQuestionRecords == null) return;
+            foreach (SurveyQuestionRecord q in SelectedQuestionRecords)
+            {
+                Removed.Add(q.Item);                
+                q.Deleted = true;
+        }
         }
 
         [RelayCommand]
