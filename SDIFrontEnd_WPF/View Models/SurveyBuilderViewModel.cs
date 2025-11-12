@@ -5,7 +5,7 @@ using ITCLib;
 using MvvmLib.ViewModels;
 using SDIFrontEnd_WPF.ViewModels;
 using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
+
 namespace SDIFrontEnd_WPF
 {
     public partial class SurveyBuilderViewModel : ViewModelBase
@@ -53,7 +53,7 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ImageIndex))]
         private SurveyImage? currentImage;
-      
+
         public string? ImageIndex => $"{(SelectedQuestion?.Images.IndexOf(CurrentImage) + 1)} of {SelectedQuestion?.Images.Count}";
         public string? ItemPosition => $"{(QuestionList.IndexOf(SelectedQuestion) + 1)} of {QuestionList?.Count}";
 
@@ -100,7 +100,7 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private string? nRName;
 
-        public SurveyBuilderViewModel(IDialogService dialogService, ISurveyService surveyService, IReferenceDataService referenceData, IWordingService wordingService, 
+        public SurveyBuilderViewModel(IDialogService dialogService, ISurveyService surveyService, IReferenceDataService referenceData, IWordingService wordingService,
             IPeopleService peopleService, ICommentService commentService, Survey survey)
         {
             _dialogService = dialogService;
@@ -169,11 +169,11 @@ namespace SDIFrontEnd_WPF
             {
                 var relatedQuestions = _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
                 relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
-                
+
                 RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
                 OnPropertyChanged(nameof(RelatedQsVM));
             }
-            
+
         }
 
         partial void OnSelectedQuestionChanged(SurveyQuestion? value)
@@ -294,12 +294,12 @@ namespace SDIFrontEnd_WPF
             else
                 RespName = oldValue;
 
-                OnPropertyChanged(nameof(CurrentQuestionText));
+            OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
         partial void OnNRNameChanged(string? oldValue, string? newValue)
         {
-            if (SelectedQuestion == null) 
+            if (SelectedQuestion == null)
                 return;
             if (SelectedQuestion?.NRCodesS.RespSetName == newValue)
                 return;
@@ -313,7 +313,7 @@ namespace SDIFrontEnd_WPF
             else
                 NRName = oldValue;
 
-                OnPropertyChanged(nameof(CurrentQuestionText));
+            OnPropertyChanged(nameof(CurrentQuestionText));
         }
         #endregion
 
@@ -336,16 +336,16 @@ namespace SDIFrontEnd_WPF
                     Survey = SelectedQuestion.SurveyCode,
                     VarName = SelectedQuestion.VarName.VarName,
                 };
-                
+
                 if (_commentService.InsertQuestionComment(newComment) == 0)
                 {
                     _dialogService.ShowError("Error saving comment.", "Comments Error");
                     return;
-        }
+                }
 
                 SelectedQuestion.Comments.Add(newComment);
                 OnPropertyChanged(nameof(Comments));
-        }
+            }
         }
 
         [RelayCommand]
@@ -383,7 +383,7 @@ namespace SDIFrontEnd_WPF
                 // save translation
                 foreach (var translation in SelectedQuestion.Translations)
                 {
-                   // _wordingService.AddTranslation(translation);
+                    // _wordingService.AddTranslation(translation);
                 }
             }
         }
@@ -464,9 +464,9 @@ namespace SDIFrontEnd_WPF
                     Added.Add(q);
                     RecordList.Insert(position, new SurveyQuestionRecord(q));
                     position++;
-        }
+                }
 
-                
+
                 OnPropertyChanged(nameof(RecordList));
             }
         }
@@ -477,9 +477,9 @@ namespace SDIFrontEnd_WPF
             if (SelectedQuestionRecords == null) return;
             foreach (SurveyQuestionRecord q in SelectedQuestionRecords)
             {
-                Removed.Add(q.Item);                
+                Removed.Add(q.Item);
                 q.Deleted = true;
-        }
+            }
         }
 
         [RelayCommand(CanExecute = nameof(Editable))]
@@ -487,15 +487,15 @@ namespace SDIFrontEnd_WPF
         {
 
             if (this.Removed.Count > 0)
-            if (_dialogService.PromptForText("One or more questions are being deleted. Type 'DELETE' to confirm.", "Confirm Deletes") != "DELETE")
-            {
-                _dialogService.ShowMessage("Failed to confirm deletes. Changes have not been saved.");
-                return; 
-            }
-            else
-            {
-                ProcessDeletes();
-            }
+                if (_dialogService.PromptForText("One or more questions are being deleted. Type 'DELETE' to confirm.", "Confirm Deletes") != "DELETE")
+                {
+                    _dialogService.ShowMessage("Failed to confirm deletes. Changes have not been saved.");
+                    return;
+                }
+                else
+                {
+                    ProcessDeletes();
+                }
 
             foreach (var r in RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord))
             {
@@ -741,7 +741,7 @@ namespace SDIFrontEnd_WPF
                 return;
             }
 
-           
+
             if (question == null)
                 return;
 
@@ -763,7 +763,7 @@ namespace SDIFrontEnd_WPF
                 if (previousQuestion == null)
                     return;
 
-                var previousQnum = previousQuestion?.GetQnumValue() ?? -1;              
+                var previousQnum = previousQuestion?.GetQnumValue() ?? -1;
 
                 if (previousQnum == -1)
                 {
@@ -783,8 +783,8 @@ namespace SDIFrontEnd_WPF
                 }
                 else if (previousQuestion.QuestionType == QuestionType.Heading || previousQuestion.QuestionType == QuestionType.Subheading)
                 {
-                   // question.Item.Qnum = (previousQnum + 1).ToString("000") + "a";
-                    
+                    // question.Item.Qnum = (previousQnum + 1).ToString("000") + "a";
+
                 }
                 else
                 {
@@ -804,12 +804,56 @@ namespace SDIFrontEnd_WPF
                 {
                     newQnum = nextQnum.ToString();
                 }
-                
+
             }
             question.Item.Qnum = newQnum;
             // renumber the rest of the questions
             CurrentSurvey.Renumber(0);
+
+        }
+
+        /// <summary>
+        /// Add an image to the selected question. Images must be already stored in the correct network location.
+        /// </summary>
+        [RelayCommand(CanExecute = nameof(Editable))]
+        
+        private void AddImage()
+        {
+            if (SelectedQuestionRecord == null)
+                return;
+
+            string file = _dialogService.OpenSurveyImageFile();
+
+            SurveyImage image = new SurveyImage(file.Substring(file.LastIndexOf(@"\") + 1));
+            image.FilePath = file;
+            image.QID = SelectedQuestion.ID;
+            image.Survey = CurrentSurvey.SurveyCode;
+            image.VarName = SelectedQuestion.VarName.VarName;
             
+            image.ImageName = file.Substring(file.LastIndexOf(@"\") + 1);
+            image.ImagePath = file;
+
+            SelectedQuestionRecord.AddedImages.Add(image);
+            SelectedQuestion.Images.Add(image);
+            CurrentImage = SelectedQuestion.Images.LastOrDefault();
+            OnPropertyChanged(nameof(ImageIndex));
+            OnPropertyChanged(nameof(SelectedQuestionRecord));
+            
+        }
+
+        [RelayCommand(CanExecute = nameof(Editable))]   
+        private void DeleteImage()
+        {
+            if (CurrentImage != null)
+            {
+                if (_dialogService.Confirm("Are you sure you want to delete this image?", "Confirm"))
+                    return;
+
+                SelectedQuestion.Images.Remove(CurrentImage);
+                SelectedQuestionRecord.DeletedImages.Add(CurrentImage);
+                CurrentImage = SelectedQuestion.Images.FirstOrDefault();
+                OnPropertyChanged(nameof(ImageIndex));
+            }
         }
 
         // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
@@ -850,7 +894,7 @@ namespace SDIFrontEnd_WPF
 
                 RecordList.Remove(RecordList.First(x => x.Item == question));
             }
-                
+
             Removed.Clear();
         }
 
@@ -870,7 +914,7 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        
+
         private void OpenResponses(string type, string setname)
         {
             ResponseSetViewModel wordingVM = new ResponseSetViewModel(_wordingService, _dialogService, type, setname);
