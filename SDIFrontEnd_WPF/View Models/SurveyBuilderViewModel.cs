@@ -5,6 +5,7 @@ using ITCLib;
 using MvvmLib.ViewModels;
 using SDIFrontEnd_WPF.ViewModels;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 namespace SDIFrontEnd_WPF
 {
     public partial class SurveyBuilderViewModel : ViewModelBase
@@ -20,7 +21,7 @@ namespace SDIFrontEnd_WPF
         private readonly ObservableCollection<SurveyQuestionRecord> _recordList;
         public ObservableCollection<SurveyQuestionRecord> RecordList => _recordList;
 
-        public ObservableCollection<SurveyQuestion> QuestionList => new ObservableCollection<SurveyQuestion>(RecordList.Select(r=>r.Item));
+        public ObservableCollection<SurveyQuestion> QuestionList => new ObservableCollection<SurveyQuestion>(RecordList.Select(r => r.Item));
 
         public List<TopicLabel> TopicLabels { get; set; }
         public List<ContentLabel> ContentLabels { get; set; }
@@ -60,9 +61,15 @@ namespace SDIFrontEnd_WPF
 
         public string CurrentQuestionText => SelectedQuestion?.GetQuestionTextHTML() ?? string.Empty;
 
+        bool Editable => !(CurrentSurvey == null || CurrentSurvey.Locked);
+        public bool Locked => !Editable;
+        
+
         // other windows
         public TranslationViewModel? TranslationVM;
         public RelatedQuestionsViewModel? RelatedQsVM;
+
+        public string StatusSummary => $"Total Questions: {QuestionList.Count}, Added: {Added.Count}, Modified: {Modified.Count}, Removed: {Removed.Count}";
 
         public string SectionCount
         {
@@ -105,18 +112,28 @@ namespace SDIFrontEnd_WPF
             if (survey == null) throw new ArgumentNullException(nameof(survey), "Questions cannot be null");
 
             CurrentSurvey = survey;
-            _recordList = new ObservableCollection<SurveyQuestionRecord>(survey.Questions.Select(x=> new SurveyQuestionRecord(x)));
+            OnPropertyChanged(nameof(Editable));
+            _recordList = new ObservableCollection<SurveyQuestionRecord>(survey.Questions.Select(x => new SurveyQuestionRecord(x)));
 
-            TopicLabels= _referenceDataService.GetTopicLabels() ?? new List<TopicLabel>();
-            ContentLabels= _referenceDataService.GetContentLabels() ?? new List<ContentLabel>();
-            DomainLabels= _referenceDataService.GetDomainLabels() ?? new List<DomainLabel>();
-            ProductLabels= _referenceDataService.GetProductLabels() ?? new List<ProductLabel>();
+            TopicLabels = _referenceDataService.GetTopicLabels() ?? new List<TopicLabel>();
+            ContentLabels = _referenceDataService.GetContentLabels() ?? new List<ContentLabel>();
+            DomainLabels = _referenceDataService.GetDomainLabels() ?? new List<DomainLabel>();
+            ProductLabels = _referenceDataService.GetProductLabels() ?? new List<ProductLabel>();
 
-            SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000") );
+            SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000"));
             SelectedQuestionRecords = new ObservableCollection<SurveyQuestionRecord>();
             SelectedQuestions = new ObservableCollection<SurveyQuestion>();
         }
 
+        void ModifyPreP(Wording prep, SurveyQuestion question)
+        {
+            question.PrePW = prep;
+            SurveyQuestionRecord record = new SurveyQuestionRecord(question);
+            if (!Modified.Contains(question)) Modified.Add(question);
+            OnPropertyChanged(nameof(CurrentQuestionText));
+        }
+
+        #region Property Changed Events
         /// <summary>
         /// Update the form when the selected question record changes.
         /// </summary>
@@ -166,14 +183,6 @@ namespace SDIFrontEnd_WPF
             var record = _recordList.FirstOrDefault(r => r.Item == value);
             if (record != null && record.Item.ID != SelectedQuestionRecord.Item.ID)
                 SelectedQuestionRecord = record;
-        }
-
-        void ModifyPreP(Wording prep, SurveyQuestion question)
-        {
-            question.PrePW = prep;
-            SurveyQuestionRecord record = new SurveyQuestionRecord(question);
-            if (!Modified.Contains(question)) Modified.Add(question);
-            OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
         partial void OnPrePIDChanged(int oldValue, int newValue)
@@ -306,6 +315,7 @@ namespace SDIFrontEnd_WPF
 
                 OnPropertyChanged(nameof(CurrentQuestionText));
         }
+        #endregion
 
         [RelayCommand]
         private void AddComment()
@@ -316,14 +326,25 @@ namespace SDIFrontEnd_WPF
                 return;
             }
 
-            QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _commentService, SelectedQuestion);
+            QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _commentService);
 
             bool? result = _dialogService.ShowDialog(vm);
             if (result.Value)
             {
-                SelectedQuestion.Comments.Add(vm.NewComment);
-                OnPropertyChanged(nameof(SelectedQuestion));
+                QuestionComment newComment = new QuestionComment(vm.NewComment)
+                {
+                    Survey = SelectedQuestion.SurveyCode,
+                    VarName = SelectedQuestion.VarName.VarName,
+                };
                 
+                if (_commentService.InsertQuestionComment(newComment) == 0)
+                {
+                    _dialogService.ShowError("Error saving comment.", "Comments Error");
+                    return;
+        }
+
+                SelectedQuestion.Comments.Add(newComment);
+                OnPropertyChanged(nameof(Comments));
         }
         }
 
@@ -346,7 +367,7 @@ namespace SDIFrontEnd_WPF
             _dialogService.ShowWindow(TranslationVM);
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void AddTranslation()
         {
             if (SelectedQuestion == null)
@@ -367,7 +388,7 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void AddSurveyQuestion()
         {
             // enter VarName
@@ -416,7 +437,7 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(RecordList));
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void AddSeries()
         {
             if (SelectedQuestion.QnumSuffix != string.Empty)
@@ -450,7 +471,7 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void RemoveSurveyQuestion()
         {
             if (SelectedQuestionRecords == null) return;
@@ -461,11 +482,11 @@ namespace SDIFrontEnd_WPF
         }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void SaveChanges()
         {
 
-            if (this.Removed.Count>0)
+            if (this.Removed.Count > 0)
             if (_dialogService.PromptForText("One or more questions are being deleted. Type 'DELETE' to confirm.", "Confirm Deletes") != "DELETE")
             {
                 _dialogService.ShowMessage("Failed to confirm deletes. Changes have not been saved.");
@@ -513,15 +534,13 @@ namespace SDIFrontEnd_WPF
             _dialogService.ShowWindow(deletedVM);
         }
 
-            
-
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void CopyPreviousWordings()
         {
-            if (SelectedQuestion == null)                 return;
+            if (SelectedQuestion == null) return;
 
             // get previous question in survey
-            var previousQuestion = QuestionList.Where(x=>x.GetQnumValue() < SelectedQuestion.GetQnumValue()).LastOrDefault();
+            var previousQuestion = QuestionList.Where(x => x.GetQnumValue() < SelectedQuestion.GetQnumValue()).LastOrDefault();
 
             if (previousQuestion == null)
             {
@@ -574,7 +593,8 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void NextImage() { 
+        private void NextImage()
+        {
             if (SelectedQuestion == null || SelectedQuestion.Images == null || !SelectedQuestion.Images.Any())
                 return;
             if (CurrentImage == null)
@@ -712,7 +732,7 @@ namespace SDIFrontEnd_WPF
         }
         #endregion
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void ToggleQuestion(SurveyQuestionRecord question)
         {
             if (CurrentSurvey.Locked)
@@ -797,7 +817,29 @@ namespace SDIFrontEnd_WPF
         {
             if (_dialogService.Confirm("Do you want to document these deletes?"))
             {
-                //_dialogService.ShowDialog(new DocumentDeletesViewModel(_dialogService, Removed));
+
+
+                QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _commentService);
+
+                bool? result = _dialogService.ShowDialog(vm);
+                if (result.Value)
+                {
+                    foreach (SurveyQuestion q in Removed)
+                    {
+                        DeletedComment newComment = new DeletedComment(vm.NewComment)
+                        {
+                            SurvID = CurrentSurvey.SID,
+                            Survey = q.SurveyCode,
+                            VarName = q.VarName.VarName,
+                        };
+
+                        if (_commentService.InsertDeletedComment(newComment) == 0)
+                        {
+                            _dialogService.ShowError("Error saving comment.", "Comments Error");
+                            return;
+                        }
+                    }
+                }
             }
 
             foreach (var question in Removed)
@@ -806,7 +848,7 @@ namespace SDIFrontEnd_WPF
                 _commentService.BackupComments(question.ID);
                 CurrentSurvey.RemoveQuestion(question, true);
 
-                RecordList.Remove(RecordList.First(x=>x.Item == question));
+                RecordList.Remove(RecordList.First(x => x.Item == question));
             }
                 
             Removed.Clear();
