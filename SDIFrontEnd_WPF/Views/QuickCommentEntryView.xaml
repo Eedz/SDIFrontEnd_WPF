@@ -47,7 +47,7 @@
             <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding NoteSource}"/>
             
             <TextBlock Grid.Row="4" Text="Authority"/>
-            <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Authority}"/>
+            <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding AllAuthors}" SelectedItem="{Binding Authority}"/>
 
             
         </Grid>
