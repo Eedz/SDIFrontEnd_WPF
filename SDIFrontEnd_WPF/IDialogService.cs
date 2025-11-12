@@ -1,4 +1,8 @@
-﻿using System;
+﻿using ITCLib;
+using Microsoft.Win32;
+using MvvmLib;
+using MvvmLib.ViewModels;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,13 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using ITCLib;
-using MvvmLib.ViewModels;
-using MvvmLib;
 namespace SDIFrontEnd_WPF
 {
     public interface IDialogService
     {
+        string OpenFile(string filter);
+        string OpenSurveyImageFile();
         void ShowMessage(string message, string title = "Info");
         void ShowError(string message, string title = "Error");
         bool Confirm(string message, string title = "Confirm");
@@ -25,6 +28,45 @@ namespace SDIFrontEnd_WPF
 
     public class  DialogService : IDialogService 
     {
+        public string OpenFile(string filter)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = filter,
+                Multiselect = false
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                return openFileDialog.FileName;
+            }
+
+            return null;
+        }
+
+        public string OpenSurveyImageFile()
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.InitialDirectory = @"\\psychfile\psych$\psych-lab-gfong\SMG\Survey Images";
+            dialog.Filter = "Images|*.jpg;*.jpeg;*.png";
+            dialog.ShowDialog();
+
+            string file = dialog.FileName;
+
+            if (string.IsNullOrEmpty(file))
+            {
+                return string.Empty;
+            }
+            else if (!file.StartsWith(@"\\psychfile\psych$\psych-lab-gfong\SMG\Survey Images"))
+            {
+                MessageBox.Show(@"Images must be stored in the following folder: \r\n" +
+                    @"\\psychfile\psych$\psych-lab-gfong\SMG\Survey Images\[Project Code] Images\[Survey Code]. Ensure the file exists and try again.");
+
+                return string.Empty;
+            }
+            return file;
+        }
+
         public void ShowMessage(string message, string title = "Info")
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
