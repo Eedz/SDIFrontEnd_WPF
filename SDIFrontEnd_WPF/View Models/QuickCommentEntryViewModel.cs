@@ -24,17 +24,14 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string NoteSource { get; set; } = string.Empty;
         public Person Authority { get; set; } = new Person();
 
-        private SurveyQuestion Question;
+        public Comment NewComment;
 
-        public QuestionComment NewComment;
-
-        public QuickCommentEntryViewModel(IPeopleService peopleService, ICommentService commentService, SurveyQuestion question)
+        public QuickCommentEntryViewModel(IPeopleService peopleService, ICommentService commentService)
         {
             _peopleService = peopleService ?? throw new ArgumentNullException(nameof(peopleService));
             _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService));
 
             base.DisplayName = "Comment Entry";
-            Question = question;
             _ = LoadLists();
         }
 
@@ -42,16 +39,16 @@ namespace SDIFrontEnd_WPF.ViewModels
         {
             AllAuthors = await _peopleService.GetPeopleBasicsAsync();
             AllCommentTypes = _commentService.GetAllCommentTypes();
+            OnPropertyChanged(nameof(AllAuthors));
+            OnPropertyChanged(nameof(AllCommentTypes));
         }
 
 
         [RelayCommand (CanExecute ="CanSave")]
         private void SaveComment()
         {
-            NewComment = new QuestionComment
+            NewComment = new Comment
             {
-                Survey = Question.SurveyCode,
-                VarName = Question.VarName.VarName,
                 Notes = new Note() { NoteText = this.NoteText },
                 Author = new Person(Author.FirstName, Author.ID),
                 NoteDate = this.NoteDate,
@@ -59,10 +56,6 @@ namespace SDIFrontEnd_WPF.ViewModels
                 Source = this.NoteSource,
                 Authority = new Person(Authority.FirstName, Authority.ID)
             };
-
-            if (_commentService.InsertQuestionComment(NewComment) == 0)
-                throw new Exception("Error saving comment.");
-
             OnRequestClose(true);
         }
 
