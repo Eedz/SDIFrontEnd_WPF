@@ -10,6 +10,7 @@ namespace SDIFrontEnd_WPF
     public interface IFileDialogService
     {
         public string OpenFile(string filter);
+        public string? OpenImageFileDialog();
     }
 
     public class FileDialogService : IFileDialogService
@@ -25,6 +26,24 @@ namespace SDIFrontEnd_WPF
             if (openFileDialog.ShowDialog() == true)
             {
                 return openFileDialog.FileName;
+            }
+
+            return null;
+        }
+
+        public string? OpenImageFileDialog()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "PNG Images|*.png",
+                Title = "Select an Image"
+            };
+
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                return dialog.FileName;
             }
 
             return null;
