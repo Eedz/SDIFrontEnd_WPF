@@ -174,35 +174,35 @@
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Grid.Row="0" >
                         <Button Content="PreP" Command="{Binding OpenPrePCommand}" CommandParameter="{Binding PrePID}" Width="50"/>
-                        <TextBox Text="{Binding PrePID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/> 
+                        <TextBox Text="{Binding PrePID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/> 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="1" >
                         <Button Content="PreI" Command="{Binding OpenPreICommand}" CommandParameter="{Binding PreIID}" Width="50"/>
-                        <TextBox Text="{Binding PreIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding PreIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="2"  >
                         <Button Content="PreA" Width="50" Command="{Binding OpenPreACommand}" CommandParameter="{Binding PreAID}"/>
-                        <TextBox Text="{Binding PreAID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding PreAID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="3" >
                         <Button Content="LitQ" Width="50" Command="{Binding OpenLitQCommand}" CommandParameter="{Binding LitQID}"/>
-                        <TextBox Text="{Binding LitQID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding LitQID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="4" >
                         <Button Content="ROs" Width="50" Command="{Binding OpenRespOptionsCommand}" CommandParameter="{Binding RespName}"/>
-                        <TextBox Text="{Binding RespName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding RespName}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="5" >
                         <Button Content="NRs" Width="50" Command="{Binding OpenNRCodesCommand}" CommandParameter="{Binding NRName}"/>
-                        <TextBox Text="{Binding NRName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding NRName}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="6" >
                         <Button Content="PstI" Width="50" Command="{Binding OpenPstICommand}" CommandParameter="{Binding PstIID}"/>
-                        <TextBox Text="{Binding PstIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding PstIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="7" >
                         <Button Content="PstP" Width="50" Command="{Binding OpenPstPCommand}" CommandParameter="{Binding PstPID}"/>
-                        <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+                        <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     
                     <!-- # comments, translations -->
@@ -230,13 +230,19 @@
         </DockPanel>
         
         <!-- Images -->
-        <local:NavigationBar Grid.Row="0" Grid.Column="2" Height="30"
+        <StackPanel Grid.Row="0" Grid.Column="2">
+            <local:NavigationBar  Height="30"
                              FirstItemCommand="{Binding FirstImageCommand}"
                              PreviousItemCommand="{Binding PreviousImageCommand}"
                              ItemPosition="{Binding ImageIndex}"
                              NextItemCommand="{Binding NextImageCommand}"
                              LastItemCommand="{Binding LastImageCommand}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="+" Width="30" Height="20" Command="{Binding AddImageCommand}"/>
+                <Button Content="X" Width="30" Height="20" Command="{Binding DeleteImageCommand}"/>
+            </StackPanel>
 
+        </StackPanel>
         <DockPanel Margin="5" Grid.Column="2" Grid.Row="1" Effect="{StaticResource SunkenEffect}">
             
             <Image Source="{Binding CurrentImage.ImageSource}" Stretch="UniformToFill"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
@@ -249,7 +255,7 @@
                 <Run Text="Comments"/>
                 <Button Content="+" Command="{Binding AddCommentCommand}" Margin="10,0"/>
             </TextBlock>
-            <views:CommentsListView Comments="{Binding SelectedQuestion.Comments}"/>
+            <views:CommentsListView Comments="{Binding Comments}"/>
             
         </DockPanel>
     </Grid>
