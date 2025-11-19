@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITC_DataAccess_EF", "..\ITC_DataAccess_EF\ITC_DataAccess_EF\ITC_DataAccess_EF.csproj", "{B0E9405E-FFA7-723A-DC5E-7240294A0741}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDIPraccingWPF", "..\SDIPraccingWPF\SDIPraccingWPF\SDIPraccingWPF.csproj", "{6AB5FA7B-6CCB-4116-A8E7-BA493F7F7925}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenXmlToHtml", "..\OpenXmlToHtml\OpenXmlToHtml.csproj", "{7BB3129F-5331-4975-A6A4-A65E16D38D07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +51,14 @@ Global
 		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0E9405E-FFA7-723A-DC5E-7240294A0741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AB5FA7B-6CCB-4116-A8E7-BA493F7F7925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AB5FA7B-6CCB-4116-A8E7-BA493F7F7925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AB5FA7B-6CCB-4116-A8E7-BA493F7F7925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AB5FA7B-6CCB-4116-A8E7-BA493F7F7925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BB3129F-5331-4975-A6A4-A65E16D38D07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BB3129F-5331-4975-A6A4-A65E16D38D07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BB3129F-5331-4975-A6A4-A65E16D38D07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BB3129F-5331-4975-A6A4-A65E16D38D07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

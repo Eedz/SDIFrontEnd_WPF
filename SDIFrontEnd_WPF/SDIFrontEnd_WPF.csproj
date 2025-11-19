@@ -52,6 +52,14 @@
     <ProjectReference Include="..\..\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess.csproj" />
     <ProjectReference Include="..\..\ITC_Services\ITC_Services\ITC_Services.csproj" />
     <ProjectReference Include="..\..\MvvmLib\MvvmLib\MvvmLib.csproj" />
+    <ProjectReference Include="..\..\OpenXmlToHtml\OpenXmlToHtml.csproj" />
+    <ProjectReference Include="..\..\SDIPraccingWPF\SDIPraccingWPF\SDIPraccingWPF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\TranslationImporterView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>
