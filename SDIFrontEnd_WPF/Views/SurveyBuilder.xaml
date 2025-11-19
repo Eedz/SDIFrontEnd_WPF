@@ -7,6 +7,8 @@
              xmlns:converters ="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
              xmlns:mvvmLib ="clr-namespace:MvvmLib;assembly=MvvmLib"
              xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:MvvmLib.Behaviors;assembly=MvvmLib"
              mc:Ignorable="d" Height="Auto"
              d:DesignHeight="450" d:DesignWidth="1200">
     <UserControl.Resources>
@@ -33,7 +35,7 @@
             <ColumnDefinition Width="0.5*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="55"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
@@ -50,7 +52,9 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button Content="+" Command="{Binding AddTranslationCommand}" Margin="5,0,0,0"/>
+                    <Button Command="{Binding AddTranslationCommand}" Margin="5,0,0,0">
+                        <Image Source="/Images/add.png" Width="15" Height="10"></Image>
+                    </Button>
                     <Button Content="Translations" Command="{Binding ViewTranslationsCommand}" Margin="0,0,5,0"/>
                     <Button Content="Deleted Vars" Command="{Binding ViewDeletedVarsCommand}" Margin="5,0"/>
                     <Button Content="Related Qs" Command="{Binding ViewRelatedQuestionsCommand}" Margin="5,0"/>
@@ -70,10 +74,20 @@
                 </TextBlock>
             </StackPanel>
         </StackPanel>
-        
 
-        <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SectionCount}" FontSize ="14" d:Text="Current Question's section count"/>
-        
+        <!-- VarName/Qnum -->
+        <StackPanel Grid.Row="0" Grid.Column="1">
+            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
+                <Run Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName" />
+                <Run Text="--- Q#"/>
+                <Run Text="{Binding SelectedQuestion.Qnum}" d:Text="Qnum" />
+            </TextBlock>
+            <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" FontSize="12" Text="AltQ#: " />
+                <TextBox Text="{Binding SelectedQuestion.AltQnum}" d:Text="AltQ#" Width="70" DockPanel.Dock="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock  HorizontalAlignment="Center" Text="{Binding SectionCount}" FontSize ="10" d:Text="Current Question's section count"/>
+        </StackPanel>
         <!-- Question List -->
         <DataGrid Grid.Row="1" Grid.Column="0" Grid.RowSpan="2"
             ItemsSource="{Binding RecordList}"
@@ -84,6 +98,7 @@
             HeadersVisibility="Column"
             CanUserAddRows="False"
             CanUserDeleteRows="False"
+                  AllowDrop="True"
             IsReadOnly="True"
             Margin="5"
             GridLinesVisibility="None"
@@ -92,7 +107,11 @@
             mvvmLib:DataGridHelper.ScrollOnSelected="True"
             mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
             RowStyle="{StaticResource QuestionRowColor}">
-            
+
+            <i:Interaction.Behaviors>
+                <behaviors:DataGridReorderBehavior MoveCommand="{Binding ReorderCommand}" />
+            </i:Interaction.Behaviors>
+
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Qnum" Binding="{Binding Item.Qnum}" Width="60"/>
                 <DataGridTextColumn Header="VarName" Binding="{Binding Item.VarName.VarName}" Width="Auto"/>
@@ -110,16 +129,7 @@
                                  ItemPosition="{Binding ItemPosition}"
                                  NextItemCommand="{Binding NextItemCommand}"
                                  LastItemCommand="{Binding LastItemCommand}"/>
-            <!-- VarName/Qnum -->
-            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
-                <Run Text="{Binding SelectedQuestion.VarName.VarName}" d:Text="VarName" />
-                <Run Text="--- Q#"/>
-                <Run Text="{Binding SelectedQuestion.Qnum}" d:Text="Qnum" />
-            </TextBlock>
-            <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Orientation="Horizontal">
-                <TextBlock FontWeight="Bold" FontSize="12" Text="AltQ#: " />
-                <TextBox Text="{Binding SelectedQuestion.AltQnum}" d:Text="AltQ#" Width="70" DockPanel.Dock="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
-            </StackPanel>
+            
           
             <!-- Labels -->
             <Border Margin="0,0,0,5" DockPanel.Dock="Bottom" Background="LightSkyBlue"
@@ -232,16 +242,20 @@
         <!-- Images -->
         <StackPanel Grid.Row="0" Grid.Column="2">
             <local:NavigationBar  Height="30"
-                             FirstItemCommand="{Binding FirstImageCommand}"
-                             PreviousItemCommand="{Binding PreviousImageCommand}"
-                             ItemPosition="{Binding ImageIndex}"
-                             NextItemCommand="{Binding NextImageCommand}"
-                             LastItemCommand="{Binding LastImageCommand}" />
+                    FirstItemCommand="{Binding FirstImageCommand}"
+                    PreviousItemCommand="{Binding PreviousImageCommand}"
+                    ItemPosition="{Binding ImageIndex}"
+                    NextItemCommand="{Binding NextImageCommand}"
+                    LastItemCommand="{Binding LastImageCommand}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="+" Width="30" Height="20" Command="{Binding AddImageCommand}"/>
-                <Button Content="X" Width="30" Height="20" Command="{Binding DeleteImageCommand}"/>
+                <Button Width="30" Height="20" Command="{Binding AddImageCommand}">
+                    <Image Source="/Images/add.png" Width="15" Height="10"></Image>
+                </Button>
+                <Button Width="30" Height="20" Command="{Binding DeleteImageCommand}">
+                    <Image Source="/Images/delete.png" Width="15" Height="10"></Image>
+                </Button>
             </StackPanel>
-
+            
         </StackPanel>
         <DockPanel Margin="5" Grid.Column="2" Grid.Row="1" Effect="{StaticResource SunkenEffect}">
             
@@ -253,7 +267,9 @@
         <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" Effect="{StaticResource SunkenEffect}">
             <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,5">
                 <Run Text="Comments"/>
-                <Button Content="+" Command="{Binding AddCommentCommand}" Margin="10,0"/>
+                <Button Command="{Binding AddCommentCommand}" Margin="10,0" VerticalAlignment="Center">
+                    <Image Source="/Images/add.png" Width="15" Height="10"></Image>
+                </Button>
             </TextBlock>
             <views:CommentsListView Comments="{Binding Comments}"/>
             
