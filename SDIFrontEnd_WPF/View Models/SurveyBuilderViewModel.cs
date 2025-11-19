@@ -856,6 +856,23 @@ namespace SDIFrontEnd_WPF
             }
         }
 
+        [RelayCommand]
+        private void Reorder()
+        {
+            var list = RecordList;
+            int start = CurrentSurvey.Questions[0].GetQnumValue() -1;
+            Survey temp = new Survey();
+            temp.Questions.AddRange(RecordList.Select(x => x.Item));
+            temp.Renumber(start);
+            foreach (var r in RecordList)
+            {
+                if (r.DirtyQnum)
+                {
+
+                }
+            }
+        }
+
         // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
         private void ProcessDeletes()
         {
