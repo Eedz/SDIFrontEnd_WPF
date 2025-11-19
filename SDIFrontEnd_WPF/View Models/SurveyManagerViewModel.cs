@@ -111,5 +111,17 @@ namespace SDIFrontEnd_WPF
             }
 
         }
+
+        [RelayCommand]
+        private void ImportTranslations() 
+        {
+            TranslationImporterViewModel vm = new TranslationImporterViewModel(_surveyService, _referenceDataService, _dialogService);
+            vm.SelectedSurvey = CurrentSurvey;
+            vm.SelectedLanguage = CurrentSurvey.LanguageList.FirstOrDefault()?.SurvLanguage;
+            _dialogService.ShowWindow(vm);
+        }
+
+        [RelayCommand]
+        private void ImportQuestions() { }
     }
 }
