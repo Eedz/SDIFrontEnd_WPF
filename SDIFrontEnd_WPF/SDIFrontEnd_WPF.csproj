@@ -49,6 +49,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ITCLib\ITCLib\ITCLib.csproj" />
+    <ProjectReference Include="..\..\ITCReportLib\ITCReportLib\ITCReportLib.csproj" />
     <ProjectReference Include="..\..\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess.csproj" />
     <ProjectReference Include="..\..\ITC_Services\ITC_Services\ITC_Services.csproj" />
     <ProjectReference Include="..\..\MvvmLib\MvvmLib\MvvmLib.csproj" />
