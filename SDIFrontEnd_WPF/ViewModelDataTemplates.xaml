@@ -54,4 +54,8 @@
     <DataTemplate DataType="{x:Type viewmodels:TranslationImporterViewModel}">
         <views:TranslationImporterView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:HarmonyReportViewModel}">
+        <views:HarmonyReportView/>
+    </DataTemplate>
 </ResourceDictionary>
