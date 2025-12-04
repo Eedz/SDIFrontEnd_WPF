@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using SDIPraccingWPF;
+using SDIFrontEnd_WPF.ViewModels;
 namespace SDIFrontEnd_WPF
 {
     public enum MenuCategory { Home, Surveys, VarNames, Search, Praccing, Reports, Timing }
@@ -18,9 +20,10 @@ namespace SDIFrontEnd_WPF
         // this class controls which items are displayed in the left pane of the main window
         // when an item is selected, the corresponding user control is displayed in the right pane
 
-        private readonly IServiceProvider _services; // Assuming you have a service to manage surveys
-        private readonly ISurveyService _surveyService; // Assuming you have a service to manage surveys
+        private readonly IServiceProvider _services; 
+        private readonly ISurveyService _surveyService; 
         private readonly IUserService _userService;
+        private readonly IVarNameService _varnameService;
 
         private UserPrefs CurrentUser;
 
@@ -73,6 +76,7 @@ namespace SDIFrontEnd_WPF
             _services = services;
             _surveyService = _services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey service cannot be null");
             _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
+            _varnameService = _services.GetService(typeof(IVarNameService)) as IVarNameService ?? throw new ArgumentNullException(nameof(_services), "VarName service cannot be null");
             CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
             AvailableSurveysToAdd = _surveyService.GetAllSurveys();
             CurrentSublinks = new ObservableCollection<SublinkItem>();
@@ -106,7 +110,9 @@ namespace SDIFrontEnd_WPF
                 ActiveForm = SelectedSublink.Key switch
                 {
                     "home" => new HomeViewModel(),
-                    "Questions" => new QuestionSearchViewModel(),
+                    "Questions" => new QuestionSearchViewModel(_surveyService),
+                    "Entry" => new SDIPraccingWPF.PraccingEntryViewModel(null,null, _surveyService, null, null),
+                    "Harmony" => new HarmonyReportViewModel(_surveyService, _varnameService),
                     _ => null
                 };
             }
