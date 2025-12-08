@@ -16,17 +16,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
+    public enum HarmonyReportDisplay { Surveys, Projects };
     public partial class HarmonyReportViewModel : WorkspaceViewModel
     {
         private readonly ISurveyService _surveyService;
         private readonly IVarNameService _varNameService;
-        public enum HarmonyReportDisplay { Surveys, Projects }; 
+        
         public HarmonyReportDisplay DisplayOption { get; set; } = HarmonyReportDisplay.Surveys;
-        public HarmonyReportDisplay SurveysOption => HarmonyReportDisplay.Surveys;
-        public HarmonyReportDisplay ProjectsOption => HarmonyReportDisplay.Projects;
 
         public List<VariableName> VarNameList { get; set; } = new List<VariableName>();
         public ObservableCollection<VariableName> SelectedVars { get; set; } = new ObservableCollection<VariableName>();
@@ -41,6 +41,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         public List<Survey> SurveyList { get; set; } = new List<Survey>();
       
         public ObservableCollection<Survey> SelectedSurveys { get; set; } = new ObservableCollection<Survey>();
+        [ObservableProperty]
+        private Survey? selectedSurvey;
         public List<StudyWave> WaveList { get; set; } = new List<StudyWave>();
     
         public List<Study> StudyList { get; set; } = new List<Study>();
@@ -236,6 +238,11 @@ namespace SDIFrontEnd_WPF.ViewModels
 
                 row["RefVarName"] = ((SurveyQuestion)g.FirstOrDefault()).VarName.RefVarName;
                 row["Question"] = GetQuestionText((SurveyQuestion)g.FirstOrDefault());
+                if (showProjects)
+                {
+                    row["Surveys"] = GetProjectData(g);
+                }
+                else
                 row["Surveys"] = GetSurveyData(g);
 
                 if (ShowGroupOn)
@@ -431,6 +438,46 @@ namespace SDIFrontEnd_WPF.ViewModels
         
         }
 
+        private string GetProjectData(IGrouping<List<object?>, SurveyQuestion> g)
+        {
+            if (SelectedSurveys.Count() == 1 && SelectedSurveys[0].SID == -1)
+            {
+                
+                
+                return g.Aggregate("", (acc, q) =>
+                {
+                    string wavecode = WaveList.FirstOrDefault(x => q.SurveyCode.StartsWith(x.WaveCode)).WaveCode;
+                    if (string.IsNullOrEmpty(acc))
+                        return wavecode;
+                    else
+                    {
+                        if (!acc.Contains(wavecode))
+                            return acc + ", " + wavecode;
+                        else return acc;
+                    }
+                });
+            }
+            else
+            {
+                return g.Aggregate("", (acc, q) =>
+                {
+                    if (SelectedSurveys.Any(x => x.SurveyCode == q.SurveyCode))
+                    {
+                        string wavecode = WaveList.FirstOrDefault(x => q.SurveyCode.StartsWith(x.WaveCode)).WaveCode;
+                        if (string.IsNullOrEmpty(acc))
+                            return wavecode;
+                        else
+                            return acc + ", " + wavecode;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+                });
+            }
+        
+        }
+
         private void PopulateFieldworkData(DataTable results)
         {
             foreach (DataRow r in results.Rows)
@@ -453,7 +500,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         [RelayCommand]
         private void OpenReportFolder()
         {
-
+            Process.Start("explorer.exe", @"\\psychfile\psych$\psych-lab-gfong\SMG\SDI\Reports\Harmony");
         }
 
         [RelayCommand]
@@ -471,14 +518,23 @@ namespace SDIFrontEnd_WPF.ViewModels
         [RelayCommand]
         private void RemoveVarName()
         {
-            if (SelectedListVar != null)
+            if (SelectedListVar == null) return;
+
+            int position = VarNameList.IndexOf(SelectedVar);
+            if (position < VarNameList.Count - 1)
+                SelectedVar = VarNameList[VarNameList.IndexOf(SelectedVar) + 1];
                 SelectedVars.Remove(SelectedListVar);
+
+
+
         }
 
         [RelayCommand]
         private void SelectRecentSurveys()
         {
-
+            var recentWaves = WaveList.Where(w => w.FieldworkDates != null && w.FieldworkDates.Any(fw => fw.End >= DateTime.Now.AddYears(-5))).ToList();
+            foreach(Survey s in SurveyList.Where(x => recentWaves.Any(w => w.ID == x.WaveID)))
+                SelectedSurveys.Add(s);
         }
 
         [RelayCommand]
