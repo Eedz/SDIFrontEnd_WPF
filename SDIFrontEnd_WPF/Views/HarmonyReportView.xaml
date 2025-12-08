@@ -88,16 +88,18 @@
                         <ListBox MinHeight="200" ItemsSource="{Binding StudyList}" SelectionMode="Multiple"
                                  behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedStudies}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" >
+                    <DockPanel Grid.Column="1" >
                         <TextBlock Text="Waves:"/>
+                        
                         <ListBox MinHeight="200" ItemsSource="{Binding WaveList}" SelectionMode="Multiple"
-                                 behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedWaves}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Surveys:"/>
+                                 behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedWaves}" />
+                    </DockPanel>
+                    <DockPanel Grid.Column="2">
+                        <TextBlock Text="Surveys:" DockPanel.Dock="Top"/>
                         <ListBox MinHeight="200" ItemsSource="{Binding SurveyList}" SelectionMode="Multiple"
-                                 behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedSurveys}"/>
-                    </StackPanel>
+                                 SelectedItem="{Binding SelectedSurvey}"
+                                 behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedSurveys, Mode=TwoWay}"/>
+                    </DockPanel>
                     <Button Grid.Column="3" Content="&lt;5 Years Ago" Height="20" Width="100" VerticalAlignment="Top"
                             Command="{Binding SelectRecentSurveysCommand}" />
                 </Grid>
@@ -113,16 +115,16 @@
                     <StackPanel>
                         <GroupBox Header="Display">
                             <StackPanel>
-                                <RadioButton Content="Surveys" />
+                                <RadioButton Content="Surveys" 
+                                        IsChecked="{Binding DisplayOption, Mode=TwoWay, 
+                                            Converter={StaticResource EnumToBooleanConverter}, 
+                                            ConverterParameter={x:Static viewmodels:HarmonyReportDisplay.Surveys}}"/>
 
-                                <!--IsChecked="{Binding DisplayOption, Mode=TwoWay, 
+                                <RadioButton Content="Projects"   
+                                        IsChecked="{Binding DisplayOption, Mode=TwoWay, 
                                                                Converter={StaticResource EnumToBooleanConverter}, 
-                                                               ConverterParameter={Binding SurveysOption}}"-->
+                                            ConverterParameter={x:Static viewmodels:HarmonyReportDisplay.Projects}}"/>
 
-                                <RadioButton Content="Projects"/>
-                                <!--IsChecked="{Binding DisplayOption, Mode=TwoWay, 
-                                                                 Converter={StaticResource EnumToBooleanConverter}, 
-                                                                 ConverterParameter={Binding ProjectsOption}}"-->
 
                             </StackPanel>
 
