@@ -24,6 +24,7 @@ namespace SDIFrontEnd_WPF
         private readonly ISurveyService _surveyService; 
         private readonly IUserService _userService;
         private readonly IVarNameService _varnameService;
+        private readonly IMatrixService _matrixService;
 
         private UserPrefs CurrentUser;
 
@@ -77,7 +78,9 @@ namespace SDIFrontEnd_WPF
             _surveyService = _services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey service cannot be null");
             _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
             _varnameService = _services.GetService(typeof(IVarNameService)) as IVarNameService ?? throw new ArgumentNullException(nameof(_services), "VarName service cannot be null");
+            _matrixService = _services.GetService(typeof(IMatrixService)) as IMatrixService ?? throw new ArgumentNullException(nameof(_services), "Matrix service cannot be null");
             CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
+
             AvailableSurveysToAdd = _surveyService.GetAllSurveys();
             CurrentSublinks = new ObservableCollection<SublinkItem>();
         }
@@ -113,6 +116,7 @@ namespace SDIFrontEnd_WPF
                     "Questions" => new QuestionSearchViewModel(_surveyService),
                     "Entry" => new SDIPraccingWPF.PraccingEntryViewModel(null,null, _surveyService, null, null),
                     "Harmony" => new HarmonyReportViewModel(_surveyService, _varnameService),
+                    "Variable List" => new QuestionSurveyMatrixViewModel(_surveyService, _matrixService),
                     _ => null
                 };
             }
@@ -172,14 +176,15 @@ namespace SDIFrontEnd_WPF
         {
             return new ObservableCollection<SublinkItem>()
             {
-                new SublinkItem("Single", "Single", MenuCategory.Praccing),
-                new SublinkItem("Comparison", "Comparison", MenuCategory.Praccing),
-                new SublinkItem("Translation", "Translation", MenuCategory.Praccing),
-                new SublinkItem("Website", "Website", MenuCategory.Praccing),
-                new SublinkItem("External", "External", MenuCategory.Praccing),
-                new SublinkItem("Harmony", "Harmony", MenuCategory.Praccing),
-                new SublinkItem("Parallel Vars", "Parallel Vars", MenuCategory.Praccing),
-                new SublinkItem("Topic/Content", "Topic/Content", MenuCategory.Praccing),
+                new SublinkItem("Single", "Single", MenuCategory.Reports),
+                new SublinkItem("Comparison", "Comparison", MenuCategory.Reports),
+                new SublinkItem("Translation", "Translation", MenuCategory.Reports),
+                new SublinkItem("Website", "Website", MenuCategory.Reports),
+                new SublinkItem("External", "External", MenuCategory.Reports),
+                new SublinkItem("Variable List", "Variable List", MenuCategory.Reports),
+                new SublinkItem("Harmony", "Harmony", MenuCategory.Reports),
+                new SublinkItem("Parallel Vars", "Parallel Vars", MenuCategory.Reports),
+                new SublinkItem("Topic/Content", "Topic/Content", MenuCategory.Reports),
                 
             };
         }

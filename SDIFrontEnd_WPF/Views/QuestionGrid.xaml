@@ -1,0 +1,172 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.QuestionGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Focusable="True"
+         
+             KeyboardNavigation.TabNavigation="Local">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Variable List" FontSize="24" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" >
+            <Button Content="Export" Command="{Binding ExportCommand}" Padding="4" Margin="4" Height="20" FontSize="8"/>
+            <TextBlock Text="Exclude:"/>
+            <CheckBox Content="Headings" IsChecked="{Binding ExcludeHeadings}" Command="{Binding ToggleHeadingsCommand}"/>
+            <CheckBox Content="BI Scripts" IsChecked="{Binding ExcludeBI}" Command="{Binding ToggleHeadingsCommand}"/>
+            <CheckBox Content="Non Standard Vars" IsChecked="{Binding StdOnly}" Command="{Binding ToggleHeadingsCommand}"/>
+            <CheckBox Content="Screeners" IsChecked="{Binding ExcludeScreeners}" Command="{Binding ToggleHeadingsCommand}"/>
+
+            <TextBlock Text="Include:"/>
+            <CheckBox Content="RespOptions" IsChecked="{Binding Options.RespOptions}"/>
+            <CheckBox Content="NRCodes" IsChecked="{Binding Options.RespOptions}"/>
+            <CheckBox Content="FmtNames" IsChecked="{Binding Options.RespOptions}"/>
+            <CheckBox Content="VarName" IsChecked="{Binding Options.RespOptions}"/>
+            <CheckBox Content="Topic" IsChecked="{Binding Options.RespOptions}"/>
+            <CheckBox Content="Content" IsChecked="{Binding Options.RespOptions}"/>
+            <CheckBox Content="VarLabel" IsChecked="{Binding Options.RespOptions}"/>
+        </StackPanel>
+        
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="LightGray" BorderThickness="1">
+            
+        <!-- Question Grid -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <!-- headers -->
+                <RowDefinition Height="30"/>
+                <!-- scrollable content -->
+                <RowDefinition/>
+
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Left headers (VarNames) -->
+                <ColumnDefinition/>
+                <!-- Body -->
+            </Grid.ColumnDefinitions>
+
+           
+
+
+            <Border Grid.Row="3" Grid.Column="1" Padding="4" >
+                <TextBlock Text="VarName"  FontWeight="Bold" TextAlignment="Center"/>
+            </Border>
+
+            <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
+                <TextBlock Text="Survey  "/>
+                <ComboBox ItemsSource="{Binding AllSurveys}" DisplayMemberPath="SurveyCode" SelectedItem="{Binding SelectedSurvey}" Width="100" Margin="0,0,10,0"/>
+                <Button Content="+" Command="{Binding AddSurveyCommand}" Margin="4,0" Width="25"/>
+            </StackPanel>
+
+            <!-- Top survey headers -->
+            <ItemsControl Grid.Row="3" Grid.Column="2" ItemsSource="{Binding VisibleSurveys}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="0,0,1,1"  Width="100" Height="30" Padding="4">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding SurveyCode}" FontWeight="Bold" TextAlignment="Center"/>
+                                <Button Content="X" Width="25" Margin="4,0,0,0"
+                                Command="{Binding DataContext.RemoveSurveyCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Left question headers -->
+            <ItemsControl Grid.Row="4" Grid.Column="1" ItemsSource="{Binding VisibleQuestions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="100" Height="30" Padding="4">
+                            <TextBlock Text="{Binding VarName}" TextWrapping="Wrap"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Main grid body -->
+            <ItemsControl Grid.Row="4" Grid.Column="2" ItemsSource="{Binding VisibleGrid}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ItemsControl ItemsSource="{Binding}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="100" Height="30" Padding="4">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Survey headers -->
+            <DockPanel Grid.Row="2" Grid.Column="2"  HorizontalAlignment="Center">
+                <ScrollBar Orientation="Horizontal"
+           Minimum="0"
+           Maximum="{Binding SelectedSurveys.Count}"
+           SmallChange="1"
+           LargeChange="10"
+           ViewportSize="10"
+           Value="{Binding ColumnOffset, Mode=TwoWay}"/>
+            </DockPanel>
+
+            <!-- Question grid -->
+            <DockPanel  Grid.Column="0" Grid.Row="4" Grid.RowSpan="4" VerticalAlignment="Top" Height="600" >
+                <ScrollBar Orientation="Vertical" 
+           Minimum="0"
+           Maximum="{Binding AvailableQuestions.Count}"
+           SmallChange="1"
+           LargeChange="20"
+           ViewportSize="10"
+           Value="{Binding RowOffset, Mode=TwoWay}"/>
+            </DockPanel>
+
+
+        </Grid>
+        </Border>
+    </Grid>
+    
+
+</UserControl>

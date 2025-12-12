@@ -58,4 +58,8 @@
     <DataTemplate DataType="{x:Type viewmodels:HarmonyReportViewModel}">
         <views:HarmonyReportView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuestionSurveyMatrixViewModel}">
+        <views:QuestionGrid/>
+    </DataTemplate>
 </ResourceDictionary>
