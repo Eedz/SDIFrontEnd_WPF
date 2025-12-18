@@ -122,9 +122,9 @@
 
                                 <RadioButton Content="Projects"   
                                         IsChecked="{Binding DisplayOption, Mode=TwoWay, 
-                                                               Converter={StaticResource EnumToBooleanConverter}, 
+                                            Converter={StaticResource EnumToBooleanConverter}, 
                                             ConverterParameter={x:Static viewmodels:HarmonyReportDisplay.Projects}}"/>
-
+                              
 
                             </StackPanel>
 

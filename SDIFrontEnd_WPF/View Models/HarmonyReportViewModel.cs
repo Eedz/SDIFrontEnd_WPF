@@ -126,6 +126,65 @@ namespace SDIFrontEnd_WPF.ViewModels
             SelectedStudies.Add(StudyList[0]);
             SelectedWaves.Add(WaveList[0]);
             SelectedSurveys.Add(SurveyList[0]);
+
+            SelectedStudies.CollectionChanged += SelectedStudies_CollectionChanged;
+            SelectedWaves.CollectionChanged += SelectedWaves_CollectionChanged;
+            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
+        }
+
+        private void SelectedSurveys_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            // Schedule the selection fix after the event finishes
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                SelectedSurveys.CollectionChanged-= SelectedSurveys_CollectionChanged;
+                if (e.NewItems != null)
+                {
+                    List<Survey> added = e.NewItems.Cast<Survey>().ToList();
+                    if (added.Any(x => x.SID == -1))
+                    {
+                        SelectedSurveys.Clear();
+                        SelectedSurveys.Add(SurveyList[0]);
+                        return;
+                    }
+
+                    else
+                    {
+                        if (SelectedSurveys.Contains(SurveyList[0]))
+                            SelectedSurveys.Remove(SurveyList[0]);
+                    }
+                }
+                SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
+                SelectedSurveys = new ObservableCollection<Survey>(SelectedSurveys);
+                OnPropertyChanged(nameof(SelectedSurveys));
+            }));
+
+            //if (e.NewItems != null)
+            //{
+            //    List<Survey> added = e.NewItems.Cast<Survey>().ToList();
+            //    if (added.Any(x => x.SID == -1))
+            //    {
+            //        SelectedSurveys.Clear();
+            //        SelectedSurveys.Add(SurveyList[0]);
+            //        return;
+            //    }
+
+            //    else
+            //    {
+            //        if (SelectedSurveys.Contains(SurveyList[0]))
+            //            SelectedSurveys.Remove(SurveyList[0]);
+            //    }
+            //}
+        }
+
+        private void SelectedWaves_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private void SelectedStudies_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            
         }     
 
         private bool FilterWave(object item)
