@@ -52,6 +52,13 @@ namespace SDIFrontEnd_WPF
                 .ToList();
         }
 
+        public IList<SurveyQuestion> SortQuestionsQnum(IEnumerable<SurveyQuestion> questions)
+        {
+            return questions
+                .OrderBy(q => q.Qnum, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
         public IList<IReadOnlyList<string>> BuildMatrix(
             IList<SurveyQuestion> questions,
             IList<Survey> surveys)

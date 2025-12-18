@@ -4,11 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:viewmodels="clr-namespace:SDIFrontEnd_WPF.ViewModels"
+             xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Focusable="True"
          
              KeyboardNavigation.TabNavigation="Local">
+    <UserControl.Resources>
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+    </UserControl.Resources>
     <Grid>
 
         <Grid.RowDefinitions>
@@ -20,24 +27,31 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Text="Variable List" FontSize="24" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
-
+        <StackPanel Grid.ColumnSpan="2" >
+            <TextBlock Text="Survey Question Grid" FontSize="24" HorizontalAlignment="Center"/>
+            <Button Content="Headings" Command="{Binding PresetHeadingReportCommand}" Width="100"  />
+            <Button Content="Overview" Command="{Binding PresetOverviewReportCommand}" Width="100"  />
+        </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" >
             <Button Content="Export" Command="{Binding ExportCommand}" Padding="4" Margin="4" Height="20" FontSize="8"/>
             <TextBlock Text="Exclude:"/>
-            <CheckBox Content="Headings" IsChecked="{Binding ExcludeHeadings}" Command="{Binding ToggleHeadingsCommand}"/>
-            <CheckBox Content="BI Scripts" IsChecked="{Binding ExcludeBI}" Command="{Binding ToggleHeadingsCommand}"/>
-            <CheckBox Content="Non Standard Vars" IsChecked="{Binding StdOnly}" Command="{Binding ToggleHeadingsCommand}"/>
-            <CheckBox Content="Screeners" IsChecked="{Binding ExcludeScreeners}" Command="{Binding ToggleHeadingsCommand}"/>
+            <CheckBox Content="Headings" IsChecked="{Binding ExcludeHeadings}" Command="{Binding UpdateScreenCommand}"/>
+            <CheckBox Content="BI Scripts" IsChecked="{Binding ExcludeBI}" Command="{Binding UpdateScreenCommand}"/>
+            <CheckBox Content="Non Standard Vars" IsChecked="{Binding StdOnly}" Command="{Binding UpdateScreenCommand}"/>
+            <CheckBox Content="Screeners" IsChecked="{Binding ExcludeScreeners}" Command="{Binding UpdateScreenCommand}"/>
 
-            <TextBlock Text="Include:"/>
-            <CheckBox Content="RespOptions" IsChecked="{Binding Options.RespOptions}"/>
-            <CheckBox Content="NRCodes" IsChecked="{Binding Options.RespOptions}"/>
-            <CheckBox Content="FmtNames" IsChecked="{Binding Options.RespOptions}"/>
-            <CheckBox Content="VarName" IsChecked="{Binding Options.RespOptions}"/>
-            <CheckBox Content="Topic" IsChecked="{Binding Options.RespOptions}"/>
-            <CheckBox Content="Content" IsChecked="{Binding Options.RespOptions}"/>
-            <CheckBox Content="VarLabel" IsChecked="{Binding Options.RespOptions}"/>
+          
+            <GroupBox Header="Display">
+                <StackPanel Orientation="Vertical">
+                    <RadioButton Content="Qnum" IsChecked="{Binding DisplayMode, Mode=TwoWay, 
+                                                            Converter={StaticResource EnumToBooleanConverter}, 
+                                                            ConverterParameter={x:Static viewmodels:QuestionGridDisplayMode.Qnum}}"/>
+
+                    <RadioButton Content="Question" IsChecked="{Binding DisplayMode, Mode=TwoWay, 
+                                                            Converter={StaticResource EnumToBooleanConverter}, 
+                                                            ConverterParameter={x:Static viewmodels:QuestionGridDisplayMode.QuestionText}}"/>
+                </StackPanel>
+            </GroupBox>
         </StackPanel>
         
         <Border Grid.Row="1" Grid.Column="1" BorderBrush="LightGray" BorderThickness="1">
@@ -76,25 +90,59 @@
             </StackPanel>
 
             <!-- Top survey headers -->
-            <ItemsControl Grid.Row="3" Grid.Column="2" ItemsSource="{Binding VisibleSurveys}">
+            <ItemsControl Grid.Row="3" Grid.Column="2" ItemsSource="{Binding VisibleColumns}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderThickness="0,0,1,1"  Width="100" Height="30" Padding="4">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding SurveyCode}" FontWeight="Bold" TextAlignment="Center"/>
-                                <Button Content="X" Width="25" Margin="4,0,0,0"
-                                Command="{Binding DataContext.RemoveSurveyCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        <Border BorderThickness="0,0,1,1" Width="150" Height="30" Padding="4">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                            <!-- Column header -->
+                            <TextBlock Text="{Binding Header}"
+                               FontWeight="Bold"
+                               TextAlignment="Center"/>
+
+                            <!-- Remove column button -->
+                            <Button Content="✕"
+                                Width="18"
+                                Height="18"
+                                Margin="4,0,0,0"
+                                Command="{Binding DataContext.RemoveColumnCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                 CommandParameter="{Binding}" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+
+                            <!-- Column options popup toggle -->
+                                    <ToggleButton Content="⚙" Visibility="{Binding IsSurvey, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                  Width="18"
+                                  Height="18"
+                                  Margin="2,0,0,0"
+                                  IsChecked="{Binding IsPopupOpen, Mode=TwoWay}"
+                                  Padding="0"
+                                  FontSize="10"/>
+
+                            <!-- Popup -->
+                            <Popup IsOpen="{Binding IsPopupOpen}" Placement="Bottom" StaysOpen="False">
+                                <Border Padding="8" Background="White" BorderBrush="Gray" BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="Columns" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <!-- These checkboxes are per-survey -->
+                                        <CheckBox Content="Topic" IsChecked="{Binding Options.Topic, Mode=TwoWay}"/>
+                                        <CheckBox Content="Content" IsChecked="{Binding Options.Content, Mode=TwoWay}"/>
+                                        <CheckBox Content="Response Options" IsChecked="{Binding Options.RespOptions, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
 
             <!-- Left question headers -->
             <ItemsControl Grid.Row="4" Grid.Column="1" ItemsSource="{Binding VisibleQuestions}">
@@ -105,7 +153,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="100" Height="30" Padding="4">
+                        <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="150" Height="{Binding DataContext.CellHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Padding="4">
                             <TextBlock Text="{Binding VarName}" TextWrapping="Wrap"/>
                         </Border>
                     </DataTemplate>
@@ -129,8 +177,8 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="100" Height="30" Padding="4">
-                                        <StackPanel HorizontalAlignment="Center">
+                                    <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="150" Height="{Binding DataContext.CellHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Padding="4" >
+                                        <StackPanel HorizontalAlignment="Center" CanVerticallyScroll="True">
                                             <TextBlock Text="{Binding}" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>

@@ -8,13 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data;
 namespace SDIFrontEnd_WPF.ViewModels
 {
-    public partial class VariableGridOptions :ObservableObject
+    public partial class VariableGridOptions : ObservableObject
     {
         [ObservableProperty]
         private bool respOptions;
@@ -32,12 +32,48 @@ namespace SDIFrontEnd_WPF.ViewModels
         private bool varLabel;
     }
 
+    public enum QuestionGridDisplayMode
+    {
+        Qnum,
+        QuestionText
+    }
+
+    public enum QuestionGridSort
+    {
+        refVarName,
+        Qnum
+    }
+
+    public enum MatrixColumnType
+    {
+        Survey,
+        Label,
+        Qnum,
+        VarName,
+    }
+
+    public class MatrixColumn
+    {
+        public string Key { get; }
+        public string Header { get; }
+        public MatrixColumnType Type { get; }
+        public Survey Survey { get; }
+        public Func<SurveyQuestion, string>? ValueProvider { get; }
+
+        public MatrixColumn(string key, string header, MatrixColumnType type, Survey survey, Func<SurveyQuestion, string>? valueProvider = null)
+        {
+            Key = key;
+            Header = header;
+            Survey = survey;
+            Type = type;
+            ValueProvider = valueProvider;
+        }
+    }
+
     public partial class QuestionSurveyMatrixViewModel : WorkspaceViewModel
     {
         private readonly ISurveyService _surveyService;
         private readonly IMatrixService _matrixService;
-
-        public VariableGridOptions Options;
 
         [ObservableProperty]
         private Survey? selectedSurvey;
@@ -67,7 +103,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             get => _columnOffset;
             set
             {
-                _columnOffset = Math.Clamp(value, 0, Math.Max(0, SelectedSurveys.Count - VisibleColumnCount));
+                _columnOffset = Math.Clamp(value, 0, Math.Max(0, AllColumns.Count - VisibleColumnCount));
                 RefreshWindow();
             }
         }
@@ -77,10 +113,10 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public ObservableCollection<SurveyQuestion> VisibleQuestions { get; } = new();
         public ObservableCollection<Survey> VisibleSurveys { get; } = new();
-        public ObservableCollection<IReadOnlyList<string>> VisibleGrid { get; } = new();
+        public ObservableCollection<MatrixColumnViewModel> AllColumns { get; } = new();
+        public ObservableCollection<MatrixColumnViewModel> VisibleColumns { get; } = new();
 
-        // Prevent reloading questions multiple times
-        private readonly Dictionary<int, Task<List<SurveyQuestion>>> _loadingTasks = new();
+        public ObservableCollection<IReadOnlyList<string>> VisibleGrid { get; } = new();
 
         [ObservableProperty]
         private bool excludeHeadings;
@@ -94,18 +130,160 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private bool excludeScreeners;
 
+        private bool HeadingsOnly = false;
+
+        [ObservableProperty]
+        private QuestionGridDisplayMode displayMode = QuestionGridDisplayMode.Qnum;
+
+        [ObservableProperty]
+        private QuestionGridSort sortMode = QuestionGridSort.refVarName;
+
+        [ObservableProperty]
+        private int cellHeight = 30;
 
         public QuestionSurveyMatrixViewModel(ISurveyService surveyService, IMatrixService matrixService)
         {
             _surveyService = surveyService;
             _matrixService = matrixService;
-            Options = new VariableGridOptions();
+
             AllQuestions = new List<SurveyQuestion>();
             AllSurveys = surveyService.GetAllSurveys();
 
             SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
             RefreshWindow();
             
+        }
+
+
+
+
+
+        private MatrixColumnViewModel CreateBaseSurveyColumn(Survey survey)
+        {
+            var column = new MatrixColumn(
+                key: $"survey:{survey.SID}:base",
+                header: survey.SurveyCode,
+                type: MatrixColumnType.Survey,
+                survey: survey,
+                valueProvider: q =>
+                    survey.Questions.Any(x => x.VarName.RefVarName == q.VarName.RefVarName)
+                        ? DisplayText(q)
+                        : string.Empty);
+
+            var vm = new MatrixColumnViewModel(column);
+
+            vm.OnSurveyColumnOptionChanged += OnSurveyColumnOptionChanged;
+
+            return vm;
+        }
+
+        private void OnSurveyColumnOptionChanged(MatrixColumnViewModel baseColumnVm, string? propertyName)
+        {
+            var survey = baseColumnVm.Column.Survey;
+            var baseIndex = AllColumns.IndexOf(baseColumnVm);
+
+            if (baseIndex < 0)
+                return;
+
+            if (propertyName == "Topic")
+                ToggleSurveyColumn(
+                    survey,
+                    baseIndex,
+                    "topic",
+                    baseColumnVm.Options.Topic,
+                    AddTopicColumn);
+
+            if (propertyName == "Content")
+                ToggleSurveyColumn(
+                    survey,
+                    baseIndex,
+                    "content",
+                    baseColumnVm.Options.Content,
+                    AddContentColumn);
+
+            //if (propertyName == nameof(Options.RespOptions))
+            //    ToggleSurveyColumn(
+            //        survey,
+            //        baseIndex,
+            //        "resp",
+            //        baseColumnVm.Options.RespOptions,
+            //        AddRespOptionsColumn);
+
+            RefreshWindow();
+        }
+
+        private void ToggleSurveyColumn(
+    Survey survey,
+    int baseIndex,
+    string suffix,
+    bool enabled,
+    Func<Survey, MatrixColumnViewModel> factory)
+        {
+            var id = $"survey:{survey.SID}:{suffix}";
+            var existing = AllColumns.FirstOrDefault(c => c.Column.Key == id);
+
+            if (enabled)
+            {
+                if (existing != null)
+                    return;
+
+                var column = factory(survey);
+
+                // insert immediately AFTER base survey column
+                AllColumns.Insert(baseIndex + 1, column);
+            }
+            else
+            {
+                if (existing != null)
+                    AllColumns.Remove(existing);
+            }
+        }
+
+
+
+        private MatrixColumnViewModel AddTopicColumn(Survey survey)
+        {
+            return new MatrixColumnViewModel (new MatrixColumn(
+                key: $"survey:{survey.SID}:topic",
+                header: $"{survey.SurveyCode} Topic",
+                type: MatrixColumnType.Label,
+                survey: survey,
+                valueProvider: q =>
+                {
+                    var sq = survey.Questions
+                        .FirstOrDefault(x => x.VarName.RefVarName == q.VarName.RefVarName);
+                    return sq?.VarName.Topic.LabelText ?? string.Empty;
+                }));
+        }
+
+        private MatrixColumnViewModel AddContentColumn(Survey survey)
+        {
+            return new MatrixColumnViewModel(new MatrixColumn(
+                key: $"survey:{survey.SID}:content",
+                header: $"{survey.SurveyCode} content",
+                type: MatrixColumnType.Label,
+                survey: survey,
+                valueProvider: q =>
+                {
+                    var sq = survey.Questions
+                        .FirstOrDefault(x => x.VarName.RefVarName == q.VarName.RefVarName);
+                    return sq?.VarName.Content.LabelText ?? string.Empty;
+                }));
+        }
+
+        private void RemoveColumn(string id)
+        {
+            var col = AllColumns.FirstOrDefault(c =>  c.Column.Key == id);
+            if (col != null)
+                AllColumns.Remove(col);
+        }
+
+        private void ToggleColumn(string id, bool enabled, Action add)
+        {
+            if (enabled)
+                add();
+            else
+                RemoveColumn(id);
         }
 
         [RelayCommand]
@@ -117,6 +295,9 @@ namespace SDIFrontEnd_WPF.ViewModels
             var survey = SelectedSurvey;
             SelectedSurveys.Add(survey);
 
+            var baseColumnVm = CreateBaseSurveyColumn(survey);
+            AllColumns.Add(baseColumnVm);
+
             var questions = await _matrixService.LoadSurveyQuestionsAsync(survey.SID);
 
             foreach (var q in questions)
@@ -126,10 +307,28 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand]
-        private void RemoveSurvey(Survey survey)
+        private void RemoveSurvey(MatrixColumn columns)
         {
-            SelectedSurveys.Remove(survey);
-            RebuildAvailableQuestions();
+            //VisibleColumns.Remove(columns);
+            if (columns.Type == MatrixColumnType.Survey)
+            {
+                RebuildAvailableQuestions();
+            }
+                
+
+            RefreshWindow();
+        }
+
+        [RelayCommand]
+        private void RemoveColumn(MatrixColumnViewModel columnVm)
+        {
+            AllColumns.Remove(columnVm);
+
+            if (columnVm.Column.Type == MatrixColumnType.Survey)
+            {
+                RebuildAvailableQuestions();
+            }
+            RefreshWindow();
         }
 
         [RelayCommand]
@@ -205,9 +404,29 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand]
-        private void ToggleHeadings()
+        private void UpdateScreen()
         {
-            RefreshWindow();
+            RebuildAvailableQuestions();
+        }
+
+        [RelayCommand]
+        private void PresetHeadingReport()
+        {
+            HeadingsOnly = !HeadingsOnly;
+            DisplayMode = QuestionGridDisplayMode.QuestionText;
+            SortMode = QuestionGridSort.Qnum;
+            RebuildAvailableQuestions();
+        }
+
+        [RelayCommand]
+        private void PresetOverviewReport()
+        {
+            HeadingsOnly = false;
+            DisplayMode = QuestionGridDisplayMode.QuestionText;
+           
+            SortMode = QuestionGridSort.Qnum;
+            RebuildAvailableQuestions();
+           
         }
 
         private void SelectedSurveys_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)        
@@ -217,13 +436,49 @@ namespace SDIFrontEnd_WPF.ViewModels
             ColumnOffset = 0;
         }
 
+        partial void OnDisplayModeChanged(QuestionGridDisplayMode value)
+        {
+            if (value == QuestionGridDisplayMode.QuestionText)
+                CellHeight = 100;
+            else
+                CellHeight = 30;
+            RefreshWindow();
+        }
+
+     
+
         private void RebuildAvailableQuestions()
         {
             var merged = _matrixService.MergeQuestions(SelectedSurveys);
-            var sorted = _matrixService.SortQuestions(merged);
+
+            List<SurveyQuestion> sorted;
+            if (SortMode == QuestionGridSort.Qnum)
+                sorted = _matrixService.SortQuestionsQnum(merged).ToList();
+            else
+                sorted = _matrixService.SortQuestions(merged).ToList();
+
+            // apply filters here
 
             _availableQuestions.Clear();
-            _availableQuestions.AddRange(sorted);
+
+            foreach (SurveyQuestion q in sorted)
+            {
+                if (HeadingsOnly)
+                {
+                    if (q.IsHeading() || q.IsSubHeading())
+                    {
+                        _availableQuestions.Add(q);
+                    }
+                }
+                else
+                {
+                    if (ExcludeHeadings && (q.IsHeading() || q.IsSubHeading())) continue;
+                    if (ExcludeBI && q.ScriptOnly && q.VarName.RefVarName.StartsWith("BI")) continue;
+                    if (StdOnly && !q.VarName.StandardForm) continue;
+                    _availableQuestions.Add(q);
+                }
+                    
+            }
 
             OnPropertyChanged(nameof(AvailableQuestions));
             RefreshWindow();
@@ -232,48 +487,55 @@ namespace SDIFrontEnd_WPF.ViewModels
         private void RefreshWindow()
         {
             VisibleQuestions.Clear();
-            VisibleSurveys.Clear();
+            VisibleColumns.Clear();
             VisibleGrid.Clear();
+
+            if (AvailableQuestions.Count == 0 || AllColumns.Count == 0)
+                return;
 
             var questions = AvailableQuestions
                 .Skip(RowOffset)
                 .Take(VisibleRowCount)
                 .ToList();
 
-            var surveys = SelectedSurveys
+            var columns = AllColumns
                 .Skip(ColumnOffset)
                 .Take(VisibleColumnCount)
                 .ToList();
 
             foreach (var q in questions)
-            {
-                if (ExcludeHeadings && (q.IsHeading() || q.IsSubHeading())) continue;
-                if (ExcludeBI && q.ScriptOnly && q.VarName.RefVarName.StartsWith("BI")) continue;
-                if (StdOnly && !q.VarName.StandardForm) continue;
                 VisibleQuestions.Add(q);
+
+            foreach (var c in columns)
+            {
+                VisibleColumns.Add(c);
             }
-            foreach (var s in surveys) VisibleSurveys.Add(s);
 
             foreach (var q in questions)
             {
-                if (ExcludeHeadings && (q.IsHeading() || q.IsSubHeading())) continue;
-                if (ExcludeBI && q.ScriptOnly && q.VarName.RefVarName.StartsWith("BI")) continue;
-                if (StdOnly && !q.VarName.StandardForm) continue;
-
-                var row = new List<string>();
-
-                foreach (var s in surveys)
-                {
-                    row.Add(s.Questions.Any(x => x.VarName.RefVarName == q.VarName.RefVarName)
-                            ? s.QuestionByRefVar(q.VarName.RefVarName).Qnum
-                            : string.Empty);
-                }
-
-                VisibleGrid.Add(row);
+                VisibleGrid.Add(columns.Select(c => c.Column.ValueProvider?.Invoke(q) ?? string.Empty).ToList());
             }
         }
 
-        
+        string DisplayText (SurveyQuestion q)
+        {
+            if (DisplayMode == QuestionGridDisplayMode.QuestionText)
+                return q.QuestionText;
+            else if (DisplayMode == QuestionGridDisplayMode.Qnum)
+                return q.Qnum;
+            else
+                return q.Qnum;
+        }
+
+        protected override void OnDispose()
+        {
+           
+          
+            
+            
+
+            base.Dispose();
+        }
 
     }
 }
