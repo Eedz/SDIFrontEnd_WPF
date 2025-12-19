@@ -77,12 +77,6 @@
             </Grid.ColumnDefinitions>
 
            
-
-
-            <Border Grid.Row="3" Grid.Column="1" Padding="4" >
-                <TextBlock Text="VarName"  FontWeight="Bold" TextAlignment="Center"/>
-            </Border>
-
             <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
                 <TextBlock Text="Survey  "/>
                 <ComboBox ItemsSource="{Binding AllSurveys}" DisplayMemberPath="SurveyCode" SelectedItem="{Binding SelectedSurvey}" Width="100" Margin="0,0,10,0"/>
@@ -144,24 +138,9 @@
         </ItemsControl>
 
 
-            <!-- Left question headers -->
-            <ItemsControl Grid.Row="4" Grid.Column="1" ItemsSource="{Binding VisibleQuestions}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="150" Height="{Binding DataContext.CellHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Padding="4">
-                            <TextBlock Text="{Binding VarName}" TextWrapping="Wrap"/>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
 
             <!-- Main grid body -->
-            <ItemsControl Grid.Row="4" Grid.Column="2" ItemsSource="{Binding VisibleGrid}">
+            <ItemsControl Grid.Row="4" Grid.Column="2" ItemsSource="{Binding VisibleGrid}" >
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Vertical"/>
@@ -177,8 +156,10 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderThickness="1,1,1,1" BorderBrush="LightGray" Width="150" Height="{Binding DataContext.CellHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Padding="4" >
-                                        <StackPanel HorizontalAlignment="Center" CanVerticallyScroll="True">
+                                    <Border BorderThickness="1,1,1,1" BorderBrush="LightGray"  Padding="4" Width="150" Height="100">
+                                            <!--Width="{Binding DataContext.CellWidth, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                                Height="{Binding DataContext.CellHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}">-->
+                                        <StackPanel HorizontalAlignment="Center" CanVerticallyScroll="True" >
                                             <TextBlock Text="{Binding}" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
