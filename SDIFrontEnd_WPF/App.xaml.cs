@@ -68,6 +68,7 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IWordingService, WordingService>();
             services.AddSingleton<IReferenceDataService, ReferenceDataService>();
             services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<IMatrixService, MatrixService>(); 
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             return serviceProvider;
