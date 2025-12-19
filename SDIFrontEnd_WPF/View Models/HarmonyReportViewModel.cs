@@ -185,7 +185,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         private void SelectedStudies_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             
-        }     
+        }
 
         private bool FilterWave(object item)
         {
@@ -302,7 +302,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     row["Surveys"] = GetProjectData(g);
                 }
                 else
-                row["Surveys"] = GetSurveyData(g);
+                    row["Surveys"] = GetSurveyData(g);
 
                 if (ShowGroupOn)
                     row["Group On"] = string.Join("<br>", g.Key);
@@ -534,7 +534,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     }
                 });
             }
-        
+
         }
 
         private void PopulateFieldworkData(DataTable results)
@@ -582,7 +582,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             int position = VarNameList.IndexOf(SelectedVar);
             if (position < VarNameList.Count - 1)
                 SelectedVar = VarNameList[VarNameList.IndexOf(SelectedVar) + 1];
-                SelectedVars.Remove(SelectedListVar);
+            SelectedVars.Remove(SelectedListVar);
 
 
 

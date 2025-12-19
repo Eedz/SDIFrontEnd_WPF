@@ -140,6 +140,8 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         [ObservableProperty]
         private int cellHeight = 30;
+        [ObservableProperty]
+        private int cellWidth = 150;
 
         public QuestionSurveyMatrixViewModel(ISurveyService surveyService, IMatrixService matrixService)
         {
@@ -439,9 +441,15 @@ namespace SDIFrontEnd_WPF.ViewModels
         partial void OnDisplayModeChanged(QuestionGridDisplayMode value)
         {
             if (value == QuestionGridDisplayMode.QuestionText)
+            {
+                CellWidth = 250;
                 CellHeight = 100;
+            }
             else
+            {
+                CellWidth = 150;
                 CellHeight = 30;
+            }
             RefreshWindow();
         }
 
@@ -506,6 +514,12 @@ namespace SDIFrontEnd_WPF.ViewModels
             foreach (var q in questions)
                 VisibleQuestions.Add(q);
 
+            VisibleColumns.Add(new MatrixColumnViewModel(new MatrixColumn(
+                key: "refVarName",
+                header: "RefVarName",
+                type: MatrixColumnType.VarName,
+                survey: null!,
+                valueProvider: q => q.VarName.RefVarName)));
             foreach (var c in columns)
             {
                 VisibleColumns.Add(c);
@@ -513,7 +527,9 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             foreach (var q in questions)
             {
-                VisibleGrid.Add(columns.Select(c => c.Column.ValueProvider?.Invoke(q) ?? string.Empty).ToList());
+                var row = columns.Select(c => c.Column.ValueProvider?.Invoke(q) ?? string.Empty).ToList();
+                row.Insert(0,q.GetRefVarName());
+                VisibleGrid.Add(row);
             }
         }
 
