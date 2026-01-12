@@ -12,6 +12,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class VariableGridOptions : ObservableObject
@@ -214,12 +215,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             RefreshWindow();
         }
 
-        private void ToggleSurveyColumn(
-    Survey survey,
-    int baseIndex,
-    string suffix,
-    bool enabled,
-    Func<Survey, MatrixColumnViewModel> factory)
+        private void ToggleSurveyColumn(Survey survey, int baseIndex, string suffix, bool enabled, Func<Survey, MatrixColumnViewModel> factory)
         {
             var id = $"survey:{survey.SID}:{suffix}";
             var existing = AllColumns.FirstOrDefault(c => c.Column.Key == id);
@@ -273,20 +269,8 @@ namespace SDIFrontEnd_WPF.ViewModels
                 }));
         }
 
-        private void RemoveColumn(string id)
-        {
-            var col = AllColumns.FirstOrDefault(c =>  c.Column.Key == id);
-            if (col != null)
-                AllColumns.Remove(col);
-        }
 
-        private void ToggleColumn(string id, bool enabled, Action add)
-        {
-            if (enabled)
-                add();
-            else
-                RemoveColumn(id);
-        }
+
 
         [RelayCommand]
         private async Task AddSurveyAsync()
@@ -309,26 +293,24 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand]
-        private void RemoveSurvey(MatrixColumn columns)
-        {
-            //VisibleColumns.Remove(columns);
-            if (columns.Type == MatrixColumnType.Survey)
-            {
-                RebuildAvailableQuestions();
-            }
-                
-
-            RefreshWindow();
-        }
-
-        [RelayCommand]
+        // TODO if survey column, remove all related columns as well
         private void RemoveColumn(MatrixColumnViewModel columnVm)
         {
             AllColumns.Remove(columnVm);
 
+            // if this is a survey column:
+            //  rebuild question list
+            //  remove from selected surveys
+            //  remove all related columns
+            // 
             if (columnVm.Column.Type == MatrixColumnType.Survey)
             {
                 RebuildAvailableQuestions();
+                SelectedSurveys.Remove(columnVm.Column.Survey);               
+                foreach(var c in AllColumns.Where(c => c.Column.Key.StartsWith($"survey:{columnVm.Column.Survey.SID}:")).ToList())
+                {
+                    AllColumns.Remove(c);
+                }
             }
             RefreshWindow();
         }
@@ -356,9 +338,13 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanExport))]
+        
         private void Export()
         {
+            if (SelectedSurveys.Count == 0)
+                return;
+
             DataTable data = new DataTable();
 
             data.Columns.Add("VarName", typeof(string));
@@ -405,6 +391,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             rpt.OutputReport();
         }
 
+        private bool CanExport()
+        {
+            return SelectedSurveys.Count > 0 && AvailableQuestions.Count > 0;
+        }
+
         [RelayCommand]
         private void UpdateScreen()
         {
@@ -436,6 +427,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             // Reset window so user doesn’t land on invalid offsets
             RowOffset = 0;
             ColumnOffset = 0;
+            ExportCommand.NotifyCanExecuteChanged();
         }
 
         partial void OnDisplayModeChanged(QuestionGridDisplayMode value)
