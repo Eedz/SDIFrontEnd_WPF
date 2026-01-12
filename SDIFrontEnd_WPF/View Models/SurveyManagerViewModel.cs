@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using ITC_Services;
 using ITCLib;
+using ITCReportLib;
 using MvvmLib.ViewModels;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
@@ -22,6 +23,7 @@ namespace SDIFrontEnd_WPF
         private readonly LookupProvider _lookupProvider; // Provides access to reference data like modes, user states, etc.
         private readonly IPeopleService _peopleService; // Service for managing people data
         private readonly ICommentService _commentService; // Service for managing comments
+        private readonly IWindowService _windowService; // Service for managing windows and dialogs
 
         [ObservableProperty]
         private Survey currentSurvey; // The currently selected survey being managed
@@ -40,6 +42,7 @@ namespace SDIFrontEnd_WPF
             _wordingService = services.GetService(typeof(IWordingService)) as IWordingService ?? throw new ArgumentNullException(nameof(services), "Wording service cannot be null");
             _peopleService = services.GetService(typeof(IPeopleService)) as IPeopleService ?? throw new ArgumentNullException(nameof(services), "People service cannot be null");
             _commentService = services.GetService(typeof(ICommentService)) as ICommentService ?? throw new ArgumentNullException(nameof(services), "Comment service cannot be null");
+            _windowService = services.GetService(typeof(IWindowService)) as IWindowService ?? throw new ArgumentNullException(nameof(services), "Window service cannot be null");
             AllSurveys = _surveyService.GetAllSurveys();
             CurrentSurvey = survey ?? throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
             DisplayName = "Survey Manager - " + CurrentSurvey.SurveyCode;
@@ -123,6 +126,26 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void ImportQuestions() { }
+        private void ImportQuestions() 
+        {
+            this._windowService.ShowQuestionImporterWindow();
+        }
+
+        [RelayCommand]
+        private void ExportSAS()
+        {
+            SyntaxReport report = new SyntaxReport();
+            report.UseQnum = true;
+            report.OutputPath = @"\\psychfile\psych$\psych-lab-gfong\SMG\SDI\Data Templates\";
+            report.CreateSyntax(CurrentSurvey, SyntaxFormat.SAS);
+            _dialogService.ShowMessage("SAS syntax exported successfully.", "Export Complete");
+        }
+
+        [RelayCommand]  
+        private void ExportQuestions()
+        {
+            
+
+        }
     }
 }

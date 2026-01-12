@@ -62,4 +62,18 @@
     <DataTemplate DataType="{x:Type viewmodels:QuestionSurveyMatrixViewModel}">
         <views:QuestionGrid/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingEntryViewModel}">
+        <views:PraccingEntryView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:PraccingIssueViewModel}">
+        <views:PraccingIssueView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingImagesViewModel}">
+        <views:PraccingImagesView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:PraccingResponseViewModel}">
+        <views:PraccingResponseView/>
+    </DataTemplate>
 </ResourceDictionary>

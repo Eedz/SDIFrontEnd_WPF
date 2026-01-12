@@ -1,10 +1,13 @@
 ﻿using ITC_DataAccess;
 using ITC_Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Configuration;
 using System.Data;
 using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
+
 namespace SDIFrontEnd_WPF
 {
     /// <summary>
@@ -43,16 +46,21 @@ namespace SDIFrontEnd_WPF
         {
             IServiceCollection services = new ServiceCollection();
             
-            services.AddAutoMapper(typeof(MappingProfile));
-
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IWindowService, WindowService>();
 
 #if DEBUG
             services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionStringTest"].ConnectionString));
 #else
             services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionString"].ConnectionString));
 #endif
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Information);
+            });
+
             services.AddSingleton<LookupProvider>();
             services.AddSingleton<ISurveyRepository, SurveyRepository>();
             services.AddSingleton<IPeopleRepository, PeopleRepository>();
@@ -61,6 +69,7 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IWordingRepository, WordingRepository>();
             services.AddSingleton<IReferenceDataRepository, ReferenceDataRepository>();
             services.AddSingleton<IUserRepository, UserRepository>();
+            services.AddSingleton<IPraccingRepository, PraccingRepository>();
             services.AddSingleton<ISurveyService, SurveyService>();
             services.AddSingleton<IPeopleService, PeopleService>();
             services.AddSingleton<ICommentService, CommentService>();
@@ -69,6 +78,13 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IReferenceDataService, ReferenceDataService>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IMatrixService, MatrixService>(); 
+            services.AddSingleton<IPraccingService, PraccingService>();
+
+            services.AddTransient<QuestionImporterService>();
+
+            services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<QuestionImporterViewModel>();
+            
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             return serviceProvider;

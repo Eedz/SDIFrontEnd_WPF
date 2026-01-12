@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using SDIPraccingWPF;
 using SDIFrontEnd_WPF.ViewModels;
 namespace SDIFrontEnd_WPF
 {
@@ -25,6 +24,11 @@ namespace SDIFrontEnd_WPF
         private readonly IUserService _userService;
         private readonly IVarNameService _varnameService;
         private readonly IMatrixService _matrixService;
+        private readonly IWindowService _windowService;
+        private readonly IPeopleService _peopleService;
+        private readonly IPraccingService _praccingService;
+        private readonly IDialogService _dialogService;
+        private readonly IFileDialogService _fileDialogService;
 
         private UserPrefs CurrentUser;
 
@@ -79,6 +83,9 @@ namespace SDIFrontEnd_WPF
             _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
             _varnameService = _services.GetService(typeof(IVarNameService)) as IVarNameService ?? throw new ArgumentNullException(nameof(_services), "VarName service cannot be null");
             _matrixService = _services.GetService(typeof(IMatrixService)) as IMatrixService ?? throw new ArgumentNullException(nameof(_services), "Matrix service cannot be null");
+            _peopleService = _services.GetService(typeof(IPeopleService)) as IPeopleService ?? throw new ArgumentNullException(nameof(_services), "People service cannot be null");
+            _dialogService = _services.GetService(typeof(IDialogService)) as IDialogService ?? throw new ArgumentNullException(nameof(_services), "Dialog service cannot be null");
+            _praccingService = _services.GetService(typeof(IPraccingService)) as IPraccingService ?? throw new ArgumentNullException(nameof(_services), "Praccing service cannot be null");
             CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
 
             AvailableSurveysToAdd = _surveyService.GetAllSurveys();
@@ -114,7 +121,7 @@ namespace SDIFrontEnd_WPF
                 {
                     "home" => new HomeViewModel(),
                     "Questions" => new QuestionSearchViewModel(_surveyService),
-                    "Entry" => new SDIPraccingWPF.PraccingEntryViewModel(null,null, _surveyService, null, null),
+                    "Entry" => new PraccingEntryViewModel(_windowService, _praccingService, _surveyService, _peopleService, _fileDialogService),
                     "Harmony" => new HarmonyReportViewModel(_surveyService, _varnameService),
                     "Variable List" => new QuestionSurveyMatrixViewModel(_surveyService, _matrixService),
                     _ => null

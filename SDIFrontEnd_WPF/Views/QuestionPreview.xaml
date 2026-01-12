@@ -1,0 +1,420 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.QuestionPreview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+             xmlns:lib="clr-namespace:ITCLib;assembly=ITCLib"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             DataContext="{Binding CurrentQuestion}"
+             mc:Ignorable="d" 
+             d:DesignHeight="550" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:QuestionTextConverter x:Key="QuestionTextConverter"/>
+        <converters:BorderColorConverter x:Key="BorderColorConverter" />
+        <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlowDocumentConverter" />
+        
+        <Style x:Key="CustomListBoxStyle" TargetType="{x:Type ListBox}" >
+            <Setter Property="MinHeight" Value="25"/>
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="ItemsSource" Value="{Binding }"/>
+            <Setter Property="AllowDrop" Value="True"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBox}">
+                        <Border BorderBrush="{Binding NewRecord, Converter={StaticResource BorderColorConverter}, RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
+                        BorderThickness="1">
+                            <ScrollViewer>
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Display survey and varname -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Text="{Binding Descriptor}" HorizontalAlignment="Center" FontWeight="Bold" FontSize="16" />
+        <!-- Original Question -->
+        <StackPanel Grid.Row ="1" Grid.Column="0" Orientation="Vertical" Margin="10,0,0,0">
+                <TextBlock Text="Original" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center"/>
+                <StackPanel>
+
+                <TextBlock>
+                    <Run Text="{Binding Original.PreP.FieldName}" FontWeight="Bold"></Run>
+                    <Run Text="{Binding Path=Original.PreP.Status, StringFormat=' - {0}', Mode=OneWay}" FontWeight="Bold"/>
+                </TextBlock> 
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.PreP.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray"
+                              >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                        
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.PreI.Status, StringFormat='PreI - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.PreI.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.PreA.Status, StringFormat='PreA - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.PreA.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                                </ScrollViewer>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.LitQ.Status, StringFormat='LitQ - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.LitQ.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </ScrollViewer>
+                        </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.RespOptions.Status, StringFormat='RespOptions - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.RespOptions.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+                
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.NRCodes.Status, StringFormat='NRCodes - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.NRCodes.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.PstI.Status, StringFormat='PstI - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.PstI.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Original.PstP.Status, StringFormat='PstP - {0}'}" FontWeight="Bold"/>
+                    <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Original.PstP.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="Gray">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <i:Interaction.Behaviors>
+                            <local:DragDropBehavior />
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </StackPanel>
+
+
+            </StackPanel>
+        <!-- Revised Question -->
+        <StackPanel Grid.Row ="1" Grid.Column="1" Orientation="Vertical" Margin="10,0,0,0" >
+
+            <TextBlock Text="Revised" FontWeight="Bold" HorizontalAlignment="Center" FontSize="16"/>
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.PreP.Status, StringFormat='PreP - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" MinWidth="200" ItemsSource="{Binding Revised.PreP.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.PreP.NewWording, Converter={StaticResource BorderColorConverter}}"
+                         >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" 
+                                       TextWrapping="Wrap" 
+                                       TextTrimming="None"
+                                       Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.PreI.Status, StringFormat='PreI - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.PreI.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.PreI.NewWording, Converter={StaticResource BorderColorConverter}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.PreA.Status, StringFormat='PreA - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.PreA.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.PreA.NewWording, Converter={StaticResource BorderColorConverter}}"
+                         >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Margin="0,0,3,0" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.LitQ.Status, StringFormat='LitQ - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.LitQ.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.LitQ.NewWording, Converter={StaticResource BorderColorConverter}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.RespOptions.Status, StringFormat='RespOptions - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.RespOptions.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.RespOptions.NewWording, Converter={StaticResource BorderColorConverter}, Mode=OneWay}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.NRCodes.Status, StringFormat='NRCodes - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.NRCodes.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.NRCodes.NewWording, Converter={StaticResource BorderColorConverter}, Mode=OneWay}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.PstI.Status, StringFormat='PstI - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.PstI.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.PstI.NewWording, Converter={StaticResource BorderColorConverter}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="{Binding Path=Revised.PstP.Status, StringFormat='PstP - {0}'}" FontWeight="Bold"/>
+                <ListBox MinHeight="25" Height="Auto" ItemsSource="{Binding Revised.PstP.Lines}" AllowDrop="True" BorderThickness="2" BorderBrush="{Binding Revised.PstP.NewWording, Converter={StaticResource BorderColorConverter}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource QuestionTextConverter}}" TextWrapping="Wrap" Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </StackPanel>
+
+            <TextBlock Text="Drag unwanted items here." HorizontalAlignment="Center" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Image Source="Images\Trash.png" Width="25" Stretch="None"/>
+                <ListBox HorizontalAlignment="Center" MinHeight="50" Height="Auto" Width="200" AllowDrop="True" BorderBrush="Red" Background="Transparent" ItemsSource="{Binding DeletedItems}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Background="White" 
+                                       Text="{Binding Converter={StaticResource QuestionTextConverter}}" 
+                                       TextTrimming="None"
+                                       TextWrapping="Wrap" 
+                                       Margin="0,0,0,0" 
+                                       Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <i:Interaction.Behaviors>
+                        <local:DragDropBehavior />
+                    </i:Interaction.Behaviors>
+                </ListBox>
+
+            </Grid>
+
+
+        </StackPanel>
+        <!-- Comments Grid -->
+        <Grid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4" Margin="10,0,10,0" MinHeight="100">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Comments" FontWeight="Bold" HorizontalAlignment="Center"></TextBlock>
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Comments}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Header="Date">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <!-- Display template for non-editing mode -->
+                            <DataTemplate>
+                                <TextBlock Text="{Binding NoteDate, StringFormat=d}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <!-- Editing template with DatePicker -->
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding NoteDate, StringFormat=\{0:dd-MMM-yyyy\}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Author" Width="70">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Author}" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.PeopleList, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        SelectedItem="{Binding Author, Mode=TwoWay}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTextColumn Header="Notes" Binding="{Binding Path=Notes.NoteText, Mode=TwoWay}" Width="300"/>
+                    
+                    <DataGridTemplateColumn Header="Type" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=NoteType}" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.CommentTypeList, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        SelectedItem="{Binding NoteType, Mode=TwoWay}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTemplateColumn Header="Authority" Width="70">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Authority}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.PeopleList, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        SelectedItem="{Binding Authority, Mode=TwoWay}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Source" Binding="{Binding Path=Source, Mode=TwoWay}" Width="225" >
+                        <DataGridTextColumn.ElementStyle>
+                            <Style>
+                                <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+    </Grid>
+    
+</UserControl>
