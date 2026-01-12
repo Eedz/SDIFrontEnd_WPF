@@ -76,7 +76,7 @@
                 <!-- Body -->
             </Grid.ColumnDefinitions>
 
-           
+
             <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
                 <TextBlock Text="Survey  "/>
                 <ComboBox ItemsSource="{Binding AllSurveys}" DisplayMemberPath="SurveyCode" SelectedItem="{Binding SelectedSurvey}" Width="100" Margin="0,0,10,0"/>
