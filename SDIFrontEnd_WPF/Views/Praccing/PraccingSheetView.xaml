@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.PraccingSheetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="150" d:DesignWidth="200">
+    <Grid Width="200">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Praccing Sheet" FontSize="20"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="Survey" Margin="0,5,2,0"/>
+            <ComboBox ItemsSource="{Binding SurveyList}" SelectedItem="{Binding SelectedSurvey}" Width="150" Margin="4"/>
+        </StackPanel>
+        <GroupBox Grid.Row="2">
+            <StackPanel>
+                <RadioButton Content="Word" IsChecked="{Binding UseWord}" Margin="4"/>
+                <RadioButton Content="Excel" IsChecked="{Binding UseExcel}" Margin="4"/>
+            </StackPanel>
+        </GroupBox>
+        <Button Grid.Row="3" Content="OK" Command="{Binding CreateSheetCommand}" Margin="5" Width="150" HorizontalAlignment="Center"/>
+    </Grid>
+</UserControl>
