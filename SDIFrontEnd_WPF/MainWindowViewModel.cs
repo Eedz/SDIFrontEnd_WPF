@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using ITC_Services;
 using ITCLib;
+using ITCReportLib;
 using MvvmLib.ViewModels;
+using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +12,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using SDIFrontEnd_WPF.ViewModels;
 namespace SDIFrontEnd_WPF
 {
     public enum MenuCategory { Home, Surveys, VarNames, Search, Praccing, Reports, Timing }
@@ -104,12 +105,12 @@ namespace SDIFrontEnd_WPF
 
         private async void SetActiveForm()
         {
-            if (SelectedSublink == null)
+            if (SelectedSublink == null || SelectedSublink.Key=="home")
             {
                 ActiveForm = new HomeViewModel(); // Reset to HomeViewModel if no sublink is selected
                 return;
             }
-
+         
             if (SelectedSublink is SurveySublinkItem surveySublink)
             {
                 // If the selected sublink is a survey, open the survey manager
@@ -117,18 +118,68 @@ namespace SDIFrontEnd_WPF
                 return;
             }else
             {
-                ActiveForm = SelectedSublink.Key switch
+                switch (SelectedSublink.Category)
                 {
-                    "home" => new HomeViewModel(),
-                    "Questions" => new QuestionSearchViewModel(_surveyService),
-                    "Entry" => new PraccingEntryViewModel(_windowService, _praccingService, _surveyService, _peopleService, _fileDialogService),
-                    "Harmony" => new HarmonyReportViewModel(_surveyService, _varnameService),
-                    "Variable List" => new QuestionSurveyMatrixViewModel(_surveyService, _matrixService),
-                    _ => null
-                };
+                    case MenuCategory.Surveys:
+
+                        ActiveForm = await OpenSurveyManager(((SurveySublinkItem)SelectedSublink).SurveyId);
+                        break;
+                    case MenuCategory.Praccing:
+                        ActiveForm = OpenPraccingView();
+                        break;
+                    case MenuCategory.Search:
+                        ActiveForm = OpenSearchView();
+                        break;
+                    default:
+                        break;
+                }
+
+                //ActiveForm = SelectedSublink.Key switch
+                //{
+                //    "Harmony" => new HarmonyReportViewModel(_surveyService, _varnameService),
+                //    "Variable List" => new QuestionSurveyMatrixViewModel(_surveyService, _matrixService),
+                //    _ => null
+                //};
             }
 
                 
+        }
+
+        private ViewModelBase OpenPraccingView()
+        {
+            switch(SelectedSublink.Key)
+            {
+                case "Entry":
+                    return new PraccingEntryViewModel(_windowService, _praccingService, _surveyService, _peopleService, _fileDialogService);
+                case "Report":
+                    return new PraccingReportViewModel(_praccingService, _surveyService);
+                case "Import":
+                    return new PraccingImportViewModel();
+                case "Sheet":
+                    return new PraccingSheetViewModel(_surveyService);
+                case "Form":
+                    PraccingReportBlank report = new PraccingReportBlank();
+                    report.CreateReport();
+                    report.OutputReport();
+                    return null;// new PraccingFormViewModel(_praccingService, _surveyService);
+                default:
+                    return new PraccingEntryViewModel(_windowService, _praccingService, _surveyService, _peopleService, _fileDialogService);
+            }
+        }
+
+        private ViewModelBase OpenSearchView()
+        {
+            switch (SelectedSublink.Key)
+            {
+                case "Questions":
+                    return new QuestionSearchViewModel(_surveyService);
+                //case "ResponseSets":
+                //    return new ResponseSetSearchViewModel(_surveyService);
+                //case "Comments":
+                //    return new CommentSearchViewModel(_surveyService, _peopleService);
+                default:
+                    return new QuestionSearchViewModel(_surveyService);
+            }
         }
 
         private ObservableCollection<SublinkItem> GetSurveyEditorList()
