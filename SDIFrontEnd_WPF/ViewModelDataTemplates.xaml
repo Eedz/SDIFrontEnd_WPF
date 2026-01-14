@@ -76,4 +76,12 @@
     <DataTemplate DataType="{x:Type viewmodels:PraccingResponseViewModel}">
         <views:PraccingResponseView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingReportViewModel}">
+        <views:PraccingReportView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingSheetViewModel}">
+        <views:PraccingSheetView/>
+    </DataTemplate>
 </ResourceDictionary>
