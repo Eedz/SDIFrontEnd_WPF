@@ -22,5 +22,21 @@ namespace SDIFrontEnd_WPF
                 TranslationText = row["French"]
             };
         }
+
+       
+    }
+
+    public class RenameParser : IDataRowParser<VarNameChange>
+    {
+        public VarNameChange Parse(IDictionary<string, string> row)
+        {
+            return new VarNameChange
+            {
+                OldName = row["Old"],
+                NewName = row["New"]
+            };
+        }
+
+
     }
 }
