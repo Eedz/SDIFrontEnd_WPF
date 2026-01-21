@@ -82,12 +82,20 @@ namespace SDIFrontEnd_WPF
 
             services.AddTransient<QuestionImporterService>();
 
-            services.AddTransient<MainWindowViewModel>();
-            services.AddTransient<QuestionImporterViewModel>();
+            AddVMServices(services);
             
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             return serviceProvider;
+        }
+
+        private static void AddVMServices(IServiceCollection services)
+        {
+            services.AddTransient<RenameVarsViewModel>();
+            services.AddTransient<VarNameChangeViewModel>();
+
+            services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<QuestionImporterViewModel>();
         }
     }
 
