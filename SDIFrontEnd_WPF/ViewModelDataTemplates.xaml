@@ -84,4 +84,12 @@
     <DataTemplate DataType="{x:Type viewmodels:PraccingSheetViewModel}">
         <views:PraccingSheetView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:RenameVarsViewModel}">
+        <views:RenameVarsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:VarNameChangeViewModel}">
+        <views:VarNameChangeView/>
+    </DataTemplate>
 </ResourceDictionary>
