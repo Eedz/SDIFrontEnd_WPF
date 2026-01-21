@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.VarNameChangeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="Changed By"/>
+            <ComboBox Margin="2" ItemsSource="{Binding PeopleList}" SelectedItem="{Binding ChangedBy}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="Authorization"/>
+            <TextBox Margin="2" Text="{Binding Authorization}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
+            <TextBlock Text="Rationale" />
+            <TextBox Text="{Binding Rationale}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+            <TextBlock Text="Source"/>
+            <TextBox Text="{Binding Source}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <CheckBox Content="Pre-FW Change" IsChecked="{Binding PreFWChange}"/>
+            <CheckBox Content="Hidden Change" IsChecked="{Binding HiddenChange}"/>
+        </StackPanel>
+
+
+        
+    </Grid>
+</UserControl>
