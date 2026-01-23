@@ -83,7 +83,7 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<QuestionImporterService>();
 
             AddVMServices(services);
-            
+
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             return serviceProvider;
@@ -91,11 +91,26 @@ namespace SDIFrontEnd_WPF
 
         private static void AddVMServices(IServiceCollection services)
         {
+            services.AddTransient<MainWindowViewModel>();
+
+            services.AddTransient<HomeViewModel>();
+
+            services.AddTransient<SurveyManagerViewModel>();
+
+            services.AddTransient<PraccingEntryViewModel>();
+            services.AddTransient<PraccingReportViewModel>();
+            services.AddTransient<PraccingImportViewModel>();
+            services.AddTransient<PraccingSheetViewModel>();
+
             services.AddTransient<RenameVarsViewModel>();
             services.AddTransient<VarNameChangeViewModel>();
 
-            services.AddTransient<MainWindowViewModel>();
+            
             services.AddTransient<QuestionImporterViewModel>();
+
+            services.AddTransient<QuestionSearchViewModel>();
+            services.AddTransient<HarmonyReportViewModel>();
+            services.AddTransient<QuestionSurveyMatrixViewModel>();
         }
     }
 
