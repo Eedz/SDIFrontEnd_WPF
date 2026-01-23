@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using ITC_Services;
 using ITCLib;
 using ITCReportLib;
+using Microsoft.Extensions.DependencyInjection;
 using MvvmLib.ViewModels;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
@@ -19,17 +20,10 @@ namespace SDIFrontEnd_WPF
     {
         // this class controls which items are displayed in the left pane of the main window
         // when an item is selected, the corresponding user control is displayed in the right pane
-
+        
         private readonly IServiceProvider _services; 
         private readonly ISurveyService _surveyService; 
         private readonly IUserService _userService;
-        private readonly IVarNameService _varnameService;
-        private readonly IMatrixService _matrixService;
-        private readonly IWindowService _windowService;
-        private readonly IPeopleService _peopleService;
-        private readonly IPraccingService _praccingService;
-        private readonly IDialogService _dialogService;
-        private readonly IFileDialogService _fileDialogService;
 
         private UserPrefs CurrentUser;
 
@@ -51,6 +45,23 @@ namespace SDIFrontEnd_WPF
 
         public bool IsSurveyCategory => SelectedMenuCategory == MenuCategory.Surveys;
 
+        [ObservableProperty]
+        public ViewModelBase? activeForm;
+
+        public MainWindowViewModel(IServiceProvider services)
+        {
+            DisplayName = "Main Window ViewModel";
+            ActiveForm = new HomeViewModel(); // Set the initial active form to HomeViewModel
+            _services = services;
+            _surveyService = _services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey service cannot be null");
+            _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
+                  
+            CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
+
+            AvailableSurveysToAdd = _surveyService.GetAllSurveys();
+            CurrentSublinks = new ObservableCollection<SublinkItem>();
+        }
+
         partial void OnSelectedMenuCategoryChanged(MenuCategory value)
         {
             LoadSublinks(value);
@@ -65,49 +76,17 @@ namespace SDIFrontEnd_WPF
 
             if (value == null && SelectedMenuCategory == MenuCategory.Home)
             {
-                ActiveForm = new HomeViewModel(); // Reset to HomeViewModel if no sublink is selected
+                ActiveForm = _services.GetRequiredService<HomeViewModel>(); // reset to HomeViewModel if no sublink is selected
                 return;
             }
             SetActiveForm();
-           
-        }
-
-        [ObservableProperty]
-        public ViewModelBase? activeForm;
-
-        public MainWindowViewModel(IServiceProvider services)
-        {
-            DisplayName = "Main Window ViewModel";
-            ActiveForm = new HomeViewModel(); // Set the initial active form to HomeViewModel
-            _services = services;
-            _surveyService = _services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey service cannot be null");
-            _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
-            _varnameService = _services.GetService(typeof(IVarNameService)) as IVarNameService ?? throw new ArgumentNullException(nameof(_services), "VarName service cannot be null");
-            _matrixService = _services.GetService(typeof(IMatrixService)) as IMatrixService ?? throw new ArgumentNullException(nameof(_services), "Matrix service cannot be null");
-            _peopleService = _services.GetService(typeof(IPeopleService)) as IPeopleService ?? throw new ArgumentNullException(nameof(_services), "People service cannot be null");
-            _dialogService = _services.GetService(typeof(IDialogService)) as IDialogService ?? throw new ArgumentNullException(nameof(_services), "Dialog service cannot be null");
-            _praccingService = _services.GetService(typeof(IPraccingService)) as IPraccingService ?? throw new ArgumentNullException(nameof(_services), "Praccing service cannot be null");
-            CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
-
-            AvailableSurveysToAdd = _surveyService.GetAllSurveys();
-            CurrentSublinks = new ObservableCollection<SublinkItem>();
-        }
-
-        private async Task<ViewModelBase> OpenSurveyManager(int surveyId)
-        {
-            // get user's filter matching the index
-           // int surveyId = CurrentUser.GetFilterID("frmSurveyEntry", index);
-            Survey survey = await _surveyService.GetSurveyByIdAsync(surveyId);
-            //var questions = _surveyService.GetQuestionsForSurvey(surveyId);
-            //survey.AddQuestions(questions);
-            return new SurveyManagerViewModel(_services, survey);
         }
 
         private async void SetActiveForm()
         {
             if (SelectedSublink == null || SelectedSublink.Key=="home")
             {
-                ActiveForm = new HomeViewModel(); // Reset to HomeViewModel if no sublink is selected
+                ActiveForm = _services.GetRequiredService<HomeViewModel>(); // reset to HomeViewModel if no sublink is selected
                 return;
             }
          
@@ -130,19 +109,38 @@ namespace SDIFrontEnd_WPF
                     case MenuCategory.Search:
                         ActiveForm = OpenSearchView();
                         break;
+                    case MenuCategory.VarNames:
+                        ActiveForm = OpenVarNameView();
+                        break;
+                    case MenuCategory.Reports:
+                        ActiveForm = OpenReportView();
+                        break;
                     default:
                         break;
                 }
-
-                //ActiveForm = SelectedSublink.Key switch
-                //{
-                //    "Harmony" => new HarmonyReportViewModel(_surveyService, _varnameService),
-                //    "Variable List" => new QuestionSurveyMatrixViewModel(_surveyService, _matrixService),
-                //    _ => null
-                //};
             }
+        }
 
-                
+        private async Task<ViewModelBase> OpenSurveyManager(int surveyId)
+        {
+            Survey survey = await _surveyService.GetSurveyByIdAsync(surveyId);
+            var vm = _services.GetRequiredService<SurveyManagerViewModel>();
+            vm.Load(survey);
+            return vm;
+        }
+
+        private ViewModelBase OpenReportView()
+        {
+            switch (SelectedSublink.Key)
+            {
+                case "Harmony":
+                    return _services.GetRequiredService<HarmonyReportViewModel>();
+                case "Variable List":
+                    return _services.GetRequiredService<QuestionSurveyMatrixViewModel>();
+            
+                default:
+                    return null;
+            }
         }
 
         private ViewModelBase OpenPraccingView()
@@ -150,20 +148,20 @@ namespace SDIFrontEnd_WPF
             switch(SelectedSublink.Key)
             {
                 case "Entry":
-                    return new PraccingEntryViewModel(_windowService, _praccingService, _surveyService, _peopleService, _fileDialogService);
+                    return _services.GetRequiredService<PraccingEntryViewModel>(); 
                 case "Report":
-                    return new PraccingReportViewModel(_praccingService, _surveyService);
+                    return _services.GetRequiredService<PraccingReportViewModel>();
                 case "Import":
-                    return new PraccingImportViewModel();
+                    return _services.GetRequiredService<PraccingImportViewModel>();
                 case "Sheet":
-                    return new PraccingSheetViewModel(_surveyService);
+                    return _services.GetRequiredService<PraccingSheetViewModel>();
                 case "Form":
                     PraccingReportBlank report = new PraccingReportBlank();
                     report.CreateReport();
                     report.OutputReport();
-                    return null;// new PraccingFormViewModel(_praccingService, _surveyService);
+                    return null;
                 default:
-                    return new PraccingEntryViewModel(_windowService, _praccingService, _surveyService, _peopleService, _fileDialogService);
+                    return _services.GetRequiredService<PraccingEntryViewModel>();
             }
         }
 
@@ -172,13 +170,34 @@ namespace SDIFrontEnd_WPF
             switch (SelectedSublink.Key)
             {
                 case "Questions":
-                    return new QuestionSearchViewModel(_surveyService);
+                    return _services.GetRequiredService<QuestionSearchViewModel>();
                 //case "ResponseSets":
                 //    return new ResponseSetSearchViewModel(_surveyService);
                 //case "Comments":
                 //    return new CommentSearchViewModel(_surveyService, _peopleService);
                 default:
-                    return new QuestionSearchViewModel(_surveyService);
+                    return _services.GetRequiredService<QuestionSearchViewModel>();
+            }
+        }
+
+        private ViewModelBase OpenVarNameView()
+        {
+            switch (SelectedSublink.Key)
+            {
+                case "rename_vars":
+                    return _services.GetRequiredService<RenameVarsViewModel>();
+                    //case "varchanges":
+                    //    return new VarNameChangesViewModel(_varnameService);
+                    //case "varusage":
+                    //    return new VarNameUsageViewModel(_varnameService, _surveyService);
+                    //case "prefixes":
+                    //    return new PrefixListViewModel(_varnameService);
+                    //case "varhistory":
+                    //    return new VarNameHistoryViewModel(_varnameService);
+                    
+                    break;
+                default:
+                    return null;//return new VarNameRenameViewModel(_varnameService, _surveyService);
             }
         }
 
