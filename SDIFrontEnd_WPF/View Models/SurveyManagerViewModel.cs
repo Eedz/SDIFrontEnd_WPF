@@ -33,21 +33,32 @@ namespace SDIFrontEnd_WPF
         public SurveyViewModel SurveyInfo { get; set; } // ViewModel for displaying basic survey information
         public SurveyBuilderViewModel SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
-        public SurveyManagerViewModel(IServiceProvider services, Survey survey)
+        public SurveyManagerViewModel(ISurveyService surveyService, IDialogService dialogService, LookupProvider lookup, IReferenceDataService referenceDataService, 
+            IWordingService wordingService, IPeopleService peopleService, ICommentService commentService, IWindowService windowService)
         {
-            _surveyService = services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(services), "Survey service cannot be null");
-            _dialogService = services.GetService(typeof(IDialogService)) as IDialogService ?? throw new ArgumentNullException(nameof(services), "Dialog service cannot be null");
-            _lookupProvider = services.GetService(typeof(LookupProvider)) as LookupProvider ?? throw new ArgumentNullException(nameof(services), "Lookup provider cannot be null");
-            _referenceDataService = services.GetService(typeof(IReferenceDataService)) as IReferenceDataService ?? throw new ArgumentNullException(nameof(services), "Reference data service cannot be null");
-            _wordingService = services.GetService(typeof(IWordingService)) as IWordingService ?? throw new ArgumentNullException(nameof(services), "Wording service cannot be null");
-            _peopleService = services.GetService(typeof(IPeopleService)) as IPeopleService ?? throw new ArgumentNullException(nameof(services), "People service cannot be null");
-            _commentService = services.GetService(typeof(ICommentService)) as ICommentService ?? throw new ArgumentNullException(nameof(services), "Comment service cannot be null");
-            _windowService = services.GetService(typeof(IWindowService)) as IWindowService ?? throw new ArgumentNullException(nameof(services), "Window service cannot be null");
+            _surveyService = surveyService;
+            _dialogService = dialogService;
+            _lookupProvider = lookup;
+            _referenceDataService = referenceDataService;
+            _wordingService = wordingService;
+            _peopleService = peopleService;
+            _commentService = commentService;
+            _windowService = windowService;
+            
+        }
+
+        public void Load(Survey survey)
+        {
+            if (survey == null)
+                throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
+            CurrentSurvey = survey;
+
             AllSurveys = _surveyService.GetAllSurveys();
-            CurrentSurvey = survey ?? throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
-            DisplayName = "Survey Manager - " + CurrentSurvey.SurveyCode;
+
             SurveyInfo = new SurveyViewModel(CurrentSurvey);
             SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _referenceDataService, _wordingService, _peopleService, _commentService, CurrentSurvey);
+
+            LoadSurvey(survey);
         }
 
         partial void OnCurrentSurveyChanged(Survey value)
