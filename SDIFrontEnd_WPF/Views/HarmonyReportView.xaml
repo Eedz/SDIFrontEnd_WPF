@@ -11,8 +11,8 @@
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
+        <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
 
-      
     </UserControl.Resources>
     <Grid Background="LightGray">
         <Grid.ColumnDefinitions></Grid.ColumnDefinitions>
@@ -37,25 +37,35 @@
                         <RowDefinition Height="25"></RowDefinition>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-
+                    
                     <StackPanel >
                         <TextBlock Text="Vars:"/>
-                        <ComboBox
-                            ItemsSource="{Binding VarNameList}"
-                            SelectedItem="{Binding SelectedVar}"
-                            DisplayMemberPath="RefVarName"
-                            IsEditable="True"
-                            IsTextSearchEnabled="True"
-                            StaysOpenOnEdit="True"
-                            behaviors:ComboBoxBehaviors.OpenOnTyping="True"
-                            TextSearch.TextPath="RefVarName"
-                            ScrollViewer.CanContentScroll="True">
-                            <ComboBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling"/>
-                                </ItemsPanelTemplate>
-                            </ComboBox.ItemsPanel>
-                        </ComboBox>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="SearchBox"
+                                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                                     MinWidth="100"
+                                                     Padding="0"/>
+                            <TextBox 
+                                 Text="{Binding SelectedVar.RefVarName, Mode=OneWay}"
+                                 MinWidth="100"
+                                 Padding="0"/>
+                        </StackPanel>
+                        <!-- Popup showing filtered results -->
+                        <Popup IsOpen="{Binding IsPopOpen, Mode=OneWay}"
+                                       PlacementTarget="{Binding ElementName=SearchBox}"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       Width="{Binding ActualWidth, ElementName=SearchBox}">        
+
+                            <Border Background="White" BorderBrush="Gray" BorderThickness="1">
+                                <ScrollViewer MaxHeight="200">
+                                    <ListBox ItemsSource="{Binding VarNameList}"
+                                             DisplayMemberPath="RefVarName"
+                                             SelectedItem="{Binding SelectedVar, Mode=TwoWay}">
+                                    </ListBox>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Grid.ColumnSpan="4" Margin="18,0,0,0">

@@ -23,12 +23,12 @@ namespace SDIFrontEnd_WPF.ViewModels
     public enum HarmonyReportDisplay { Surveys, Projects };
     public partial class HarmonyReportViewModel : WorkspaceViewModel
     {
-        private readonly ISurveyService _surveyService;
-        private readonly IVarNameService _varNameService;
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiVarNameService _varNameService;
         
         public HarmonyReportDisplay DisplayOption { get; set; } = HarmonyReportDisplay.Surveys;
 
-        public List<VariableName> VarNameList { get; set; } = new List<VariableName>();
+        public ObservableCollection<VariableName> VarNameList { get; set; } = new ObservableCollection<VariableName>();
         public ObservableCollection<VariableName> SelectedVars { get; set; } = new ObservableCollection<VariableName>();
         [ObservableProperty]
         private VariableName? selectedVar;
@@ -91,22 +91,17 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private string searchText = string.Empty;
 
-        public HarmonyReportViewModel(ISurveyService surveyService, IVarNameService varNameService)
+        [ObservableProperty]
+        private bool isPopOpen = false;
+
+        public HarmonyReportViewModel(IApiSurveyService surveyService, IApiVarNameService varNameService)
         {
             DisplayName = "Harmony Report";
 
             _surveyService = surveyService;
             _varNameService = varNameService;
 
-            var allVars = _varNameService.GetAllVarNames();
-            VarNameList = allVars.GroupBy(x=>x.RefVarName).Select(x=>x.FirstOrDefault()).OrderBy(v => v.VarName).ToList();
-            PrefixList = VarNameList.Select(v => v.VarName.Substring(0, 2)).Distinct().OrderBy(p => p).ToList();
-            SurveyList = _surveyService.GetAllSurveys().OrderBy(s => s.SurveyCode).ToList();
-            SurveyList.Insert(0, new Survey() { SID = -1, SurveyCode = "<All>"});
-            WaveList = _surveyService.GetAllWaves().OrderBy(w => w.ISO_Code).ThenBy(w => w.Wave).ToList();
-            WaveList.Insert (0, new StudyWave() { ID = -1, ISO_Code = "<All>"});
-            StudyList = _surveyService.GetAllStudies().OrderBy(s => s.StudyName).ToList();
-            StudyList.Insert(0, new Study() { ID = -1, StudyName = "<All>" });
+            LoadDataAsync();
 
             SelectedGroupOnList.Add("PreA");
             SelectedGroupOnList.Add("LitQ");
@@ -123,13 +118,29 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             SelectedWaves.CollectionChanged += (_, __) => FilteredSurveys.Refresh();
 
+            SelectedStudies.CollectionChanged += SelectedStudies_CollectionChanged;
+           
+            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
+        }
+
+        private async void LoadDataAsync()
+        {
+            var allVars = await _varNameService.GetAllVarNames();
+            VarNameList = new ObservableCollection<VariableName>( allVars.GroupBy(x => x.RefVarName).Select(x => x.FirstOrDefault()).OrderBy(v => v.VarName).ToList());
+            PrefixList = VarNameList.Select(v => v.VarName.Substring(0, 2)).Distinct().OrderBy(p => p).ToList();
+            var allSurveys = await _surveyService.GetAllAsync();
+            SurveyList = allSurveys.OrderBy(s => s.SurveyCode).ToList();
+            SurveyList.Insert(0, new Survey() { SID = -1, SurveyCode = "<All>" });
+            var allWaves = await _surveyService.GetAllWavesAsync();
+            WaveList = allWaves.OrderBy(w => w.ISO_Code).ThenBy(w => w.Wave).ToList();
+            WaveList.Insert(0, new StudyWave() { ID = -1, ISO_Code = "<All>" });
+            var allStudies = await _surveyService.GetAllStudiesAsync();
+            StudyList = allStudies.OrderBy(s => s.StudyName).ToList();
+            StudyList.Insert(0, new Study() { ID = -1, StudyName = "<All>" });
+
             SelectedStudies.Add(StudyList[0]);
             SelectedWaves.Add(WaveList[0]);
             SelectedSurveys.Add(SurveyList[0]);
-
-            SelectedStudies.CollectionChanged += SelectedStudies_CollectionChanged;
-            SelectedWaves.CollectionChanged += SelectedWaves_CollectionChanged;
-            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
         }
 
         private void SelectedSurveys_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -186,6 +197,51 @@ namespace SDIFrontEnd_WPF.ViewModels
         {
             
         }
+        partial void OnSelectedVarChanged(VariableName? oldValue, VariableName? newValue)
+        {
+            
+            IsPopOpen = false;
+        }
+        partial void OnSearchTextChanged(string? oldValue, string newValue)
+        {
+            _ = OnSearchTextChangedAsync(newValue);
+        }
+
+        private CancellationTokenSource? _cts;
+        private async Task OnSearchTextChangedAsync(string search)
+        {
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+
+            try
+            {
+                await Task.Delay(300, _cts.Token); // debounce
+
+                if (string.IsNullOrWhiteSpace(search))
+                {
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        VarNameList.Clear();
+                        IsPopOpen = false;
+                    });
+                    return;
+                }
+
+                var results = await _varNameService.SearchVarNames(search, 50);
+
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    VarNameList.Clear();
+                    foreach (var item in results)
+                        VarNameList.Add(item);
+                    IsPopOpen = VarNameList.Count > 0;
+                });
+            }
+            catch (TaskCanceledException)
+            {
+                // expected when user keeps typing
+            }
+        }
 
         private bool FilterWave(object item)
         {
@@ -212,14 +268,14 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand]
-        private void GenerateReport(string type)
+        private async void GenerateReport(string type)
         {
             // Implementation for generating the Harmony report goes here.
             if (type == "single")
             {
                 HarmonyReport report = new HarmonyReport();
                 // TODO get var filter
-                DataTable results = GetHarmonyResults(SelectedVars.ToList());
+                DataTable results = await GetHarmonyResults(SelectedVars.ToList());
 
                 report.OpenFinalReport = true;
                 report.ReportTable = results;
@@ -251,14 +307,15 @@ namespace SDIFrontEnd_WPF.ViewModels
                 // … add the rest of your 13 properties
             };
 
-        private DataTable GetHarmonyResults(List<VariableName> vars)
+        private async Task<DataTable> GetHarmonyResults(List<VariableName> vars)
         {
 
             List<SurveyQuestion> questions = new List<SurveyQuestion>();
 
             foreach (var v in vars)
             {
-                var qs = _surveyService.FindQuestionsByRefVarName(v.RefVarName);
+                var qs = await _surveyService.FindQuestionsByRefVarName(v.RefVarName);
+                qs = qs.ToList();
 
                 // <All> survey selected
                 if (SelectedSurveys.Count == 1 && SelectedSurveys[0].SID == -1)
@@ -565,7 +622,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         [RelayCommand]
         private void AddVarName()
         {
-            if (!SelectedVars.Contains(SelectedVar))
+            if (!SelectedVars.Any(x=>x.RefVarName == SelectedVar.RefVarName))
             {
                 SelectedVars.Add(SelectedVar);
                 int position = VarNameList.IndexOf(SelectedVar);
