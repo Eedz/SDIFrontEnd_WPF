@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenXmlToHtml", "..\OpenXml
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITCReportLib", "..\ITCReportLib\ITCReportLib\ITCReportLib.csproj", "{8CEB9CDE-9507-4909-B517-7437ED8F42FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITC_Contracts", "..\ITC_Contracts\ITC_Contracts\ITC_Contracts.csproj", "{BFB237B7-BBFE-1FE2-5A7C-7DBAAE29F52C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{8CEB9CDE-9507-4909-B517-7437ED8F42FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CEB9CDE-9507-4909-B517-7437ED8F42FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CEB9CDE-9507-4909-B517-7437ED8F42FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB237B7-BBFE-1FE2-5A7C-7DBAAE29F52C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB237B7-BBFE-1FE2-5A7C-7DBAAE29F52C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB237B7-BBFE-1FE2-5A7C-7DBAAE29F52C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB237B7-BBFE-1FE2-5A7C-7DBAAE29F52C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

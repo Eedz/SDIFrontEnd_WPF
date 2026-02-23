@@ -22,14 +22,15 @@ namespace SDIFrontEnd_WPF
         // when an item is selected, the corresponding user control is displayed in the right pane
         
         private readonly IServiceProvider _services; 
-        private readonly ISurveyService _surveyService; 
+       // private readonly ISurveyService _surveyService; 
         private readonly IUserService _userService;
+        private readonly IApiSurveyService apiSurveyService; // Service for managing surveys via API calls
 
         private UserPrefs CurrentUser;
 
         public IEnumerable<MenuCategory> MenuCategories => Enum.GetValues(typeof(MenuCategory)).Cast<MenuCategory>();
 
-        public List<Survey> AvailableSurveysToAdd { get; }
+        public List<Survey> AvailableSurveysToAdd { get; } = new List<Survey>();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CurrentSublinks))]
@@ -39,9 +40,9 @@ namespace SDIFrontEnd_WPF
         private ObservableCollection<SublinkItem> currentSublinks;
            
         [ObservableProperty]
-        private SublinkItem selectedSublink;
+        private SublinkItem? selectedSublink;
         [ObservableProperty]
-        private Survey selectedNewSurvey;
+        private Survey? selectedNewSurvey;
 
         public bool IsSurveyCategory => SelectedMenuCategory == MenuCategory.Surveys;
 
@@ -53,13 +54,21 @@ namespace SDIFrontEnd_WPF
             DisplayName = "Main Window ViewModel";
             ActiveForm = new HomeViewModel(); // Set the initial active form to HomeViewModel
             _services = services;
-            _surveyService = _services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey service cannot be null");
             _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
-                  
+            
+            apiSurveyService = _services.GetService(typeof(IApiSurveyService)) as IApiSurveyService; // Initialize the API survey service with the survey service
             CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
-
-            AvailableSurveysToAdd = _surveyService.GetAllSurveys();
+           
+            // Load surveys from the API instead of the local service
             CurrentSublinks = new ObservableCollection<SublinkItem>();
+
+            _ = LoadAsync(); // Load surveys asynchronously when the ViewModel is initialized
+        }
+
+        private async Task LoadAsync()
+        {
+            var surveys = await apiSurveyService.GetAllAsync();
+            AvailableSurveysToAdd.AddRange(surveys);
         }
 
         partial void OnSelectedMenuCategoryChanged(MenuCategory value)
@@ -123,7 +132,7 @@ namespace SDIFrontEnd_WPF
 
         private async Task<ViewModelBase> OpenSurveyManager(int surveyId)
         {
-            Survey survey = await _surveyService.GetSurveyByIdAsync(surveyId);
+            Survey survey = await apiSurveyService.GetSurveyByIdAsync(surveyId);
             var vm = _services.GetRequiredService<SurveyManagerViewModel>();
             vm.Load(survey);
             return vm;
@@ -194,14 +203,16 @@ namespace SDIFrontEnd_WPF
                     //    return new PrefixListViewModel(_varnameService);
                     //case "varhistory":
                     //    return new VarNameHistoryViewModel(_varnameService);
-                    
+
                     break;
+                case "history":
+                    return _services.GetRequiredService<QuestionHistoryManagerViewModel>();
                 default:
                     return null;//return new VarNameRenameViewModel(_varnameService, _surveyService);
             }
         }
 
-        private ObservableCollection<SublinkItem> GetSurveyEditorList()
+        private async Task<ObservableCollection<SublinkItem>> GetSurveyEditorList()
         {
             var list = Enumerable.Range(1, 3)
                 .Select(i => CurrentUser.GetFilterID("frmSurveyEntry", i))
@@ -209,7 +220,7 @@ namespace SDIFrontEnd_WPF
 
             ObservableCollection<SublinkItem> surveyList = new ObservableCollection<SublinkItem>();
             foreach (int index in list) {
-                var survey = _surveyService.GetSurveyById(index);
+                var survey = await apiSurveyService.GetSurveyByIdAsync(index);
                 surveyList.Add(new SurveySublinkItem(survey.SurveyCode, "survey_" + index, MenuCategory.Surveys, survey.SID));
             }
 
@@ -223,7 +234,7 @@ namespace SDIFrontEnd_WPF
                 new SublinkItem("VarName Changes", "varchanges", MenuCategory.VarNames),
                 new SublinkItem("VarName Usage", "varusage", MenuCategory.VarNames),
                 new SublinkItem("Prefix List", "prefixes", MenuCategory.VarNames),
-                new SublinkItem("VarName History", "varhistory", MenuCategory.VarNames),
+                new SublinkItem("VarName History", "history", MenuCategory.VarNames),
             };
         }
 
@@ -266,7 +277,7 @@ namespace SDIFrontEnd_WPF
             };
         }
 
-        private void LoadSublinks(MenuCategory category)
+        private async void  LoadSublinks(MenuCategory category)
         { 
             // This method can be used to load sublinks based on the selected category
             // For now, it just sets the SelectedSublink to null to reset the view
@@ -275,7 +286,7 @@ namespace SDIFrontEnd_WPF
             IEnumerable<SublinkItem> items = category switch
             {
                 MenuCategory.Home => new[] { new SublinkItem("Home", "home", category) },
-                MenuCategory.Surveys => GetSurveyEditorList(),
+                MenuCategory.Surveys => await GetSurveyEditorList(),
                 MenuCategory.VarNames => GetVarNameLinks(),
                 MenuCategory.Search => GetSearchLinks(),
                 MenuCategory.Praccing => GetPraccingLinks(),

@@ -6,6 +6,7 @@ using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Net.Http;
 using System.Windows;
 
 namespace SDIFrontEnd_WPF
@@ -21,7 +22,7 @@ namespace SDIFrontEnd_WPF
             e.Handled = true;
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
@@ -29,6 +30,24 @@ namespace SDIFrontEnd_WPF
 
 
             ServiceProvider serviceProvider = AddServices();
+
+            var surveyApi = serviceProvider.GetRequiredService<IApiSurveyService>();
+
+            var isHealthy = await surveyApi.CheckHealthAsync();
+
+            if (!isHealthy)
+            {
+                MessageBox.Show(
+                    "The server is unavailable. The application will now close.",
+                    "Server Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Shutdown();
+                return;
+            }
+
+
             MainWindow window = new MainWindow();
 
 
@@ -42,6 +61,8 @@ namespace SDIFrontEnd_WPF
             window.Show();
         }
 
+
+
         static ServiceProvider AddServices()
         {
             IServiceCollection services = new ServiceCollection();
@@ -49,6 +70,17 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<IWindowService, WindowService>();
+
+            services.AddHttpClient<IApiSurveyService, ApiSurveyService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+            services.AddHttpClient<IApiVarNameService, ApiVarNameService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
 
 #if DEBUG
             services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionStringTest"].ConnectionString));
@@ -70,6 +102,8 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IReferenceDataRepository, ReferenceDataRepository>();
             services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<IPraccingRepository, PraccingRepository>();
+            services.AddSingleton<IAuditRepository, AuditRepository>();
+
             services.AddSingleton<ISurveyService, SurveyService>();
             services.AddSingleton<IPeopleService, PeopleService>();
             services.AddSingleton<ICommentService, CommentService>();
@@ -79,11 +113,17 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IMatrixService, MatrixService>(); 
             services.AddSingleton<IPraccingService, PraccingService>();
+            services.AddSingleton<IAuditService, AuditService>();
 
             services.AddTransient<QuestionImporterService>();
 
             AddVMServices(services);
 
+
+            services.AddHttpClient<ApiSurveyService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:5001/"); // your API URL
+            });
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             return serviceProvider;
@@ -104,7 +144,7 @@ namespace SDIFrontEnd_WPF
 
             services.AddTransient<RenameVarsViewModel>();
             services.AddTransient<VarNameChangeViewModel>();
-
+            services.AddTransient<QuestionHistoryManagerViewModel>();
             
             services.AddTransient<QuestionImporterViewModel>();
 
