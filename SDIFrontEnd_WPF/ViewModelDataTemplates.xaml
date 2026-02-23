@@ -92,4 +92,21 @@
     <DataTemplate DataType="{x:Type viewmodels:VarNameChangeViewModel}">
         <views:VarNameChangeView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuestionHistoryManagerViewModel}">
+        <views:QuestionHistoryManagerView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuestionHistoryViewModel}">
+        <views:QuestionHistoryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:WordingHistoryViewModel}">
+        <views:WordingHistoryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:ChangedQuestionViewModel}">
+        <views:ChangedQuestionView/>
+    </DataTemplate>
+    
 </ResourceDictionary>
