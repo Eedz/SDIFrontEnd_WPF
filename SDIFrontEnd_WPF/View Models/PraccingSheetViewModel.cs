@@ -14,26 +14,35 @@ namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class PraccingSheetViewModel : ViewModelBase
     {
-        private readonly ISurveyService _surveyService;      
+        private readonly IApiSurveyService _surveyService;      
 
-        public List<Survey> SurveyList { get; set; }
+        public List<Survey> SurveyList { get; set; } = new List<Survey>();
         public bool UseWord { get; set; } = true;
         public bool UseExcel { get; set; } = false;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(CreateSheetCommand))]
-        private Survey selectedSurvey;
+        private Survey? selectedSurvey;
 
-        public PraccingSheetViewModel(ISurveyService surveyService)
+        public PraccingSheetViewModel(IApiSurveyService surveyService)
         {
             _surveyService = surveyService;
-            SurveyList = _surveyService.GetAllSurveys().ToList();
+            _ = LoadSurveys();
+        }
+
+        private async Task LoadSurveys()
+        {
+            
+            SurveyList = (await _surveyService.GetAllAsync()).ToList();
+            OnPropertyChanged(nameof(SurveyList));
         }
 
         [RelayCommand(CanExecute = nameof(CanRun))]
-        private void CreateSheet()
+        private async Task CreateSheet()
         {
-            SelectedSurvey.AddQuestions(_surveyService.GetQuestionsForSurvey(SelectedSurvey.SID));
+            var questions = await _surveyService.GetSurveyQuestions(SelectedSurvey.SID);
+            SelectedSurvey.Questions.Clear();
+            SelectedSurvey.AddQuestions(questions);
 
             PraccingSheetGenerator generator = new PraccingSheetGenerator(SelectedSurvey);
             generator.UseWord = UseWord;
