@@ -15,5 +15,6 @@ namespace SDIFrontEnd_WPF
         Task<Survey?> GetSurveyByIdAsync(int id);
 
         Task<List<SurveyQuestion>> FindQuestionsByRefVarName(string refVarName);
+        Task<List<SurveyQuestion>> GetSurveyQuestions(int id);
     }
 }

@@ -80,6 +80,14 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         return new List<SurveyQuestion>();
     }
 
+    public async Task<List<SurveyQuestion>> GetSurveyQuestions(int id)
+    {
+        var dto = await _http.GetFromJsonAsync<SurveyDto>($"api/surveys/{id}/questions");
+        if (dto == null) return new List<SurveyQuestion>();
+        var questions = dto.Questions.Select(x =>MapToEntity(x));
+        return questions.ToList() ?? new List<SurveyQuestion>();
+    }
+
     public async Task<int> CreateAsync(Survey survey)
     {
         var response = await _http.PostAsJsonAsync("api/surveys", survey);
@@ -99,6 +107,47 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
     {
         var response = await _http.DeleteAsync($"api/surveys/{id}");
         response.EnsureSuccessStatusCode();
+    }
+
+    //private SurveyQuestionDto MapToDto(SurveyQuestion entity)
+    //{
+    //    return new SurveyQuestionDto
+    //    {
+    //        VarName = entity.VarName,
+    //        VarLabel = entity.VarLabel,
+    //        Domain = new VarNameLabelDto() { LabelText = entity.Domain.LabelText, ID = entity.Domain.ID },
+    //        Topic = new VarNameLabelDto() { LabelText = entity.Topic.LabelText, ID = entity.Topic.ID },
+    //        Content = new VarNameLabelDto() { LabelText = entity.Content.LabelText, ID = entity.Content.ID },
+    //        Product = new VarNameLabelDto() { LabelText = entity.Product.LabelText, ID = entity.Product.ID },
+    //    };
+    //}
+
+    private SurveyQuestion MapToEntity(SurveyQuestionDto dto)
+    {
+        return new SurveyQuestion
+        {
+            VarName = new VariableName(dto.VarName.VarName)
+            {
+                VarLabel = dto.VarName.VarLabel,
+                Domain = new DomainLabel() { LabelText = dto.VarName.Domain.LabelText, ID = dto.VarName.Domain.ID },
+                Topic = new TopicLabel() { LabelText = dto.VarName.Topic.LabelText, ID = dto.VarName.Topic.ID },
+                Content = new ContentLabel() { LabelText = dto.VarName.Content.LabelText, ID = dto.VarName.Content.ID },
+                Product = new ProductLabel() { LabelText = dto.VarName.Product.LabelText, ID = dto.VarName.Product.ID },
+            },
+            Qnum = dto.Qnum,
+            AltQnum = dto.AltQnum,
+            PrePW = dto.PrePW == null ? null : new Wording() { WordID = dto.PrePW.ID, WordingText = dto.PrePW.WordingText },
+            PreIW = dto.PreIW == null ? null : new Wording() { WordID = dto.PreIW.ID, WordingText = dto.PreIW.WordingText },
+            PreAW = dto.PreAW == null ? null : new Wording() { WordID = dto.PreAW.ID, WordingText = dto.PreAW.WordingText },
+            LitQW = dto.LitQW == null ? null : new Wording() { WordID = dto.LitQW.ID, WordingText = dto.LitQW.WordingText },
+            PstIW = dto.PstIW == null ? null : new Wording() { WordID = dto.PstIW.ID, WordingText = dto.PstIW.WordingText },
+            PstPW = dto.PstPW == null ? null : new Wording() { WordID = dto.PstPW.ID, WordingText = dto.PstPW.WordingText },
+            RespOptionsS = dto.RespOptionsS == null ? null : new ResponseSet() { RespSetName = dto.RespOptionsS.RespSetName, RespList = dto.RespOptionsS.RespList },
+            NRCodesS = dto.NRCodesS == null ? null : new ResponseSet() { RespSetName = dto.NRCodesS.RespSetName, RespList = dto.NRCodesS.RespList },
+
+
+
+        };
     }
 }
 
