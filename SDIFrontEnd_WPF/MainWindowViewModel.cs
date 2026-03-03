@@ -9,10 +9,7 @@ using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+
 namespace SDIFrontEnd_WPF
 {
     public enum MenuCategory { Home, Surveys, VarNames, Search, Praccing, Reports, Timing }
@@ -20,9 +17,8 @@ namespace SDIFrontEnd_WPF
     {
         // this class controls which items are displayed in the left pane of the main window
         // when an item is selected, the corresponding user control is displayed in the right pane
-        
+
         private readonly IServiceProvider _services; 
-       // private readonly ISurveyService _surveyService; 
         private readonly IUserService _userService;
         private readonly IApiSurveyService apiSurveyService; // Service for managing surveys via API calls
 
@@ -52,7 +48,7 @@ namespace SDIFrontEnd_WPF
         public MainWindowViewModel(IServiceProvider services)
         {
             DisplayName = "Main Window ViewModel";
-            ActiveForm = new HomeViewModel(); // Set the initial active form to HomeViewModel
+            ActiveForm = services.GetRequiredService<HomeViewModel>(); // Set the initial active form to HomeViewModel
             _services = services;
             _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
             
@@ -62,7 +58,7 @@ namespace SDIFrontEnd_WPF
             // Load surveys from the API instead of the local service
             CurrentSublinks = new ObservableCollection<SublinkItem>();
 
-            _ = LoadAsync(); // Load surveys asynchronously when the ViewModel is initialized
+            _ = LoadAsync(); // TODO move this call to a command 
         }
 
         private async Task LoadAsync()
