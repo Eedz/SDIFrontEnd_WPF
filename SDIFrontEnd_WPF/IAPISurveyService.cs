@@ -16,5 +16,13 @@ namespace SDIFrontEnd_WPF
 
         Task<List<SurveyQuestion>> FindQuestionsByRefVarName(string refVarName);
         Task<List<SurveyQuestion>> GetSurveyQuestions(int id);
+
+        Task<List<Survey>> GetChangedSurveys(DateTime date);
+
+        Task<Survey> UpdateSurvey(Survey survey);
+
+        Task<List<DeletedQuestion>> GetDeletedQuestions(int id);
+
+       
     }
 }
