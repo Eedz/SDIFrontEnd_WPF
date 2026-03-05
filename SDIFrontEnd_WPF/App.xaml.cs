@@ -47,6 +47,10 @@ namespace SDIFrontEnd_WPF
                 return;
             }
 
+            var loader = serviceProvider.GetRequiredService<ReferenceDataService>();
+
+            await loader.LoadAsync();
+
 
             MainWindow window = new MainWindow();
 
@@ -82,6 +86,17 @@ namespace SDIFrontEnd_WPF
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            services.AddHttpClient<IApiQuestionService, ApiQuestionService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+            services.AddHttpClient<IApiReferenceDataService, ApiReferenceDataService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
 #if DEBUG
             services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionStringTest"].ConnectionString));
 #else
@@ -93,8 +108,10 @@ namespace SDIFrontEnd_WPF
                 builder.SetMinimumLevel(LogLevel.Information);
             });
 
-            services.AddSingleton<LookupProvider>();
-            services.AddSingleton<ISurveyRepository, SurveyRepository>();
+            services.AddSingleton<ReferenceDataStore>();
+            services.AddSingleton<ReferenceDataService>();
+            
+
             services.AddSingleton<IPeopleRepository, PeopleRepository>();
             services.AddSingleton<ICommentRepository, CommentRepository>();
             services.AddSingleton<IVarNameRepository, VarNameRepository>();
@@ -104,12 +121,12 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IPraccingRepository, PraccingRepository>();
             services.AddSingleton<IAuditRepository, AuditRepository>();
 
-            services.AddSingleton<ISurveyService, SurveyService>();
+            
             services.AddSingleton<IPeopleService, PeopleService>();
             services.AddSingleton<ICommentService, CommentService>();
             services.AddSingleton<IVarNameService, VarNameService>();
             services.AddSingleton<IWordingService, WordingService>();
-            services.AddSingleton<IReferenceDataService, ReferenceDataService>();
+       //     services.AddSingleton<IReferenceDataService, ReferenceDataService>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IMatrixService, MatrixService>(); 
             services.AddSingleton<IPraccingService, PraccingService>();
