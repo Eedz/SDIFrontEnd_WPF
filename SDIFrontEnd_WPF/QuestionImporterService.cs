@@ -12,7 +12,7 @@ namespace SDIFrontEnd_WPF
 {
     public class QuestionImporterService
     {
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
         private readonly IWordingService _wordingService;
         private readonly IPeopleService _peopleService;
         private readonly ICommentService _commentService;
@@ -20,7 +20,7 @@ namespace SDIFrontEnd_WPF
         private WordingData? _cachedWordings;
 
         public QuestionImporterService(
-            ISurveyService surveyService,
+            IApiSurveyService surveyService,
             IWordingService wordingService,
             IPeopleService peopleService,
             ICommentService commentService)
@@ -31,7 +31,7 @@ namespace SDIFrontEnd_WPF
             _commentService = commentService;
         }
 
-        public List<QuestionCandidatePreview> ImportQuestions(string surveyCode, string sourceFilePath)
+        public async Task<List<QuestionCandidatePreview>> ImportQuestions(string surveyCode, string sourceFilePath)
         {
             var importer = new QuestionImporter(surveyCode)
             {
@@ -39,10 +39,10 @@ namespace SDIFrontEnd_WPF
             };
 
             importer.Import(sourceFilePath);
-
+          
+          
             var questions = importer.ImportedPreviews.ToList();
-            var existingQuestions = _surveyService.GetQuestionsForSurvey(
-                _surveyService.GetAllSurveys().FirstOrDefault(s => s.SurveyCode == surveyCode)?.SID ?? -1);
+            var existingQuestions = await GetExistingQuestions(surveyCode);
 
             var people = _peopleService.GetPeopleBasics();
             var commentTypes = _commentService.GetAllCommentTypes();
@@ -55,6 +55,14 @@ namespace SDIFrontEnd_WPF
             }
 
             return questions;
+        }
+
+        public async Task<List<SurveyQuestion>> GetExistingQuestions(string surveyCode)
+        {
+            var survey = (await _surveyService.GetAllAsync()).FirstOrDefault(s => s.SurveyCode == surveyCode);
+            if (survey == null)
+                throw new ArgumentException($"Survey with code {surveyCode} not found.");
+            return await _surveyService.GetSurveyQuestions(survey.SID);
         }
 
         public List<Wording> GetMasterListFor(WordingType type)
