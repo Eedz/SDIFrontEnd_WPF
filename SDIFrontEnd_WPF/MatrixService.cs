@@ -10,20 +10,16 @@ namespace SDIFrontEnd_WPF
 { 
     public class MatrixService : IMatrixService
     {
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
 
-        public MatrixService(ISurveyService surveyService)
+        public MatrixService(IApiSurveyService surveyService)
         {
             _surveyService = surveyService;
         }
 
         public async Task<IList<SurveyQuestion>> LoadSurveyQuestionsAsync(int surveyId)
         {
-            // This wraps your existing sync service call in a Task
-            return await Task.Run(() =>
-            {
-                return _surveyService.GetQuestionsForSurvey(surveyId);
-            });
+            return await _surveyService.GetSurveyQuestions(surveyId);
         }
 
         public IList<SurveyQuestion> MergeQuestions(IEnumerable<Survey> surveys)
