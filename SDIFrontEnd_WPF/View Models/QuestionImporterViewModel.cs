@@ -371,13 +371,13 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanImportData))]
-        void ImportData(string surveycode)
+        async Task ImportData(string surveycode)
         {
             ApprovedQuestions.Clear();
 
             try
             {
-                var imported = _questionImporterService.ImportQuestions(surveycode, SourceFilePath);
+                var imported = await _questionImporterService.ImportQuestions(surveycode, SourceFilePath);
 
 
                 if (imported.Count() == 0)
