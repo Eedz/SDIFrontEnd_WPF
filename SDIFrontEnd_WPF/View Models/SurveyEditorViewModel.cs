@@ -25,7 +25,7 @@ namespace SDIFrontEnd_WPF
         public List<UserState> UserStatesList => _survey.UserStates.Select(x => x.State).ToList();
         public List<ScreenedProduct> ScreenedProductsList => _survey.ScreenedProducts.Select(x => x.Product).ToList();
 
-        public SurveyEditorViewModel(Survey survey, LookupProvider lookup)
+        public SurveyEditorViewModel(Survey survey, ReferenceDataStore lookup)
         {
             DisplayName = "Survey - " + survey.SurveyCode;
             _survey = survey;
