@@ -11,8 +11,9 @@ namespace SDIFrontEnd_WPF
     public partial class SurveyBuilderViewModel : ViewModelBase
     {
         private readonly IDialogService _dialogService;
-        private readonly ISurveyService _surveyService;
-        private readonly IReferenceDataService _referenceDataService;
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiQuestionService _questionService;
+        private readonly ReferenceDataStore _referenceDataService;
         private readonly IWordingService _wordingService;
         private readonly ICommentService _commentService;
         private readonly IPeopleService _peopleService;
@@ -23,10 +24,10 @@ namespace SDIFrontEnd_WPF
 
         public ObservableCollection<SurveyQuestion> QuestionList => new ObservableCollection<SurveyQuestion>(RecordList.Select(r => r.Item));
 
-        public List<TopicLabel> TopicLabels { get; set; }
-        public List<ContentLabel> ContentLabels { get; set; }
-        public List<DomainLabel> DomainLabels { get; set; }
-        public List<ProductLabel> ProductLabels { get; set; }
+        public List<VarNameLabel> TopicLabels { get; set; }
+        public List<VarNameLabel> ContentLabels { get; set; }
+        public List<VarNameLabel> DomainLabels { get; set; }
+        public List<VarNameLabel> ProductLabels { get; set; }
 
         public ObservableCollection<SurveyQuestion> Added { get; } = new ObservableCollection<SurveyQuestion>();
         public ObservableCollection<SurveyQuestion> Removed { get; } = new ObservableCollection<SurveyQuestion>();
@@ -100,11 +101,12 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private string? nRName;
 
-        public SurveyBuilderViewModel(IDialogService dialogService, ISurveyService surveyService, IReferenceDataService referenceData, IWordingService wordingService,
+        public SurveyBuilderViewModel(IDialogService dialogService, IApiSurveyService surveyService, IApiQuestionService questionService, ReferenceDataStore referenceData, IWordingService wordingService,
             IPeopleService peopleService, ICommentService commentService, Survey survey)
         {
             _dialogService = dialogService;
             _surveyService = surveyService ?? throw new ArgumentNullException(nameof(surveyService), "Survey service cannot be null.");
+            _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService), "Question service cannot be null.");
             _referenceDataService = referenceData ?? throw new ArgumentNullException(nameof(referenceData), "Reference data service cannot be null.");
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService), "Wording service cannot be null.");
             _peopleService = peopleService ?? throw new ArgumentNullException(nameof(peopleService), "People service cannot be null.");
@@ -115,10 +117,10 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(Editable));
             _recordList = new ObservableCollection<SurveyQuestionRecord>(survey.Questions.Select(x => new SurveyQuestionRecord(x)));
 
-            TopicLabels = _referenceDataService.GetTopicLabels() ?? new List<TopicLabel>();
-            ContentLabels = _referenceDataService.GetContentLabels() ?? new List<ContentLabel>();
-            DomainLabels = _referenceDataService.GetDomainLabels() ?? new List<DomainLabel>();
-            ProductLabels = _referenceDataService.GetProductLabels() ?? new List<ProductLabel>();
+            TopicLabels = _referenceDataService.TopicLabels.ToList() ?? new List<VarNameLabel>();
+            ContentLabels = _referenceDataService.ContentLabels.ToList() ?? new List<VarNameLabel>();
+            DomainLabels = _referenceDataService.DomainLabels.ToList() ?? new List<VarNameLabel>();
+            ProductLabels = _referenceDataService.ProductLabels.ToList() ?? new List<VarNameLabel>();
 
             SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000"));
             SelectedQuestionRecords = new ObservableCollection<SurveyQuestionRecord>();
@@ -167,13 +169,18 @@ namespace SDIFrontEnd_WPF
             // update related questions window
             if (RelatedQsVM != null)
             {
-                var relatedQuestions = _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
-                relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
-
-                RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
-                OnPropertyChanged(nameof(RelatedQsVM));
+                _ = UpdateRelatedQuestions(question.VarName.RefVarName);
             }
 
+        }
+
+        async Task UpdateRelatedQuestions(string refVarName)
+        {
+            var relatedQuestions = await _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
+            relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
+
+            RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
+            OnPropertyChanged(nameof(RelatedQsVM));
         }
 
         partial void OnSelectedQuestionChanged(SurveyQuestion? value)
@@ -389,7 +396,7 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand(CanExecute = nameof(Editable))]
-        private void AddSurveyQuestion()
+        private async Task AddSurveyQuestion()
         {
             // enter VarName
             // if exists, ask user if they want to copy wordings or labels
@@ -398,7 +405,7 @@ namespace SDIFrontEnd_WPF
             if (string.IsNullOrWhiteSpace(newVarName))
                 return;
 
-            var existingQuestions = _surveyService.FindQuestionsByRefVarName(newVarName);
+            var existingQuestions = await _surveyService.FindQuestionsByRefVarName(newVarName);
             SurveyQuestion selectedSource = null;
             string newQnum = SelectedQuestion.Qnum;
             int position = QuestionList.IndexOf(SelectedQuestion);
@@ -499,21 +506,21 @@ namespace SDIFrontEnd_WPF
 
             foreach (var r in RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord))
             {
-                _surveyService.SaveQuestion(r);
+                _questionService.SaveQuestion(r.Item);
             }
 
             OnPropertyChanged(nameof(RecordList));
         }
 
         [RelayCommand]
-        private void ViewRelatedQuestions()
+        private async Task ViewRelatedQuestions()
         {
             if (SelectedQuestion == null)
             {
                 _dialogService.ShowError("No question selected.", "Related Questions Error");
                 return;
             }
-            var relatedQuestions = _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
+            var relatedQuestions = await _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
             relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
             if (relatedQuestions == null || !relatedQuestions.Any())
             {
@@ -526,9 +533,9 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void ViewDeletedVars()
+        private async Task ViewDeletedVars()
         {
-            var deletes = _surveyService.GetDeletedQuestions(CurrentSurvey.SurveyCode);
+            var deletes = await _surveyService.GetDeletedQuestions(CurrentSurvey.SID);
             // show related questions window
             DeletedQuestionsViewModel deletedVM = new DeletedQuestionsViewModel(deletes);
             _dialogService.ShowWindow(deletedVM);
