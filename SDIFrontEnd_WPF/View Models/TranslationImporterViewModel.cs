@@ -14,8 +14,9 @@ namespace SDIFrontEnd_WPF.ViewModels
     public partial  class TranslationImporterViewModel : WorkspaceViewModel
     {
 
-        private readonly ISurveyService _surveyService;
-        private readonly IReferenceDataService _referenceDataService;
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiQuestionService _questionService;
+        private readonly ReferenceDataStore _referenceDataService;
         private readonly IDialogService _fileDialogService;
 
         public List<Translation> Missing { get; set; } = new List<Translation>();
@@ -37,8 +38,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string CurrentMissingText => MissingCurrent != null ? MissingCurrent.TranslationText : string.Empty;
         public string CurrentDuplicateText => DuplicateCurrent != null ? DuplicateCurrent.TranslationText : string.Empty;
 
-        public List<Survey> SurveyList { get; }
-        public List<Language> LanguageList { get; set; }
+        public List<Survey> SurveyList { get; private set; }
+        public List<Language> LanguageList { get; private set; }
 
         [ObservableProperty]
         private string sourceFile;
@@ -46,14 +47,15 @@ namespace SDIFrontEnd_WPF.ViewModels
         public Survey SelectedSurvey { get; set; }
         public Language SelectedLanguage { get; set; }
 
-        public TranslationImporterViewModel(ISurveyService surveyService, IReferenceDataService referenceDataService, IDialogService fileDialogService)
+        public TranslationImporterViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, ReferenceDataStore referenceDataService, IDialogService fileDialogService)
         {
             _surveyService = surveyService;
+            _questionService = questionService;
             _referenceDataService = referenceDataService;
             _fileDialogService = fileDialogService;
 
-            SurveyList = _surveyService.GetAllSurveys();
-            LanguageList = _referenceDataService.GetLanguages();
+            
+            LanguageList = _referenceDataService.Languages.ToList();
 
             this.DisplayName = "Translation Importer";
 
@@ -61,6 +63,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             DuplicateIndex = 0;
             ImportedIndex = 0;
             
+        }
+
+        public async Task LoadAsync()
+        {
+            SurveyList = await _surveyService.GetAllAsync();
         }
 
         /// <summary>
@@ -82,7 +89,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         /// </summary>
         /// <param name="filepath"></param>
         [RelayCommand]
-        private void Import(string filepath)
+        private async void Import(string filepath)
         {
             var tableImporter = new WordTableImporter(SourceFile);
             var parser = new TranslationParser();
@@ -92,7 +99,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             List<Translation> translations = importer.Import().ToList();
 
             // get reference survey questions
-            List<SurveyQuestion> questions = _surveyService.GetQuestionsForSurvey(SelectedSurvey.SID);
+            List<SurveyQuestion> questions = await _surveyService.GetSurveyQuestions(SelectedSurvey.SID);
             foreach (Translation t in translations)
             {
                 t.Survey = SelectedSurvey.SurveyCode;
@@ -143,9 +150,11 @@ namespace SDIFrontEnd_WPF.ViewModels
         /// </summary>
         [RelayCommand]
         
-        private void CheckVarName(Translation translation)
+        private async void CheckVarName(Translation translation)
         {
-            int qid = _surveyService.GetQuestionID(translation.Survey, translation.VarName);
+            var questions = await _questionService.GetQuestionsByVarNameAsync(translation.VarName);
+
+            int qid = questions.FirstOrDefault(q => q.SurveyCode == SelectedSurvey.SurveyCode)?.ID ?? 0;
             if (qid != 0)
             {
                 translation.QID = qid;
