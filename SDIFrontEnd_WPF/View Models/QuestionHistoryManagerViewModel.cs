@@ -7,18 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using ITCLib;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ITC_Services;
-using SDIFrontEnd_WPF.Views;
 using System.Collections.ObjectModel;
-
-    
-
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class QuestionHistoryManagerViewModel : ViewModelBase
     {
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiQuestionService _questionService;
         private readonly IAuditService _auditService;
         private readonly ICommentService _commentService;
 
@@ -47,12 +43,12 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public ObservableCollection<QuestionComment> Comments { get; } = new ObservableCollection<QuestionComment>();
 
-        public QuestionHistoryManagerViewModel(IAuditService auditService, ISurveyService surveyService, ICommentService commentService)
+        public QuestionHistoryManagerViewModel(IAuditService auditService, IApiSurveyService surveyService, IApiQuestionService questionService, ICommentService commentService)
         {
             _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
             _surveyService = surveyService ?? throw new ArgumentNullException(nameof(surveyService));
             _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService));
-
+            _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
             DisplayName = "Question History Manager";
 
             SurveyList = _auditService.GetAuditSurveys().Select(x=> new Survey(x)).ToList();
@@ -71,11 +67,13 @@ namespace SDIFrontEnd_WPF.ViewModels
             OnPropertyChanged(nameof(VarNameList));
         }
 
-        partial void OnSelectedVarNameChanged(VariableName? oldValue, VariableName? newValue)
+        async partial void OnSelectedVarNameChanged(VariableName? oldValue, VariableName? newValue)
         {
             if (newValue == null || SelectedSurvey == null) return;
 
-            var qid = _surveyService.GetQuestionID(SelectedSurvey.SurveyCode, newValue.VarName);
+            //var qid = _surveyService.GetQuestionID(SelectedSurvey.SurveyCode, newValue.VarName);
+            var vars = await _questionService.GetQuestionsByVarNameAsync(newValue.VarName);
+            var qid = vars.FirstOrDefault(q => q.SurveyCode == SelectedSurvey.SurveyCode)?.ID ?? 0;
             var history = _auditService.GetQuestionHistory(qid);
             foreach (var item in history)
             {
