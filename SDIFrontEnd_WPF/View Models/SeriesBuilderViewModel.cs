@@ -17,7 +17,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class SeriesBuilderViewModel : WorkspaceViewModel
     {
-        private readonly IReferenceDataService _referenceData;
+        private readonly ReferenceDataStore _referenceData;
         private readonly IWordingService _wordingService;
 
         [ObservableProperty]
@@ -36,10 +36,10 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private ObservableCollection<object> listItems;
 
-        public List<ContentLabel> ContentLabels { get; set; }
-        public List<TopicLabel> TopicLabels { get; set; }
-        public List<DomainLabel> DomainLabels { get; set; }
-        public List<ProductLabel> ProductLabels { get; set; }
+        public List<VarNameLabel> ContentLabels { get; set; }
+        public List<VarNameLabel> TopicLabels { get; set; }
+        public List<VarNameLabel> DomainLabels { get; set; }
+        public List<VarNameLabel> ProductLabels { get; set; }
 
         public List<Wording> PrePs { get; set; }
         public List<Wording> PreIs { get; set; }
@@ -96,17 +96,17 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string CurrentQuestionText => CurrentQuestion == null ? string.Empty : CurrentQuestion.GetQuestionTextHTML(true);
 
         #region Constructor
-        public SeriesBuilderViewModel(IReferenceDataService referenceData, IWordingService wordingService)
+        public SeriesBuilderViewModel(ReferenceDataStore referenceData, IWordingService wordingService)
         {
             base.DisplayName = "Series Builder";
 
             _referenceData = referenceData;
             _wordingService = wordingService;
 
-            ContentLabels = _referenceData.GetContentLabels();
-            TopicLabels = _referenceData.GetTopicLabels();
-            DomainLabels = _referenceData.GetDomainLabels();
-            ProductLabels = _referenceData.GetProductLabels();
+            ContentLabels = _referenceData.ContentLabels.ToList();
+            TopicLabels = _referenceData.TopicLabels.ToList();
+            DomainLabels = _referenceData.DomainLabels.ToList();
+            ProductLabels = _referenceData.ProductLabels.ToList();
 
             PrePs= _wordingService.GetAllPreP();
             PreIs= _wordingService.GetAllPreI();
