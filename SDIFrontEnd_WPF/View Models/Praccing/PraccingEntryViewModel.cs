@@ -21,7 +21,7 @@ namespace SDIFrontEnd_WPF.ViewModels
     {
         private readonly IWindowService _windowService;
         private readonly IPraccingService _praccingService;
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
         private readonly IPeopleService _peopleService;
         private readonly IFileDialogService _dialogService;
 
@@ -160,14 +160,16 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private bool isFiltered;
 
-        public PraccingEntryViewModel(IWindowService windowService, IPraccingService praccingService, ISurveyService surveyService, IPeopleService peopleService, IFileDialogService dialogService)
+        public PraccingEntryViewModel(IWindowService windowService, IPraccingService praccingService, IApiSurveyService surveyService, IPeopleService peopleService, IFileDialogService dialogService)
         {
             _windowService = windowService;
             _praccingService = praccingService;
             _surveyService = surveyService;
             _peopleService = peopleService;
             _dialogService = dialogService;
-            SurveyList = new ObservableCollection<Survey>(_surveyService.GetAllSurveys());
+           
+            _ = Load();
+
             // Register for the message
             WeakReferenceMessenger.Default.Register<IssueSelectedMessage>(this, (r, m) =>
             {
@@ -180,20 +182,17 @@ namespace SDIFrontEnd_WPF.ViewModels
             ResponseImageViewModel = new PraccingImagesViewModel();
         }
 
+        private async Task Load()
+        {
+            SurveyList = new ObservableCollection<Survey>( await _surveyService.GetAllAsync());
+        }
+
         partial void OnRecordsChanged(ObservableCollection<PraccingIssueRecord>? oldValue, ObservableCollection<PraccingIssueRecord> newValue)
         {
             OnPropertyChanged(nameof(TotalIssues));
         }
 
         #region Commands
-
-        // TODO not working. trying to get survey list loaded using async
-        [RelayCommand]
-        private async Task OnLoadedAsync()
-        {
-            var surveys = await _surveyService.GetAllSurveysAsync();
-            SurveyList = new ObservableCollection<Survey>(surveys);
-        }
 
         [RelayCommand]
         private void LoadSurveyIssues(int survID)
