@@ -18,7 +18,7 @@ namespace SDIFrontEnd_WPF.ViewModels
     public partial class RenameVarsViewModel : ViewModelBase
     {
         private readonly IVarNameService _varNameService;
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
         private readonly IFileDialogService _fileDialogService;
 
         public List<Survey> SurveyList { get; set; }
@@ -33,7 +33,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string SourceFilePath { get; set; }
 
 
-        public RenameVarsViewModel(IVarNameService varNameService, ISurveyService surveyService, IFileDialogService fileDialogService, VarNameChangeViewModel changeDetails)
+        public RenameVarsViewModel(IVarNameService varNameService, IApiSurveyService surveyService, IFileDialogService fileDialogService, VarNameChangeViewModel changeDetails)
         {
             DisplayName = "Rename Variables";
 
@@ -41,9 +41,15 @@ namespace SDIFrontEnd_WPF.ViewModels
             _surveyService = surveyService;
             _fileDialogService = fileDialogService;
 
-            SurveyList = _surveyService.GetAllSurveys();
+            _ = LoadSurveysAsync();
             RenameList.CollectionChanged += RenameList_CollectionChanged;
             VarChangeDetails = changeDetails;
+        }
+
+        private async Task LoadSurveysAsync()
+        {
+            SurveyList = await _surveyService.GetAllAsync();
+            OnPropertyChanged(nameof(SurveyList));
         }
 
         private void RenameList_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -67,11 +73,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             // Only recompute when relevant fields change
             if (e.PropertyName is nameof(RenameVarItem.OldVarName) or nameof(RenameVarItem.NewVarName))
             {
-                LoadItemInfo(item);
+                _ = LoadItemInfo(item);
             }
         }
 
-        private void LoadItemInfo(RenameVarItem item)
+        private async Task LoadItemInfo(RenameVarItem item)
         {
             if (string.IsNullOrWhiteSpace(item.OldVarName) && string.IsNullOrWhiteSpace(item.NewVarName))
             {
@@ -93,13 +99,13 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             if (UseVarName) 
             {           
-                surveysWithOldVar = _surveyService.GetSurveysWithVarName(item.OldVarName);
-                surveysWithNewVar = _surveyService.GetSurveysWithVarName(item.NewVarName);
+                surveysWithOldVar = await _surveyService.GetSurveysByVar(item.OldVarName);
+                surveysWithNewVar = await _surveyService.GetSurveysByVar(item.NewVarName);
             }
             else
             {
-                surveysWithOldVar = _surveyService.GetSurveysWithRefVarName(item.OldVarName);
-                surveysWithNewVar = _surveyService.GetSurveysWithRefVarName(item.NewVarName);
+                surveysWithOldVar = await _surveyService.GetSurveysByRefVar(item.OldVarName);
+                surveysWithNewVar = await _surveyService.GetSurveysByRefVar(item.NewVarName);
             }
 
             item.SurveysAffected = string.Join(", ", surveysWithOldVar.Where(x=>!x.Locked));
