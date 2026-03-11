@@ -52,6 +52,13 @@ namespace SDIFrontEnd_WPF
             return question;
         }
 
+        public async Task<List<SurveyQuestion>> SearchQuestions(string searchTerm)
+        {
+            var dtos = await _http.GetFromJsonAsync<IEnumerable<SurveyQuestionDto>>($"api/questions/search?query={Uri.EscapeDataString(searchTerm)}");           
+            var questions = dtos.Select(x => MapToEntity(x));
+            return questions.ToList();
+        }
+
         private SurveyQuestion MapToEntity(SurveyQuestionDto dto)
         {
             return new SurveyQuestion

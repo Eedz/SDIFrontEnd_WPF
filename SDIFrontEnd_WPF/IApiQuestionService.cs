@@ -13,5 +13,7 @@ namespace SDIFrontEnd_WPF
         Task<List<SurveyQuestion>> GetQuestionsByRefVarNameAsync(string refVarName);
 
         Task<SurveyQuestion> SaveQuestion(SurveyQuestion question);
+
+        Task<List<SurveyQuestion>> SearchQuestions(string searchTerm);
     }
 }
