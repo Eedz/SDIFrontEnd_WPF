@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Drawing.Charts;
 using ITC_Services;
 using ITCLib;
 using ITCReportLib;
@@ -12,7 +11,6 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
