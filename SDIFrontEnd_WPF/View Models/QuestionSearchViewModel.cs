@@ -13,11 +13,14 @@ namespace SDIFrontEnd_WPF
 {
     public partial class QuestionSearchViewModel : WorkspaceViewModel
     {
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiQuestionService _questionService;
 
         public ObservableCollection<SurveyQuestion> SearchResults { get; set; } = new ObservableCollection<SurveyQuestion>();
         public ObservableCollection<SurveyQuestion> FilteredResults { get; set; } = new ObservableCollection<SurveyQuestion>();
         public string SearchTerm { get; set; } = string.Empty;
+
+        public List<Survey> SurveyList { get; private set; }
 
         [ObservableProperty]
         private bool searchPreP;
@@ -36,20 +39,28 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private bool searchNR;
 
-        public QuestionSearchViewModel(ISurveyService surveyService)
+        public QuestionSearchViewModel(IApiSurveyService surveyService, IApiQuestionService questionService)
         {
             _surveyService = surveyService;
             this.DisplayName = "Question Search";
+            _questionService = questionService;
+            _ = LoadSurveys();
+        }
+
+        private async Task LoadSurveys()
+        {
+            SurveyList = await _surveyService.GetAllAsync();
+            OnPropertyChanged(nameof(SurveyList));
         }
 
         [RelayCommand]
-        private void Search()
+        private async Task Search()
         {
+            // TODO survey and varname are not used in the search, need to add those as parameters to the API and filter on the backend
+
             SearchResults.Clear();
-            SearchResults = new ObservableCollection<SurveyQuestion>( _surveyService.SearchQuestions(SearchTerm));
+            SearchResults = new ObservableCollection<SurveyQuestion>( await _questionService.SearchQuestions(SearchTerm));
             FilteredResults = new ObservableCollection<SurveyQuestion>(UpdateFilter());
-           
-            OnPropertyChanged(nameof(FilteredResults));
         }
 
        
