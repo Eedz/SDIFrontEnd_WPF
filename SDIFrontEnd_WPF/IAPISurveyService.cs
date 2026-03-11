@@ -23,6 +23,7 @@ namespace SDIFrontEnd_WPF
 
         Task<List<DeletedQuestion>> GetDeletedQuestions(int id);
 
-       
+        Task<List<Survey>> GetSurveysByVar(string varname);
+        Task<List<Survey>> GetSurveysByRefVar(string varname);
     }
 }

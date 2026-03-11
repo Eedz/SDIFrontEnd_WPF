@@ -85,6 +85,31 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         {
             SID = dtos.SID,
             SurveyCode = dtos.SurveyCode,
+            Locked = dtos.Locked
+        }).ToList();
+        return surveys;
+    }
+
+    public async Task<List<Survey>> GetSurveysByVar(string varname)
+    {
+        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/surveys/by-var/{varname}");
+        var surveys = dto.Select(dtos => new Survey
+        {
+            SID = dtos.SID,
+            SurveyCode = dtos.SurveyCode,
+            Locked = dtos.Locked
+        }).ToList();
+        return surveys;
+    }
+
+    public async Task<List<Survey>> GetSurveysByRefVar(string varname)
+    {
+        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/surveys/by-ref/{varname}");
+        var surveys = dto.Select(dtos => new Survey
+        {
+            SID = dtos.SID,
+            SurveyCode = dtos.SurveyCode,
+            Locked = dtos.Locked
         }).ToList();
         return surveys;
     }
