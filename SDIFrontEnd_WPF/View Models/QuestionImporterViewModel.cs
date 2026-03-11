@@ -27,8 +27,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         #region Fields
 
         private readonly IFileDialogService _fileDialogService;
-        private readonly ISurveyService _surveyService;
-
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiQuestionService _questionService;
         private readonly IPeopleService _peopleService;
         private readonly ICommentService _commentService;
         private readonly IWordingService _wordingService;
@@ -227,7 +227,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         #region Constructor
 
-        public QuestionImporterViewModel(IFileDialogService dialogService, ISurveyService surveySerivce,
+        public QuestionImporterViewModel(IFileDialogService dialogService, IApiSurveyService surveySerivce, IApiQuestionService questionService,
                                         IPeopleService peopleService, ICommentService commentService,
                                         IWordingService wordingService, IVarNameService varnameService, QuestionImporterService questionImporterService)
         {
@@ -235,7 +235,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             _fileDialogService = dialogService;
             _surveyService = surveySerivce;
-
+            _questionService = questionService;
             _peopleService = peopleService;
             _commentService = commentService;
 ;
@@ -542,7 +542,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         /// <summary>
         /// Save each approved question candidate to the database and add it to the list of saved questions if succuessful.
         /// </summary>
-        void SaveQuestions()
+        async Task SaveQuestions()
         {
             foreach (QuestionCandidatePreview candidate in ApprovedQuestions)
             {
@@ -553,7 +553,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
 
                 // process the candidate and return the resulting SurveyQuestion object or null if the operation failed.
-                SurveyQuestion? question = ProcessCandidate(candidate);
+                SurveyQuestion? question = await ProcessCandidate(candidate);
 
                 if (question == null)
                     continue;
@@ -658,9 +658,9 @@ namespace SDIFrontEnd_WPF.ViewModels
         #endregion // Commands
 
         #region Private Helpers
-        void LoadData()
+        async Task LoadData()
         {
-            SurveyList = _surveyService.GetAllSurveys();
+            SurveyList = await _surveyService.GetAllAsync();
             PeopleList = _peopleService.GetPeopleBasics();
             CommentTypeList = _commentService.GetAllCommentTypes();
 
@@ -738,7 +738,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
 
 
-        SurveyQuestion? ProcessCandidate(QuestionCandidatePreview candidate)
+        async Task<SurveyQuestion?> ProcessCandidate(QuestionCandidatePreview candidate)
         {
             int result = 0;
             // make new SurveyQuestion object from the candidate
@@ -749,17 +749,17 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             if (candidate.IsDeletion)
             {
-                result = ProcessDeletion(question);
+                result = await ProcessDeletion(question);
             }
             else
             {
                 if (candidate.IsNewQuestion)
                 {
-                    result = ProcessNewQuestion(question);
+                    result = await ProcessNewQuestion(question);
                 }
                 else
                 {
-                    result = ProcessExistingQuestion(question, !candidate.NoChanges());
+                    result = await ProcessExistingQuestion(question, !candidate.NoChanges());
                 }
 
                 if (candidate.SaveComments)
@@ -1043,34 +1043,14 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        int ProcessNewQuestion(SurveyQuestion question)
-        {
-            if (_varNameService.InsertVariable(new VariableName(question.VarName)) == 1)
-                return 1;
-            
-
-            if (_surveyService.AddQuestion(question) !=1 && _surveyService.UpdateQuestion(question)!=1)
-            {
-
-                return 0;
-            }
-            else
-            {
-                // error inserting/updating question
-                return 1;
-            }
-
-            
-        }
-
-        int ProcessNewQuestionAsync(SurveyQuestion question)
+        async Task<int> ProcessNewQuestion(SurveyQuestion question)
         {
             int result = _varNameService.InsertVariable(new VariableName(question.VarName));
             if (result == 1)
                 return 1;
 
-            bool addSuccess = _surveyService.AddQuestion(question) !=1;
-            bool updateSuccess = _surveyService.UpdateQuestion(question) !=1;
+            bool addSuccess = await _questionService.AddQuestion(question) !=1;
+            bool updateSuccess = await _questionService.UpdateQuestion(question) !=1;
             
             if (addSuccess && updateSuccess)
             {
@@ -1092,12 +1072,12 @@ namespace SDIFrontEnd_WPF.ViewModels
             return 0;
         }
 
-        int ProcessExistingQuestion (SurveyQuestion question, bool updateWordings)
+        async Task<int> ProcessExistingQuestion (SurveyQuestion question, bool updateWordings)
         {
             if (updateWordings)
 
             {
-                var result = _surveyService.UpdateQuestion(question);
+                var result = await _questionService.UpdateQuestion(question);
                 return result == 0 ? 0 : 1;
             }                
 
@@ -1107,7 +1087,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
        
 
-        int ProcessDeletion(SurveyQuestion question)
+        async Task<int> ProcessDeletion(SurveyQuestion question)
         {
             // create deleted comments first
             _commentService.BackupComments(question.ID);
@@ -1130,7 +1110,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
 
 
-            bool result = _surveyService.RemoveQuestion(question.SurveyCode, question.VarName.VarName) !=1;
+            bool result = await _questionService.DeleteQuestion(question) !=1;
 
 
             if (result)
