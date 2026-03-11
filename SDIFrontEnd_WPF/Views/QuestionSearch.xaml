@@ -20,7 +20,7 @@
 
         <StackPanel Grid.Row="1" Width="200" HorizontalAlignment="Left">
             <TextBlock Text="Survey"/>
-            <ComboBox SelectedItem="{Binding SearchSurvey}"/>
+            <ComboBox SelectedItem="{Binding SearchSurvey}" ItemsSource="{Binding SurveyList}"/>
             <TextBlock Text="VarName"/>
             <TextBox Text="{Binding SearchVarName}"/>
             <TextBlock Text="Search Term"/>
