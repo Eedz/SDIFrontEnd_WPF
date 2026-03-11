@@ -73,7 +73,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
     public partial class QuestionSurveyMatrixViewModel : WorkspaceViewModel
     {
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
         private readonly IMatrixService _matrixService;
 
         [ObservableProperty]
@@ -109,8 +109,8 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        public List<SurveyQuestion> AllQuestions { get; }
-        public List<Survey> AllSurveys { get; }
+        public List<SurveyQuestion> AllQuestions { get; private set; }
+        public List<Survey> AllSurveys { get; private set; }
 
         public ObservableCollection<SurveyQuestion> VisibleQuestions { get; } = new();
         public ObservableCollection<Survey> VisibleSurveys { get; } = new();
@@ -144,21 +144,24 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private int cellWidth = 150;
 
-        public QuestionSurveyMatrixViewModel(ISurveyService surveyService, IMatrixService matrixService)
+        public QuestionSurveyMatrixViewModel(IApiSurveyService surveyService, IMatrixService matrixService)
         {
             _surveyService = surveyService;
             _matrixService = matrixService;
 
-            AllQuestions = new List<SurveyQuestion>();
-            AllSurveys = surveyService.GetAllSurveys();
-
+            
+            _ = Load();
             SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
             RefreshWindow();
             
         }
 
 
-
+        private async Task Load()
+        {
+            AllQuestions = new List<SurveyQuestion>();
+            AllSurveys = await _surveyService.GetAllAsync();
+        }
 
 
         private MatrixColumnViewModel CreateBaseSurveyColumn(Survey survey)
