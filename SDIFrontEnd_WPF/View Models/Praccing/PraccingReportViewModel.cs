@@ -19,27 +19,24 @@ namespace SDIFrontEnd_WPF.ViewModels
     public partial class PraccingReportViewModel : ViewModelBase
     {
         private readonly IPraccingService _praccingService;
-        private readonly ISurveyService _surveyService;
 
         // lists
-        
-
-        public List<Survey> SurveyList { get; set; }
-        public List<string> StatusList { get; set; }
+        public List<Survey> SurveyList { get; private set; }
+        public List<string> StatusList { get; private set; }
        
-        public List<string> SortOptions { get; set; }
+        public List<string> SortOptions { get; private set; }
 
-        public List<PraccingIssue> IssueList { get; set; }
+        public List<PraccingIssue> IssueList { get; private set; }
 
-        public ObservableCollection<string> DateList { get; set; }
-        public ObservableCollection<Person> FromList { get; set; }
-        public ObservableCollection<Person> ToList { get; set; }
-        public ObservableCollection<PraccingCategory> CategoryList { get; set; }
-        public ObservableCollection<string> LastUpdateDateList { get; set; }
-        public ObservableCollection<Person> LastUpdateFromList { get; set; }
-        public ObservableCollection<Person> LastUpdateToList { get; set; }
+        public ObservableCollection<string> DateList { get; private set; }
+        public ObservableCollection<Person> FromList { get; private set; }
+        public ObservableCollection<Person> ToList { get; private set; }
+        public ObservableCollection<PraccingCategory> CategoryList { get; private set; }
+        public ObservableCollection<string> LastUpdateDateList { get; private set; }
+        public ObservableCollection<Person> LastUpdateFromList { get; private set; }
+        public ObservableCollection<Person> LastUpdateToList { get; private set; }
 
-        public ObservableCollection<string> LanguageList { get; set; }
+        public ObservableCollection<string> LanguageList { get; private set; }
 
         // selected items
         [ObservableProperty]
@@ -61,10 +58,9 @@ namespace SDIFrontEnd_WPF.ViewModels
         public bool IncludeEmptyRow { get; set; } = true;
         public bool IncludePrevNames { get; set; }
 
-        public PraccingReportViewModel(IPraccingService praccingService, ISurveyService survey) 
+        public PraccingReportViewModel(IPraccingService praccingService) 
         { 
             _praccingService = praccingService ?? throw new ArgumentNullException(nameof(praccingService));
-            _surveyService = survey ?? throw new ArgumentNullException(nameof(survey));
             DisplayName = "Praccing Report";
 
             SurveyList = _praccingService.GetPraccingSurveys();
