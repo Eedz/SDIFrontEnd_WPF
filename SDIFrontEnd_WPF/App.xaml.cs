@@ -51,6 +51,9 @@ namespace SDIFrontEnd_WPF
 
             await loader.LoadAsync();
 
+            var wordingLoader = serviceProvider.GetRequiredService<WordingDataService>();
+            await wordingLoader.LoadAsync();
+
 
             MainWindow window = new MainWindow();
 
@@ -97,6 +100,18 @@ namespace SDIFrontEnd_WPF
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            services.AddHttpClient<IApiWordingService, ApiWordingService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<IApiUserService, ApiUserService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
 #if DEBUG
             services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionStringTest"].ConnectionString));
 #else
@@ -108,30 +123,28 @@ namespace SDIFrontEnd_WPF
                 builder.SetMinimumLevel(LogLevel.Information);
             });
 
+            // data storage
             services.AddSingleton<ReferenceDataStore>();
             services.AddSingleton<ReferenceDataService>();
             
+            services.AddSingleton<WordingData>();
+            services.AddSingleton<WordingDataService>();
 
+            // respositories and services (to be replaced with API calls in the future) 
             services.AddSingleton<IPeopleRepository, PeopleRepository>();
             services.AddSingleton<ICommentRepository, CommentRepository>();
-            services.AddSingleton<IVarNameRepository, VarNameRepository>();
-            services.AddSingleton<IWordingRepository, WordingRepository>();
-            services.AddSingleton<IReferenceDataRepository, ReferenceDataRepository>();
-            services.AddSingleton<IUserRepository, UserRepository>();
+            
             services.AddSingleton<IPraccingRepository, PraccingRepository>();
             services.AddSingleton<IAuditRepository, AuditRepository>();
-
             
             services.AddSingleton<IPeopleService, PeopleService>();
-            services.AddSingleton<ICommentService, CommentService>();
-            services.AddSingleton<IVarNameService, VarNameService>();
-            services.AddSingleton<IWordingService, WordingService>();
-       //     services.AddSingleton<IReferenceDataService, ReferenceDataService>();
-            services.AddSingleton<IUserService, UserService>();
+            services.AddSingleton<ICommentService, CommentService>();           
+            
             services.AddSingleton<IMatrixService, MatrixService>(); 
             services.AddSingleton<IPraccingService, PraccingService>();
             services.AddSingleton<IAuditService, AuditService>();
 
+            // client services
             services.AddTransient<QuestionImporterService>();
 
             AddVMServices(services);
