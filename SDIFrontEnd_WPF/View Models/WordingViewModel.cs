@@ -24,7 +24,7 @@ namespace SDIFrontEnd_WPF
     public partial class WordingViewModel : WorkspaceViewModel
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
-        private readonly IWordingService _wordingService; // Service for managing question wordings and translations
+        private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
 
         public string WordingType { get; set; } // type of wording being managed (e.g., PreP, PreI etc.)
         [ObservableProperty]
@@ -49,27 +49,32 @@ namespace SDIFrontEnd_WPF
                 CurrentWording.WordingText = HtmlUtils.ConvertFlowDocumentToHtml(value);
             }
         }
-        public WordingViewModel(IWordingService wordingService, IDialogService dialogService, string type)
+        public WordingViewModel(IApiWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Wording Manager";
             
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             WordingType = type ?? throw new ArgumentNullException(nameof(type));
-            switch (type)
-            {
-                case "PreP": Wordings = new ObservableCollection<Wording>( _wordingService.GetAllPreP()); break;
-                case "PreI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreI()); break;
-                case "PreA": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPreA()); break;
-                case "LitQ": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllLitQ()); break;
-                case "PstI": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPstI()); break;
-                case "PstP": Wordings = new ObservableCollection<Wording>(_wordingService.GetAllPstP()); break;
-            }
-
+            
+            _ = Load();
             CurrentWording = Wordings.FirstOrDefault();
         }
 
-        public WordingViewModel(IWordingService wordingService, IDialogService dialogService, string type, int wordID) : this(wordingService, dialogService, type)
+        private async Task Load()
+        {
+            switch (WordingType)
+            {
+                case "PreP": Wordings = new ObservableCollection<Wording>( await _wordingService.GetAllPreP()); break;
+                case "PreI": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPreI()); break;
+                case "PreA": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPreA()); break;
+                case "LitQ": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllLitQ()); break;
+                case "PstI": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPstI()); break;
+                case "PstP": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPstP()); break;
+            }
+        }
+
+        public WordingViewModel(IApiWordingService wordingService, IDialogService dialogService, string type, int wordID) : this(wordingService, dialogService, type)
         {
             CurrentWording = Wordings.FirstOrDefault(w => w.WordID == wordID);
         }
@@ -82,8 +87,16 @@ namespace SDIFrontEnd_WPF
                 return;
             }
             WordingText = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(value.WordingText, true));
-            Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(value));
+            _ = UpdateUsages();
+            
             LockedForEditing = true;
+        }
+
+        async Task UpdateUsages()
+        {
+            if (CurrentWording == null)
+                return;
+            Usages = new ObservableCollection<WordingUsage>(await _wordingService.GetWordingUsages(CurrentWording));
         }
 
         [RelayCommand]
@@ -125,7 +138,7 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void DeleteWording(Wording wording)
+        private async Task DeleteWording(Wording wording)
         {
             if (wording.WordID == 0) // reserved
             {
@@ -154,7 +167,7 @@ namespace SDIFrontEnd_WPF
             if (wording.WordID > 0)
             {
                 PreviousItem();
-                if (_wordingService.DeleteWording(wording.WordID, wording.FieldType) == 1)
+                if (await _wordingService.DeleteWording(wording) == 1)
                 {
                     Wordings.Remove(wording);
                 }
@@ -271,7 +284,7 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private void SaveChanges()
+        private async Task SaveChanges()
         {
             if (CurrentWording == null)
                 return;
@@ -285,16 +298,16 @@ namespace SDIFrontEnd_WPF
                 if (CurrentWording.WordID == -1)
                 {
                     // New wording
-                    int newId = _wordingService.InsertWording(CurrentWording);
+                    Wording newId = await _wordingService.CreateWording(CurrentWording);
                 }
                 else
                 {
                     // Existing wording
-                    _wordingService.UpdateWording(CurrentWording);
+                    await _wordingService.UpdateWording(CurrentWording);
                 }
                 
                 // Refresh usages after save
-                Usages = new ObservableCollection<WordingUsage>(_wordingService.GetWordingUsages(CurrentWording));
+                Usages = new ObservableCollection<WordingUsage>(await _wordingService.GetWordingUsages(CurrentWording));
             }
             catch(SqlException sqle)
             {
