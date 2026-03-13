@@ -31,8 +31,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         private readonly IApiQuestionService _questionService;
         private readonly IPeopleService _peopleService;
         private readonly ICommentService _commentService;
-        private readonly IWordingService _wordingService;
-        private readonly IVarNameService _varNameService;
+        private readonly IApiWordingService _wordingService;
+        private readonly IApiVarNameService _varNameService;
         private readonly QuestionImporterService _questionImporterService;
 
         [ObservableProperty]
@@ -229,7 +229,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public QuestionImporterViewModel(IFileDialogService dialogService, IApiSurveyService surveySerivce, IApiQuestionService questionService,
                                         IPeopleService peopleService, ICommentService commentService,
-                                        IWordingService wordingService, IVarNameService varnameService, QuestionImporterService questionImporterService)
+                                        IApiWordingService wordingService, IApiVarNameService varnameService, QuestionImporterService questionImporterService)
         {
             base.DisplayName = "Survey Importer";
 
@@ -664,14 +664,14 @@ namespace SDIFrontEnd_WPF.ViewModels
             PeopleList = _peopleService.GetPeopleBasics();
             CommentTypeList = _commentService.GetAllCommentTypes();
 
-            PrePList = _wordingService.GetAllPreP();
-            PreIList = _wordingService.GetAllPreI();
-            PreAList = _wordingService.GetAllPreA();
-            LitQList = _wordingService.GetAllLitQ();
-            PstIList = _wordingService.GetAllPstI();
-            PstPList = _wordingService.GetAllPstP();
-            ROList = _wordingService.GetAllResponseSets();
-            NRList = _wordingService.GetAllNonResponseSets();
+            PrePList = await _wordingService.GetAllPreP();
+            PreIList = await _wordingService.GetAllPreI();
+            PreAList = await _wordingService.GetAllPreA();
+            LitQList = await _wordingService.GetAllLitQ();
+            PstIList = await _wordingService.GetAllPstI();
+            PstPList = await _wordingService.GetAllPstP();
+            ROList = await _wordingService.GetAllRespOptions();
+            NRList = await _wordingService.GetAllNonResponses();
 
         }
 
@@ -774,7 +774,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         /// <summary>
         /// Creates or Updates wordings in the database for each field that has a new wording. The candidate's wording ID is updated with the new or existing wording ID.
         /// </summary>
-        void CreateNewWordings()
+        async Task CreateNewWordings()
         {
             foreach (QuestionCandidatePreview candidate in ApprovedQuestions)
             { 
@@ -783,7 +783,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = PrePList.FirstOrDefault(x => x.WordingText.Equals(candidate.Revised.PreP.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetWordingUsages(new Wording(candidate.Revised.PreP.WordID, WordingType.PreP, candidate.Revised.PreP.Text));
+                        var uses = await _wordingService.GetWordingUsages(new Wording(candidate.Revised.PreP.WordID, WordingType.PreP, candidate.Revised.PreP.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.PreP.WordID = uses[0].WordID;
@@ -804,7 +804,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = PreIList.FirstOrDefault(x => x.WordingText.Equals(candidate.Revised.PreI.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetWordingUsages(new Wording(candidate.Revised.PreI.WordID, WordingType.PreI, candidate.Revised.PreI.Text));
+                        var uses = await _wordingService.GetWordingUsages(new Wording(candidate.Revised.PreI.WordID, WordingType.PreI, candidate.Revised.PreI.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.PreI.WordID = uses[0].WordID;
@@ -825,7 +825,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = PreAList.FirstOrDefault(x => x.WordingText.Equals(candidate.Revised.PreA.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetWordingUsages(new Wording(candidate.Revised.PreA.WordID, WordingType.PreA, candidate.Revised.PreA.Text));
+                        var uses = await _wordingService.GetWordingUsages(new Wording(candidate.Revised.PreA.WordID, WordingType.PreA, candidate.Revised.PreA.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.PreA.WordID = uses[0].WordID;
@@ -846,7 +846,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = LitQList.FirstOrDefault(x => x.WordingText.Equals(candidate.Revised.LitQ.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetWordingUsages(new Wording(candidate.Revised.LitQ.WordID, WordingType.LitQ, candidate.Revised.LitQ.Text));
+                        var uses = await  _wordingService.GetWordingUsages(new Wording(candidate.Revised.LitQ.WordID, WordingType.LitQ, candidate.Revised.LitQ.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.LitQ.WordID = uses[0].WordID;
@@ -867,7 +867,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = PstIList.FirstOrDefault(x => x.WordingText.Equals(candidate.Revised.PstI.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetWordingUsages(new Wording(candidate.Original.PstI.WordID, WordingType.PstI, candidate.Original.PstI.Text));
+                        var uses = await _wordingService.GetWordingUsages(new Wording(candidate.Original.PstI.WordID, WordingType.PstI, candidate.Original.PstI.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.PstI.WordID = uses[0].WordID;
@@ -888,7 +888,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = PstPList.FirstOrDefault(x => x.WordingText.Equals(candidate.Revised.PstP.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetWordingUsages(new Wording(candidate.Original.PstP.WordID, WordingType.PstP, candidate.Original.PstP.Text));
+                        var uses = await _wordingService.GetWordingUsages(new Wording(candidate.Original.PstP.WordID, WordingType.PstP, candidate.Original.PstP.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.PstP.WordID = uses[0].WordID;
@@ -909,7 +909,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = ROList.FirstOrDefault(x => x.RespList.Equals(candidate.Revised.RespOptions.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetResponseUsages("RespOptions", candidate.Revised.RespOptions.SetName);
+                        var uses = await _wordingService.GetResponseUsages(new ResponseSet(candidate.Revised.RespOptions.SetName, ResponseType.RespOptions, candidate.Revised.RespOptions.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.RespOptions.SetName = uses[0].RespName;
@@ -930,7 +930,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     var match = NRList.FirstOrDefault(x => x.RespList.Equals(candidate.Revised.NRCodes.Text));
                     if (match == null)
                     {
-                        var uses = _wordingService.GetResponseUsages("NRCodes", candidate.Revised.NRCodes.SetName);
+                        var uses = await _wordingService.GetResponseUsages(new ResponseSet(candidate.Revised.NRCodes.SetName, ResponseType.NRCodes, candidate.Revised.NRCodes.Text));
                         if (uses.Count == 1 && uses[0].VarName == candidate.VarName && uses[0].SurveyCode == candidate.Survey)
                         {
                             candidate.Revised.NRCodes.SetName = uses[0].RespName;
@@ -948,10 +948,10 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        void CreateWording(WordingCandidate wordingCandidate)
+        async Task CreateWording(WordingCandidate wordingCandidate)
         {
             Wording newWording = new Wording(-1, wordingCandidate.FieldName, wordingCandidate.Text);
-            _wordingService.InsertWording(newWording);
+            await _wordingService.CreateWording(newWording);
 
             switch (wordingCandidate.FieldName)
             {
@@ -1027,10 +1027,10 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        void CreateResponseSet(ResponseSetCandidate candidate)
+        async Task CreateResponseSet(ResponseSetCandidate candidate)
         {
             ResponseSet newWording = new ResponseSet(candidate.SetName, candidate.FieldName, candidate.Text);
-            _wordingService.InsertResponseSet(newWording);
+            await _wordingService.CreateResponseSet(newWording);
 
             switch (candidate.FieldName)
             {
@@ -1045,7 +1045,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         async Task<int> ProcessNewQuestion(SurveyQuestion question)
         {
-            int result = _varNameService.InsertVariable(new VariableName(question.VarName));
+            int result = await _varNameService.InsertVariable(new VariableName(question.VarName));
             if (result == 1)
                 return 1;
 
