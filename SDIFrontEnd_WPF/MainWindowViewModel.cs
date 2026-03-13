@@ -19,7 +19,7 @@ namespace SDIFrontEnd_WPF
         // when an item is selected, the corresponding user control is displayed in the right pane
 
         private readonly IServiceProvider _services; 
-        private readonly IUserService _userService;
+        private readonly IApiUserService _userService;
         private readonly IApiSurveyService apiSurveyService; // Service for managing surveys via API calls
 
         private UserPrefs CurrentUser;
@@ -50,14 +50,10 @@ namespace SDIFrontEnd_WPF
             DisplayName = "Main Window ViewModel";
             ActiveForm = services.GetRequiredService<HomeViewModel>(); // Set the initial active form to HomeViewModel
             _services = services;
-            _userService = _services.GetService(typeof(IUserService)) as IUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
+            _userService = _services.GetService(typeof(IApiUserService)) as IApiUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
             
-            apiSurveyService = _services.GetService(typeof(IApiSurveyService)) as IApiSurveyService; // Initialize the API survey service with the survey service
-            CurrentUser = _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
-           
-            // Load surveys from the API instead of the local service
-            CurrentSublinks = new ObservableCollection<SublinkItem>();
-
+            apiSurveyService = _services.GetService(typeof(IApiSurveyService)) as IApiSurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey API service cannot be null");// Initialize the API survey service with the survey service
+            
             _ = LoadAsync(); // TODO move this call to a command 
         }
 
@@ -65,6 +61,8 @@ namespace SDIFrontEnd_WPF
         {
             var surveys = await apiSurveyService.GetAllAsync();
             AvailableSurveysToAdd.AddRange(surveys);
+            CurrentUser = await _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");            
+            CurrentSublinks = new ObservableCollection<SublinkItem>();
         }
 
         partial void OnSelectedMenuCategoryChanged(MenuCategory value)
