@@ -42,11 +42,23 @@ namespace SDIFrontEnd_WPF
             return question.ToList();
         }
 
-        public async Task<SurveyQuestion> SaveQuestion(SurveyQuestion question)
+        public async Task<SurveyQuestionRecord> SaveQuestion(SurveyQuestionRecord question)
         {
-            var dto = MapToDto(question);
+            var dto = MapToDto(question.Item);
 
-            var response = await _http.PutAsJsonAsync($"api/questions/{dto.ID}", dto);
+            HttpResponseMessage response;
+            if (question.NewRecord)
+                response = await _http.PostAsJsonAsync($"api/questions", dto);
+            else if (question.Deleted)
+                response = await _http.DeleteAsync($"api/questions/{dto.ID}");
+            else if (question.ShouldSave)
+            {
+                if (question.DirtyLabels)
+                    await _http.PutAsJsonAsync($"api/labels/variable/{dto.VarName.VarName}", dto.VarName);
+                response = await _http.PutAsJsonAsync($"api/questions/{dto.ID}", dto);
+            }
+            else
+                return question; // No changes to save
 
             response.EnsureSuccessStatusCode();
             return question;
@@ -57,6 +69,30 @@ namespace SDIFrontEnd_WPF
             var dtos = await _http.GetFromJsonAsync<IEnumerable<SurveyQuestionDto>>($"api/questions/search?query={Uri.EscapeDataString(searchTerm)}");           
             var questions = dtos.Select(x => MapToEntity(x));
             return questions.ToList();
+        }
+
+        public async Task<int> AddQuestion(SurveyQuestion question)
+        {
+            var dto = MapToDto(question);
+            var response = await _http.PostAsJsonAsync($"api/questions", dto);
+            response.EnsureSuccessStatusCode();
+            var createdDto = await response.Content.ReadFromJsonAsync<SurveyQuestionDto>();
+            return createdDto.ID;
+        }
+
+        public async Task<int> UpdateQuestion(SurveyQuestion question)
+        {
+            var dto = MapToDto(question);
+            var response = await _http.PutAsJsonAsync($"api/questions/{dto.ID}", dto);
+            response.EnsureSuccessStatusCode();
+            return dto.ID;
+        }
+
+        public async Task<int> DeleteQuestion(SurveyQuestion question)
+        {
+            var response = await _http.DeleteAsync($"api/questions/{question.ID}");
+            response.EnsureSuccessStatusCode();
+            return question.ID;
         }
 
         private SurveyQuestion MapToEntity(SurveyQuestionDto dto)

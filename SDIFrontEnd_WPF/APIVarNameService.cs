@@ -21,12 +21,12 @@ namespace SDIFrontEnd_WPF
         {
         }
 
-        public int InsertVariable(VariableName dto)
+        public async Task<int> InsertVariable(VariableName variable)
         {
-            return 0;
-            //var entity = MapToEntity(dto);
-            //return _service.InsertVariable(entity);
-
+            
+            var dto = MapToDto(variable);
+            var result = await _http.PostAsJsonAsync("api/varnames", dto);
+            return result.IsSuccessStatusCode ? 1 : 0;
         }
 
         public async Task<List<VariableName>> GetAllVarNames()
@@ -55,8 +55,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariableName>> GetVariableInfoByRef(string refvarname)
         {
-            //var list = _http.GetFromJsonAsAsyncEnumerable<VariableNameDto>($"api/varnames/{refvarname}");
-            return null;
+            throw new NotImplementedException();
         }
 
         public async Task<List<VariableName>> SearchVarNames(string search, int take = 50)

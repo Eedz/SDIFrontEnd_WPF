@@ -1,9 +1,9 @@
-﻿using System;
+﻿using ITCLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ITCLib;
 namespace SDIFrontEnd_WPF
 {
     public  interface IApiQuestionService
@@ -12,8 +12,12 @@ namespace SDIFrontEnd_WPF
         Task<List<SurveyQuestion>> GetQuestionsByVarNameAsync(string varName);
         Task<List<SurveyQuestion>> GetQuestionsByRefVarNameAsync(string refVarName);
 
-        Task<SurveyQuestion> SaveQuestion(SurveyQuestion question);
+        Task<SurveyQuestionRecord> SaveQuestion(SurveyQuestionRecord question);
 
         Task<List<SurveyQuestion>> SearchQuestions(string searchTerm);
+
+        Task<int> AddQuestion(SurveyQuestion question);
+        Task<int> UpdateQuestion(SurveyQuestion question);
+        Task<int> DeleteQuestion(SurveyQuestion question);
     }
 }
