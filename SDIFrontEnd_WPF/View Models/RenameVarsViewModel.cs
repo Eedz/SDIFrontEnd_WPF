@@ -17,7 +17,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class RenameVarsViewModel : ViewModelBase
     {
-        private readonly IVarNameService _varNameService;
+        private readonly IApiVarNameService _varNameService;
         private readonly IApiSurveyService _surveyService;
         private readonly IFileDialogService _fileDialogService;
 
@@ -33,7 +33,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string SourceFilePath { get; set; }
 
 
-        public RenameVarsViewModel(IVarNameService varNameService, IApiSurveyService surveyService, IFileDialogService fileDialogService, VarNameChangeViewModel changeDetails)
+        public RenameVarsViewModel(IApiVarNameService varNameService, IApiSurveyService surveyService, IFileDialogService fileDialogService, VarNameChangeViewModel changeDetails)
         {
             DisplayName = "Rename Variables";
 
@@ -85,8 +85,8 @@ namespace SDIFrontEnd_WPF.ViewModels
                 return;
             }
 
-            VariableName oldVarInfo = _varNameService.GetVariableInfo(item.OldVarName);
-            VariableName newVarInfo = _varNameService.GetVariableInfo(item.NewVarName);
+            VariableName oldVarInfo = await _varNameService.GetVariableInfo(item.OldVarName);
+            VariableName newVarInfo = await _varNameService.GetVariableInfo(item.NewVarName);
 
             string varlabel = (oldVarInfo != null ? $"{oldVarInfo.VarName}: {oldVarInfo.VarLabel}" : $"{item.OldVarName}:[new variable]") +
                             "\r\n" +
