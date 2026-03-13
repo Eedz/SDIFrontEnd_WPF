@@ -8,27 +8,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Collections.ObjectModel;
 namespace SDIFrontEnd_WPF
 {
     public class QuestionImporterService
     {
         private readonly IApiSurveyService _surveyService;
-        private readonly IWordingService _wordingService;
+        private readonly WordingData _wordingDataService;
         private readonly IPeopleService _peopleService;
         private readonly ICommentService _commentService;
 
-        private WordingData? _cachedWordings;
-
         public QuestionImporterService(
             IApiSurveyService surveyService,
-            IWordingService wordingService,
             IPeopleService peopleService,
-            ICommentService commentService)
+            ICommentService commentService,
+            WordingData wordingDataService)
         {
             _surveyService = surveyService;
-            _wordingService = wordingService;
             _peopleService = peopleService;
             _commentService = commentService;
+            _wordingDataService = wordingDataService;
         }
 
         public async Task<List<QuestionCandidatePreview>> ImportQuestions(string surveyCode, string sourceFilePath)
@@ -47,11 +46,11 @@ namespace SDIFrontEnd_WPF
             var people = _peopleService.GetPeopleBasics();
             var commentTypes = _commentService.GetAllCommentTypes();
 
-            var wordings = GetWordings();
+            
 
             foreach (var q in questions)
             {
-                EnrichCandidate(q, questions, existingQuestions, people, commentTypes, wordings, sourceFilePath);
+                EnrichCandidate(q, questions, existingQuestions, people, commentTypes, sourceFilePath);
             }
 
             return questions;
@@ -65,46 +64,30 @@ namespace SDIFrontEnd_WPF
             return await _surveyService.GetSurveyQuestions(survey.SID);
         }
 
-        public List<Wording> GetMasterListFor(WordingType type)
+        public async Task<ObservableCollection<Wording>> GetMasterListFor(WordingType type)
         {
-            var w = GetWordings();
             return type switch
             {
-                WordingType.PreP => w.PreP,
-                WordingType.PreI => w.PreI,
-                WordingType.PreA => w.PreA,
-                WordingType.LitQ => w.LitQ,
-                WordingType.PstI => w.PstI,
-                WordingType.PstP => w.PstP,
+                WordingType.PreP => _wordingDataService.PreP,
+                WordingType.PreI => _wordingDataService.PreI,
+                WordingType.PreA => _wordingDataService.PreA,
+                WordingType.LitQ => _wordingDataService.LitQ,
+                WordingType.PstI => _wordingDataService.PstI,
+                WordingType.PstP => _wordingDataService.PstP,
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
         }
 
-        public List<ResponseSet> GetMasterListFor(ResponseType type)
+        public async Task<ObservableCollection<ResponseSet>> GetMasterListFor(ResponseType type)
         {
-            var w = GetWordings();
             return type switch
             {
-                ResponseType.RespOptions => w.RO,
-                ResponseType.NRCodes => w.NR,
+                ResponseType.RespOptions => _wordingDataService.RO,
+                ResponseType.NRCodes => _wordingDataService.NR,
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
         }
 
-
-        private WordingData GetWordings()
-        {
-            return _cachedWordings ??= new WordingData(
-                _wordingService.GetAllPreP(),
-                _wordingService.GetAllPreI(),
-                _wordingService.GetAllPreA(),
-                _wordingService.GetAllLitQ(),
-                _wordingService.GetAllPstI(),
-                _wordingService.GetAllPstP(),
-                _wordingService.GetAllResponseSets(),
-                _wordingService.GetAllNonResponseSets()
-            );
-        }
 
         /// <summary>
         /// Add information from the database like QID, Wording ID, and missing series members.
@@ -128,7 +111,6 @@ namespace SDIFrontEnd_WPF
             List<SurveyQuestion> existing,
             List<Person> people,
             List<CommentType> commentTypes,
-            WordingData wording,
             string sourceFilePath)
         {
 
@@ -138,11 +120,11 @@ namespace SDIFrontEnd_WPF
                 candidate.QID = matchingQuestion.ID;
 
             // set the missing series parts 
-            SetSeriesParts(candidate, questions, existing, wording);
+            SetSeriesParts(candidate, questions, existing);
 
             // set the wording numbers for each wording
-            SetWordingSet(candidate.Original, wording);
-            SetWordingSet(candidate.Revised, wording);
+            SetWordingSet(candidate.Original);
+            SetWordingSet(candidate.Revised);
 
             // fill in comment data
             foreach (var comment in candidate.Comments)
@@ -156,30 +138,32 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private void SetWordingSet(QuestionCandidate qc, WordingData w)
+        private void SetWordingSet(QuestionCandidate qc)
         {
-            SetWording(qc.PreP, w.PreP);
-            SetWording(qc.PreI, w.PreI);
-            SetWording(qc.PreA, w.PreA);
-            SetWording(qc.LitQ, w.LitQ);
-            SetWording(qc.PstI, w.PstI);
-            SetWording(qc.PstP, w.PstP);
-            SetResponseSet(qc.RespOptions, w.RO);
-            SetResponseSet(qc.NRCodes, w.NR);
+            SetWording(qc.PreP, _wordingDataService.PreP);
+            SetWording(qc.PreI, _wordingDataService.PreI);
+            SetWording(qc.PreA, _wordingDataService.PreA);
+            SetWording(qc.LitQ, _wordingDataService.LitQ);
+            SetWording(qc.PstI, _wordingDataService.PstI);
+            SetWording(qc.PstP, _wordingDataService.PstP);
+            SetResponseSet(qc.RespOptions, _wordingDataService.RO);
+            SetResponseSet(qc.NRCodes, _wordingDataService.NR);
         }
 
        
-        public void SetWording(WordingCandidate candidate)
+        public async Task SetWording(WordingCandidate candidate)
         {
-            SetWording(candidate, GetMasterListFor(candidate.FieldName));
+            var masterlist = await GetMasterListFor(candidate.FieldName);
+            SetWording(candidate, masterlist);
         }
 
-        public void SetResponseSet(ResponseSetCandidate candidate)
+        public async Task SetResponseSet(ResponseSetCandidate candidate)
         {
-            SetResponseSet(candidate, GetMasterListFor(candidate.FieldName));
+            var masterlist = await GetMasterListFor(candidate.FieldName);
+            SetResponseSet(candidate, masterlist);
         }
 
-        public void SetWording(WordingCandidate candidate, List<Wording> master)
+        public void SetWording(WordingCandidate candidate, IEnumerable<Wording> master)
         {
             var match = master.FirstOrDefault(w => LinesMatch(w.WordingText, candidate.Text));
             candidate.NewWording = match == null;
@@ -187,14 +171,14 @@ namespace SDIFrontEnd_WPF
         }
 
       
-        public void SetResponseSet(ResponseSetCandidate candidate, List<ResponseSet> master)
+        public void SetResponseSet(ResponseSetCandidate candidate, IEnumerable<ResponseSet> master)
         {
             var match = master.FirstOrDefault(r => LinesMatch(r.RespList, candidate.Text));
             candidate.NewWording = match == null;
             candidate.SetName = match?.RespSetName ?? GenerateUniqueName(master);
         }
 
-        private string GenerateUniqueName(List<ResponseSet> list)
+        private string GenerateUniqueName(IEnumerable<ResponseSet> list)
         {
             var tmp = new ResponseSet();
             do tmp.SetRandomName();
@@ -235,7 +219,7 @@ namespace SDIFrontEnd_WPF
             return true;
         }
 
-        private void SetSeriesParts(QuestionCandidatePreview questionCandidate, List<QuestionCandidatePreview> questions, List<SurveyQuestion> existing, WordingData wording)
+        private void SetSeriesParts(QuestionCandidatePreview questionCandidate, List<QuestionCandidatePreview> questions, List<SurveyQuestion> existing)
         {
             var matchingQuestion = existing.FirstOrDefault(x => x.VarName.VarName.Equals(questionCandidate.VarName));
             if (matchingQuestion != null && !string.IsNullOrEmpty(questionCandidate.Qnum) && char.IsLetter(questionCandidate.Qnum[questionCandidate.Qnum.Length - 1]) && questionCandidate.Qnum[questionCandidate.Qnum.Length - 1] != 'a')
@@ -293,14 +277,5 @@ namespace SDIFrontEnd_WPF
 
 
 
-    public record WordingData(
-        List<Wording> PreP,
-        List<Wording> PreI,
-        List<Wording> PreA,
-        List<Wording> LitQ,
-        List<Wording> PstI,
-        List<Wording> PstP,
-        List<ResponseSet> RO,
-        List<ResponseSet> NR
-        );
+    
 }
