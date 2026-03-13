@@ -15,7 +15,7 @@ namespace SDIFrontEnd_WPF
     public partial class ResponseSetViewModel : WorkspaceViewModel
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
-        private readonly IWordingService _wordingService; // Service for managing question wordings and translations
+        private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
 
         public bool NewSet { get; set; }
         public string ResponseType { get; set; } // Type of wording being managed (e.g., PreP, PreI etc.)
@@ -31,36 +31,46 @@ namespace SDIFrontEnd_WPF
 
         public string ItemPosition => $"{(Responses.IndexOf(CurrentResponse) + 1)} of {Responses.Count}";
 
-        public ResponseSetViewModel(IWordingService wordingService, IDialogService dialogService, string type)
+        public ResponseSetViewModel(IApiWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Response Set Manager";
 
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             ResponseType = type ?? throw new ArgumentNullException(nameof(type));
-            switch (type)
-            {
-                case "RespOptions": Responses = new ObservableCollection<ResponseSet>( _wordingService.GetAllResponseSets()); break;
-                case "NRCodes": Responses = new ObservableCollection<ResponseSet>(_wordingService.GetAllNonResponseSets()); break;
-            }
+            _ = Load();
             CurrentResponse = Responses.FirstOrDefault();
         }
 
-        public ResponseSetViewModel(IWordingService wordingService, IDialogService dialogService, string type, string wordID) : this(wordingService, dialogService, type)
+        async Task Load()
+        {
+            switch (ResponseType)
+            {
+                case "RespOptions": Responses = new ObservableCollection<ResponseSet>(await _wordingService.GetAllRespOptions()); break;
+                case "NRCodes": Responses = new ObservableCollection<ResponseSet>(await _wordingService.GetAllNonResponses()); break;
+            }
+        }
+
+        public ResponseSetViewModel(IApiWordingService wordingService, IDialogService dialogService, string type, string wordID) : this(wordingService, dialogService, type)
         {
             CurrentResponse = Responses.FirstOrDefault(w => w.RespSetName == wordID);
         }
 
         partial void OnCurrentResponseChanged(ResponseSet? value)
         {
-            if (value.RespSetName == "0")
-            {
-                Usages.Clear();
-                return;
-            }
-
-            Usages = new ObservableCollection<ResponseUsage>(_wordingService.GetResponseUsages(ResponseType, CurrentResponse.RespSetName));
+            _ = UpdateUsages();
             NewSet = CurrentResponse.RespSetName == string.Empty;
+        }
+
+        async Task UpdateUsages()
+        {
+            if (CurrentResponse == null)
+                return;
+
+            if (CurrentResponse.RespSetName == "0") 
+                Usages.Clear();
+            else 
+                Usages = new ObservableCollection<ResponseUsage>(await _wordingService.GetResponseUsages(CurrentResponse));
         }
 
         [RelayCommand]
@@ -100,7 +110,7 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void DeleteWording(ResponseSet wording)
+        private async Task DeleteWording(ResponseSet wording)
         {
             if (wording.RespSetName == "0")
             {
@@ -110,7 +120,7 @@ namespace SDIFrontEnd_WPF
 
             if (!string.IsNullOrEmpty(wording.RespSetName) && Usages.Count==0)
             {
-                _wordingService.DeleteResponseSet(wording.RespSetName, ResponseType);
+                await _wordingService.DeleteResponseSet(wording);
             }
            
             Responses.Remove(wording);
@@ -205,7 +215,7 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private void SaveChanges()
+        private async Task SaveChanges()
         {
             if (CurrentResponse == null)
                 return;
@@ -231,15 +241,16 @@ namespace SDIFrontEnd_WPF
                     
                 }else if (taken && !NewSet)
                 {
-                    _wordingService.UpdateResponseSet(CurrentResponse);                    
+                    await _wordingService.UpdateResponseSet(CurrentResponse);                    
                 }
                 else
                 {
-                    _wordingService.InsertResponseSet(CurrentResponse);
+                    await _wordingService.CreateResponseSet(CurrentResponse);
                 }
                 LockedForEditing = true;
                 // Refresh usages after save
-                Usages = new ObservableCollection<ResponseUsage>(_wordingService.GetResponseUsages(CurrentResponse.FieldType, CurrentResponse.RespSetName));
+                await UpdateUsages();
+                
             }
             catch (Exception ex)
             {
