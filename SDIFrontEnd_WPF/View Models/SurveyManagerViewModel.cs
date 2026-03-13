@@ -19,8 +19,9 @@ namespace SDIFrontEnd_WPF
         private readonly IApiSurveyService _surveyService;
         private readonly IApiQuestionService _questionService; // Service for managing questions and their properties
         private readonly IDialogService _dialogService;
-        private readonly ReferenceDataStore _referenceDataService; 
-        private readonly IWordingService _wordingService; // Service for managing question wordings and translations
+        private readonly ReferenceDataStore _referenceDataService;
+        private readonly WordingData _wordingData;
+        private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
        
         private readonly IPeopleService _peopleService; // Service for managing people data
         private readonly ICommentService _commentService; // Service for managing comments
@@ -34,8 +35,8 @@ namespace SDIFrontEnd_WPF
         public SurveyViewModel? SurveyInfo { get; set; } // ViewModel for displaying basic survey information
         public SurveyBuilderViewModel? SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
-        public SurveyManagerViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, IDialogService dialogService, ReferenceDataStore referenceDataService, 
-            IWordingService wordingService, IPeopleService peopleService, ICommentService commentService, IWindowService windowService)
+        public SurveyManagerViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, IDialogService dialogService, ReferenceDataStore referenceDataService, WordingData wordingData,
+            IApiWordingService wordingService, IPeopleService peopleService, ICommentService commentService, IWindowService windowService)
         {
             _surveyService = surveyService;
             _questionService = questionService;
@@ -46,7 +47,8 @@ namespace SDIFrontEnd_WPF
             _peopleService = peopleService;
             _commentService = commentService;
             _windowService = windowService;
-            
+            _wordingData = wordingData;
+
         }
 
         public async void Load(Survey survey)
@@ -77,7 +79,7 @@ namespace SDIFrontEnd_WPF
             survey.AddQuestions(questions);
 
             SurveyInfo = new SurveyViewModel(survey);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, survey);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, _wordingData, survey);
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
