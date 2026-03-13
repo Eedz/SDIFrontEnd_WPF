@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using ITC_Services;
 using ITCLib;
 using MvvmLib.ViewModels;
 using RtfPipe.Tokens;
@@ -12,13 +10,13 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Schema;
+
 namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class SeriesBuilderViewModel : WorkspaceViewModel
     {
         private readonly ReferenceDataStore _referenceData;
-        private readonly IWordingService _wordingService;
+        private readonly IApiWordingService _wordingService;
 
         [ObservableProperty]
         private SurveyQuestion currentQuestion;
@@ -96,30 +94,37 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string CurrentQuestionText => CurrentQuestion == null ? string.Empty : CurrentQuestion.GetQuestionTextHTML(true);
 
         #region Constructor
-        public SeriesBuilderViewModel(ReferenceDataStore referenceData, IWordingService wordingService)
+        public SeriesBuilderViewModel(ReferenceDataStore referenceData, IApiWordingService wordingService)
         {
             base.DisplayName = "Series Builder";
 
             _referenceData = referenceData;
             _wordingService = wordingService;
 
+
+
+            _ = Load();
+
+            NewQuestions = new ObservableCollection<SurveyQuestion>();
+        }
+        #endregion
+
+        async Task Load()
+        {
             ContentLabels = _referenceData.ContentLabels.ToList();
             TopicLabels = _referenceData.TopicLabels.ToList();
             DomainLabels = _referenceData.DomainLabels.ToList();
             ProductLabels = _referenceData.ProductLabels.ToList();
 
-            PrePs= _wordingService.GetAllPreP();
-            PreIs= _wordingService.GetAllPreI();
-            PreAs= _wordingService.GetAllPreA();
-            LitQs = _wordingService.GetAllLitQ();
-            PstIs= _wordingService.GetAllPstI();
-            PstPs= _wordingService.GetAllPstP();
-            RespOptions = _wordingService.GetAllResponseSets();
-            NRCodes = _wordingService.GetAllNonResponseSets();
-
-            NewQuestions = new ObservableCollection<SurveyQuestion>();
+            PrePs = await _wordingService.GetAllPreP();
+            PreIs = await _wordingService.GetAllPreI();
+            PreAs = await _wordingService.GetAllPreA();
+            LitQs = await _wordingService.GetAllLitQ();
+            PstIs = await _wordingService.GetAllPstI();
+            PstPs = await _wordingService.GetAllPstP();
+            RespOptions = await _wordingService.GetAllRespOptions();
+            NRCodes = await _wordingService.GetAllNonResponses();
         }
-        #endregion
 
         partial void OnCurrentQuestionChanged(SurveyQuestion value)
         {
