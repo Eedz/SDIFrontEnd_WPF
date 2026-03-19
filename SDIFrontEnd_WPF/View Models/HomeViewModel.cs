@@ -7,6 +7,7 @@ using MvvmLib.ViewModels;
 using ITCLib;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Configuration;
 
 namespace SDIFrontEnd_WPF
 {
@@ -14,8 +15,8 @@ namespace SDIFrontEnd_WPF
     {
         private readonly IApiSurveyService apiSurveyService; // Service for managing surveys via API calls
 
-        public static string BackupPath = @"\\psychfile\psych$\psych-lab-gfong\SMG\Backend\DailyBackups\VarInfoback\";
-        public static string AutoSurveysPath = @"\\psychfile\psych$\psych-lab-gfong\SMG\SDI\Reports\Automatic Surveys\";
+        private string BackupPath = ConfigurationManager.AppSettings["BackupPath"] ?? string.Empty;
+        private string AutoSurveysPath = ConfigurationManager.AppSettings["AutoSurveysPath"] ?? string.Empty;
 
         [ObservableProperty]
         private string? backupStatusMessage;
@@ -32,8 +33,10 @@ namespace SDIFrontEnd_WPF
 
         public async Task Load()
         {
-            BackupStatusMessage = await BackupStatus();
-            AutoSurveysStatusMessage = await AutoSurveysStatus();
+            if (!string.IsNullOrEmpty(BackupPath))
+                BackupStatusMessage = await BackupStatus();
+            if (!string.IsNullOrEmpty(AutoSurveysPath))
+                AutoSurveysStatusMessage = await AutoSurveysStatus();
         }
 
         private async Task<string> BackupStatus()

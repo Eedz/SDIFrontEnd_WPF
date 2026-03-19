@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using CommunityToolkit.Mvvm.Messaging;
 using System.IO;
+using System.Configuration;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
@@ -82,7 +83,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> languages = new();
 
-        private string dbImageRepo = @"\\psychfile\psych$\psych-lab-gfong\SMG\Praccing Images";
+        private string dbImageRepo = ConfigurationManager.AppSettings["PraccingImagesPath"] ?? string.Empty;
 
 
         private Survey? currentSurvey;
