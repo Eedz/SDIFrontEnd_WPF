@@ -19,20 +19,20 @@ namespace SDIFrontEnd_WPF.ViewModels
         private readonly IApiWordingService _wordingService;
 
         [ObservableProperty]
-        private SurveyQuestion currentQuestion;
+        private SurveyQuestion? currentQuestion;
 
         public List<string> FieldList { get; } = new List<string> { string.Empty, "PreP", "PreI", "PreA", "PstI", "PstP", "RespOptions", "NRCodes", 
                                                                             "Content", "Topic", "Domain", "Product" };
 
         [ObservableProperty]
-        private string selectedField;
+        private string? selectedField;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SelectedItemText))]
-        private object selectedItem;
+        private object? selectedItem;
 
         [ObservableProperty]
-        private ObservableCollection<object> listItems;
+        private ObservableCollection<object>? listItems;
 
         public List<VarNameLabel> ContentLabels { get; set; }
         public List<VarNameLabel> TopicLabels { get; set; }
@@ -126,7 +126,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             NRCodes = await _wordingService.GetAllNonResponses();
         }
 
-        partial void OnCurrentQuestionChanged(SurveyQuestion value)
+        partial void OnCurrentQuestionChanged(SurveyQuestion? value)
         {
             if (value == null)
             {
@@ -155,7 +155,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnSelectedFieldChanged(string value)
+        partial void OnSelectedFieldChanged(string? value)
         {
             switch (SelectedField)
             {
@@ -264,7 +264,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnCurrentRespOptionsChanged(string oldValue, string newValue)
+        partial void OnCurrentRespOptionsChanged(string? oldValue, string newValue)
         {
             if (!RespOptions.Any(x => x.RespSetName == newValue))
             {
@@ -275,7 +275,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
-        partial void OnCurrentNRCodesChanged(string oldValue, string newValue)
+        partial void OnCurrentNRCodesChanged(string? oldValue, string newValue)
         {
             if (!NRCodes.Any(x => x.RespSetName == newValue))
             {
