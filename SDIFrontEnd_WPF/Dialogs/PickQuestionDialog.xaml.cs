@@ -7,13 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SDIFrontEnd_WPF
 {
@@ -22,10 +15,10 @@ namespace SDIFrontEnd_WPF
     /// </summary>
     public partial class PickQuestionDialog : Window, INotifyPropertyChanged
     {
-        private SurveyQuestion _selectedQuestion;
+        private SurveyQuestion? _selectedQuestion;
 
         public ObservableCollection<SurveyQuestion> Questions { get; }
-        public SurveyQuestion SelectedQuestion
+        public SurveyQuestion? SelectedQuestion
         {
             get => _selectedQuestion;
             set { _selectedQuestion = value; OnPropertyChanged(nameof(SelectedQuestion)); }
@@ -51,7 +44,7 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
