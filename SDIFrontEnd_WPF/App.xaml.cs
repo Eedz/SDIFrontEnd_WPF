@@ -1,6 +1,4 @@
-﻿using ITC_DataAccess;
-using ITC_Services;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
@@ -112,6 +110,30 @@ namespace SDIFrontEnd_WPF
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
+            services.AddHttpClient<IApiPeopleService, ApiPeopleService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<IApiCommentService, ApiCommentService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<IApiPraccingService, ApiPraccingService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+            services.AddHttpClient<IApiAuditService, ApiAuditService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+
 #if DEBUG
             services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionStringTest"].ConnectionString));
 #else
@@ -130,29 +152,16 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<WordingData>();
             services.AddSingleton<WordingDataService>();
 
-            // respositories and services (to be replaced with API calls in the future) 
-            services.AddSingleton<IPeopleRepository, PeopleRepository>();
-            services.AddSingleton<ICommentRepository, CommentRepository>();
-            
-            services.AddSingleton<IPraccingRepository, PraccingRepository>();
-            services.AddSingleton<IAuditRepository, AuditRepository>();
-            
-            services.AddSingleton<IPeopleService, PeopleService>();
-            services.AddSingleton<ICommentService, CommentService>();           
-            
-            services.AddSingleton<IMatrixService, MatrixService>(); 
-            services.AddSingleton<IPraccingService, PraccingService>();
-            services.AddSingleton<IAuditService, AuditService>();
-
             // client services
             services.AddTransient<QuestionImporterService>();
+            services.AddSingleton<IMatrixService, MatrixService>();
 
             AddVMServices(services);
 
 
             services.AddHttpClient<ApiSurveyService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:5001/"); // your API URL
+                client.BaseAddress = new Uri("https://localhost:5001/");
             });
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();

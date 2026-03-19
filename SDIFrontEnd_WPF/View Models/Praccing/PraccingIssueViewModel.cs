@@ -1,8 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DocumentFormat.OpenXml.Bibliography;
-using ITCLib;
+﻿using ITCLib;
 using MvvmLib.ViewModels;
-using ITC_Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

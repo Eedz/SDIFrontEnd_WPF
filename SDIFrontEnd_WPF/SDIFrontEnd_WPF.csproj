@@ -82,8 +82,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ITCLib\ITCLib\ITCLib.csproj" />
     <ProjectReference Include="..\..\ITCReportLib\ITCReportLib\ITCReportLib.csproj" />
-    <ProjectReference Include="..\..\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess.csproj" />
-    <ProjectReference Include="..\..\ITC_Services\ITC_Services\ITC_Services.csproj" />
+    <ProjectReference Include="..\..\ITC_Contracts\ITC_Contracts\ITC_Contracts.csproj" />
     <ProjectReference Include="..\..\MvvmLib\MvvmLib\MvvmLib.csproj" />
     <ProjectReference Include="..\..\OpenXmlToHtml\OpenXmlToHtml.csproj" />
   </ItemGroup>
@@ -92,10 +91,6 @@
     <Compile Update="Views\TranslationImporterView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

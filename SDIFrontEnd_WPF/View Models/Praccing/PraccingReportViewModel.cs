@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ITC_Services;
 using ITCLib;
 using ITCReportLib;
 using MvvmLib.ViewModels;
@@ -16,10 +15,10 @@ namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class PraccingReportViewModel : ViewModelBase
     {
-        private readonly IPraccingService _praccingService;
+        private readonly IApiPraccingService _praccingService;
 
         // lists
-        public List<Survey> SurveyList { get; private set; }
+        public IEnumerable<Survey> SurveyList { get; private set; }
         public List<string> StatusList { get; private set; }
        
         public List<string> SortOptions { get; private set; }
@@ -56,23 +55,31 @@ namespace SDIFrontEnd_WPF.ViewModels
         public bool IncludeEmptyRow { get; set; } = true;
         public bool IncludePrevNames { get; set; }
 
-        public PraccingReportViewModel(IPraccingService praccingService) 
+        public PraccingReportViewModel(IApiPraccingService praccingService) 
         { 
             _praccingService = praccingService ?? throw new ArgumentNullException(nameof(praccingService));
             DisplayName = "Praccing Report";
+            _ = LoadSurveysAsync();
 
-            SurveyList = _praccingService.GetPraccingSurveys();
+
+        }
+
+        private async Task LoadSurveysAsync()
+        {
+            var surveys = await _praccingService.GetPraccingSurveys();
+            SurveyList = surveys;
             StatusList = new List<string> { "Unresolved", "Resolved" };
             StatusList.Insert(0, "<All>");
             SelectedStatus = StatusList[1];
             LanguageList = ["<All>"];
             SortOptions = new List<string> { "IssueNo", "Last Update" };
             SelectedSortOption = "IssueNo";
+            OnPropertyChanged(nameof(SurveyList));
         }
 
-        partial void OnSelectedSurveyChanged(Survey? oldValue, Survey newValue)
+        async partial void OnSelectedSurveyChanged(Survey? oldValue, Survey newValue)
         {
-            IssueList = _praccingService.GetPraccingIssues(SelectedSurvey.SID);
+            IssueList = await _praccingService.GetPraccingIssues(SelectedSurvey.SID);
             LoadData();
         }
 

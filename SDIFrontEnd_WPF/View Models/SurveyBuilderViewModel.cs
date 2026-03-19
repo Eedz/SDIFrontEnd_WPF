@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ITC_Services;
 using ITCLib;
 using MvvmLib.ViewModels;
 using SDIFrontEnd_WPF.ViewModels;
@@ -15,8 +14,8 @@ namespace SDIFrontEnd_WPF
         private readonly IApiQuestionService _questionService;
         private readonly ReferenceDataStore _referenceDataService;
         private readonly IApiWordingService _wordingService;
-        private readonly ICommentService _commentService;
-        private readonly IPeopleService _peopleService;
+        private readonly IApiCommentService _commentService;
+        private readonly IApiPeopleService _peopleService;
         private readonly WordingData _wordingData;
 
         private readonly Survey CurrentSurvey;
@@ -103,7 +102,7 @@ namespace SDIFrontEnd_WPF
         private string? nRName;
 
         public SurveyBuilderViewModel(IDialogService dialogService, IApiSurveyService surveyService, IApiQuestionService questionService, ReferenceDataStore referenceData, IApiWordingService wordingService,
-            IPeopleService peopleService, ICommentService commentService, WordingData wordingData, Survey survey)
+            IApiPeopleService peopleService, IApiCommentService commentService, WordingData wordingData, Survey survey)
         {
             _dialogService = dialogService;
             _surveyService = surveyService ?? throw new ArgumentNullException(nameof(surveyService), "Survey service cannot be null.");
@@ -326,7 +325,7 @@ namespace SDIFrontEnd_WPF
         #endregion
 
         [RelayCommand]
-        private void AddComment()
+        private async Task AddComment()
         {
             if (SelectedQuestion == null)
             {
@@ -334,7 +333,7 @@ namespace SDIFrontEnd_WPF
                 return;
             }
 
-            QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _commentService);
+            QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _referenceDataService);
 
             bool? result = _dialogService.ShowDialog(vm);
             if (result.Value)
@@ -345,7 +344,7 @@ namespace SDIFrontEnd_WPF
                     VarName = SelectedQuestion.VarName.VarName,
                 };
 
-                if (_commentService.InsertQuestionComment(newComment) == 0)
+                if (await _commentService.AddCommentAsync(newComment) == 0)
                 {
                     _dialogService.ShowError("Error saving comment.", "Comments Error");
                     return;
@@ -882,13 +881,13 @@ namespace SDIFrontEnd_WPF
         }
 
         // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
-        private void ProcessDeletes()
+        private async Task ProcessDeletes()
         {
             if (_dialogService.Confirm("Do you want to document these deletes?"))
             {
 
 
-                QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _commentService);
+                QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _referenceDataService);
 
                 bool? result = _dialogService.ShowDialog(vm);
                 if (result.Value)
@@ -902,7 +901,7 @@ namespace SDIFrontEnd_WPF
                             VarName = q.VarName.VarName,
                         };
 
-                        if (_commentService.InsertDeletedComment(newComment) == 0)
+                        if (!await _commentService.InsertDeletedComment(newComment) )
                         {
                             _dialogService.ShowError("Error saving comment.", "Comments Error");
                             return;
@@ -914,7 +913,7 @@ namespace SDIFrontEnd_WPF
             foreach (var question in Removed)
             {
                 // transfer comments
-                _commentService.BackupComments(question.ID);
+                await _commentService.BackupCommentsAsync(question.ID);
                 CurrentSurvey.RemoveQuestion(question, true);
 
                 RecordList.Remove(RecordList.First(x => x.Item == question));

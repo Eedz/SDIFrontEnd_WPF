@@ -1,8 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
-
-using ITC_Services;
 using ITCLib;
 using ITCReportLib;
 using MvvmLib.ViewModels;

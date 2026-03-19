@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MvvmLib.ViewModels;
 using ITCLib;
-using ITC_Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -20,9 +19,9 @@ namespace SDIFrontEnd_WPF.ViewModels
     public partial class PraccingEntryViewModel : WorkspaceViewModel 
     {
         private readonly IWindowService _windowService;
-        private readonly IPraccingService _praccingService;
+        private readonly IApiPraccingService _praccingService;
         private readonly IApiSurveyService _surveyService;
-        private readonly IPeopleService _peopleService;
+        private readonly IApiPeopleService _peopleService;
         private readonly IFileDialogService _dialogService;
 
         public PraccingImagesViewModel ResponseImageViewModel { get; set; }
@@ -160,7 +159,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private bool isFiltered;
 
-        public PraccingEntryViewModel(IWindowService windowService, IPraccingService praccingService, IApiSurveyService surveyService, IPeopleService peopleService, IFileDialogService dialogService)
+        public PraccingEntryViewModel(IWindowService windowService, IApiPraccingService praccingService, IApiSurveyService surveyService, IApiPeopleService peopleService, IFileDialogService dialogService)
         {
             _windowService = windowService;
             _praccingService = praccingService;
@@ -195,10 +194,10 @@ namespace SDIFrontEnd_WPF.ViewModels
         #region Commands
 
         [RelayCommand]
-        private void LoadSurveyIssues(int survID)
+        private async Task LoadSurveyIssues(int survID)
         {
             AllRecords.Clear();
-            var issues = _praccingService.GetPraccingIssues(survID);
+            var issues = await _praccingService.GetPraccingIssues(survID);
             foreach (var issue in issues)
             {
                 AllRecords.Add(new PraccingIssueRecord(issue));
@@ -243,14 +242,16 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand(CanExecute = "CanSave")]
-        private void SaveRecord()
+        private async Task SaveRecord()
         {
             if (CurrentRecord == null)
                 return;
             
             if (CurrentRecord.NewRecord)
             {
-                if (_praccingService.AddPraccingIssue(CurrentRecord.Item) == 1)
+                var added = await _praccingService.AddPraccingIssue(CurrentRecord.Item);
+
+                if (added.ID == 0)
                 {
                     // notify error
                 }
@@ -260,10 +261,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
             else if (CurrentRecord.Dirty)
             {
-                if (_praccingService.UpdatePraccingIssue(CurrentRecord.Item) == 1)
-                { 
-                    // notify error
-                }
+                var updated = await _praccingService.UpdatePraccingIssue(CurrentRecord.Item);
+                //if (await _praccingService.UpdatePraccingIssue(CurrentRecord.Item) == 1)
+                //{ 
+                //    // notify error
+                //}
 
                 CurrentRecord.Dirty = false;
             }
@@ -278,7 +280,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         bool CanSave() => CurrentRecord != null;
 
-        private int SaveResponses()
+        private async Task<int> SaveResponses()
         {
             if (CurrentRecord == null)
                 return 1;
@@ -286,25 +288,25 @@ namespace SDIFrontEnd_WPF.ViewModels
             foreach (PraccingResponse response in CurrentRecord.AddedResponses)
             {
                 response.IssueID = CurrentRecord.Item.ID;
-                _praccingService.AddPraccingResponse(response);
+                await _praccingService.AddPraccingResponse(response);
             }
             CurrentRecord.AddedResponses.Clear();
 
             foreach (PraccingResponse response in CurrentRecord.EditedResponses)
             {
-                _praccingService.UpdatePraccingResponse(response);
+               await _praccingService.UpdatePraccingResponse(response);
             }
             CurrentRecord.EditedResponses.Clear();
 
             foreach (PraccingResponse response in CurrentRecord.DeletedResponses)
             {
-                _praccingService.DeletePraccingResponse(response);
+                await _praccingService.DeletePraccingResponse(response.ID);
             }
             CurrentRecord.DeletedResponses.Clear();
             return 0;
         }
 
-        public int SaveImages()
+        public async Task<int> SaveImages()
         {
             if (CurrentRecord == null)
                 return 1;
@@ -312,13 +314,13 @@ namespace SDIFrontEnd_WPF.ViewModels
             foreach (PraccingImage img in CurrentRecord.AddedImages)
             {
                 img.PraccID = CurrentRecord.Item.ID;
-                _praccingService.AddPraccingImage(img);
+                await _praccingService.AddPraccingImage(img);
             }
             CurrentRecord.AddedImages.Clear();
 
             foreach (PraccingImage img in CurrentRecord.DeletedImages)
             {
-                _praccingService.DeletePraccingImage(img);
+                await _praccingService.DeletePraccingImage(img.ID);
                 try
                 {
                     File.Delete(img.Path);
@@ -335,13 +337,13 @@ namespace SDIFrontEnd_WPF.ViewModels
                 var response = CurrentRecord.Item.Responses.Where(x => x.Images.Contains(img)).FirstOrDefault();
                 if (response == null) continue;
                 img.PraccID = response.ID;
-                _praccingService.AddResponseImage(img);
+                await _praccingService.AddResponseImage(img);
             }
             CurrentRecord.AddedResponseImages.Clear();
 
             foreach (PraccingImage img in CurrentRecord.DeletedResponseImages)
             {
-                _praccingService.DeletePraccingResponseImage(img);
+                await _praccingService.DeletePraccingResponseImage(img.ID);
                 try
                 {
 #if DEBUG
@@ -373,14 +375,14 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand(CanExecute = "CanRefresh")]
-        private void DeleteIssue()
+        private async Task DeleteIssue()
         {
             if (CurrentRecord != null)
             {
                 if (MessageBox.Show("Are you sure you want to delete this issue?", "Confirm", MessageBoxButton.YesNo) == MessageBoxResult.No)
                     return;
 
-                _praccingService.DeletePraccingIssue(CurrentRecord.Item);
+                await _praccingService.DeletePraccingIssue(CurrentRecord.Item.ID);
                 Records.Remove(CurrentRecord);
                 if (CurrentRecord.NewRecord)
                     CurrentRecord.NewRecord = false;
@@ -720,7 +722,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         private async Task LoadLists()
         {
-            var people = await _peopleService.GetPeopleBasicsAsync();
+            var people = await _peopleService.GetPeopleBasics();
             PeopleList = new ObservableCollection<Person>(people);
             var categories = await _praccingService.GetPraccingCategories();
             CategoryList = new ObservableCollection<PraccingCategory>(categories);

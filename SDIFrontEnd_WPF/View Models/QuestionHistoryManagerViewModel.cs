@@ -1,5 +1,4 @@
-﻿using ITC_Services;
-using MvvmLib.ViewModels;
+﻿using MvvmLib.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +14,8 @@ namespace SDIFrontEnd_WPF.ViewModels
     {
         private readonly IApiSurveyService _surveyService;
         private readonly IApiQuestionService _questionService;
-        private readonly IAuditService _auditService;
-        private readonly ICommentService _commentService;
+        private readonly IApiAuditService _auditService;
+        private readonly IApiCommentService _commentService;
 
         public List<Survey> SurveyList { get; set; }
 
@@ -43,15 +42,20 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public ObservableCollection<QuestionComment> Comments { get; } = new ObservableCollection<QuestionComment>();
 
-        public QuestionHistoryManagerViewModel(IAuditService auditService, IApiSurveyService surveyService, IApiQuestionService questionService, ICommentService commentService)
+        public QuestionHistoryManagerViewModel(IApiAuditService auditService, IApiSurveyService surveyService, IApiQuestionService questionService, IApiCommentService commentService)
         {
             _auditService = auditService ?? throw new ArgumentNullException(nameof(auditService));
             _surveyService = surveyService ?? throw new ArgumentNullException(nameof(surveyService));
             _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService));
             _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
             DisplayName = "Question History Manager";
+            _ = Load();
+           
+        }
 
-            SurveyList = _auditService.GetAuditSurveys().Select(x=> new Survey(x)).ToList();
+        private async Task Load()
+        {
+            SurveyList = (await _auditService.GetAuditSurveys()).Select(x => new Survey(x)).ToList();
             VarNameList = new List<VariableName>();
         }
 
@@ -59,11 +63,14 @@ namespace SDIFrontEnd_WPF.ViewModels
         {
             if (newValue == null) return;
 
-            VarNameList = _auditService.GetAuditVarNames(newValue.SurveyCode)
-                .Select(q => new VariableName { VarName = q.VarName })
-                .OrderBy(v => v.VarName)
-                .ToList();
+            _ = LoadVarNames(newValue.SurveyCode);
+        }
 
+        async Task LoadVarNames(string survey)
+        {
+            VarNameList = (await _auditService.GetAuditVarNames(survey))
+                .Select(q => new VariableName { VarName = q.VarName })
+                .OrderBy(v => v.VarName).ToList();
             OnPropertyChanged(nameof(VarNameList));
         }
 
@@ -74,7 +81,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             //var qid = _surveyService.GetQuestionID(SelectedSurvey.SurveyCode, newValue.VarName);
             var vars = await _questionService.GetQuestionsByVarNameAsync(newValue.VarName);
             var qid = vars.FirstOrDefault(q => q.SurveyCode == SelectedSurvey.SurveyCode)?.ID ?? 0;
-            var history = _auditService.GetQuestionHistory(qid);
+            var history = await _auditService.GetQuestionHistory(qid);
             foreach (var item in history)
             {
                 var vm = new ChangedQuestionViewModel();
@@ -86,13 +93,14 @@ namespace SDIFrontEnd_WPF.ViewModels
             OnPropertyChanged(nameof(WordingList));
 
             Comments.Clear();
-            foreach (var c in _commentService.GetQuestionComments(qid))
+            var comments = await _commentService.GetQuestionCommentsAsync(qid);
+            foreach (var c in comments)
                 Comments.Add(c);
         }
 
-        partial void OnSelectedWordingChanged(Wording? oldValue, Wording newValue)
+        async partial void OnSelectedWordingChanged(Wording? oldValue, Wording newValue)
         {
-            var history = _auditService.GetWordingHistory(newValue.FieldType, newValue.WordID);
+            var history = await _auditService.GetWordingHistory(newValue.FieldType, newValue.WordID);
             WordingHistoryVMs.Clear();
 
             foreach (var item in history)

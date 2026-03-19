@@ -4,16 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MvvmLib.ViewModels;
-using ITC_Services;
 using ITCLib;
-using System.Windows.Navigation;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
     public class VarNameChangeViewModel : ViewModelBase
     {
 
-        private readonly IPeopleService _peopleService;
+        private readonly IApiPeopleService _peopleService;
 
         public string OldVarName { get; set; } = string.Empty;
         public string NewVarName { get; set; } = string.Empty;
@@ -37,11 +35,16 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public List<Person> PeopleList { get; set; }
 
-        public VarNameChangeViewModel(IPeopleService peopleService) 
+        public VarNameChangeViewModel(IApiPeopleService peopleService) 
         {
             _peopleService = peopleService;
             DisplayName = "Variable Name Change Details";
-            PeopleList = _peopleService.GetPeopleBasics();
+            _ = Load();
+        }
+
+        async Task Load()
+        {
+            PeopleList = await _peopleService.GetPeopleBasics();
         }
     }
 }

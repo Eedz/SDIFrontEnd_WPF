@@ -1,11 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using HtmlToXaml;
-using ITC_Services;
 using ITCLib;
 using ITCReportLib;
-using Microsoft.Extensions.DependencyInjection;
+
 using MvvmLib.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -29,11 +27,12 @@ namespace SDIFrontEnd_WPF.ViewModels
         private readonly IFileDialogService _fileDialogService;
         private readonly IApiSurveyService _surveyService;
         private readonly IApiQuestionService _questionService;
-        private readonly IPeopleService _peopleService;
-        private readonly ICommentService _commentService;
+        private readonly IApiPeopleService _peopleService;
+        private readonly IApiCommentService _commentService;
         private readonly IApiWordingService _wordingService;
         private readonly IApiVarNameService _varNameService;
         private readonly QuestionImporterService _questionImporterService;
+        private readonly ReferenceDataStore _referenceDataStore;
 
         [ObservableProperty]
         private Survey? surveyCode;
@@ -228,8 +227,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         #region Constructor
 
         public QuestionImporterViewModel(IFileDialogService dialogService, IApiSurveyService surveySerivce, IApiQuestionService questionService,
-                                        IPeopleService peopleService, ICommentService commentService,
-                                        IApiWordingService wordingService, IApiVarNameService varnameService, QuestionImporterService questionImporterService)
+                                        IApiPeopleService peopleService, IApiCommentService commentService,
+                                        IApiWordingService wordingService, IApiVarNameService varnameService, QuestionImporterService questionImporterService, ReferenceDataStore referenceDataStore)
         {
             base.DisplayName = "Survey Importer";
 
@@ -238,7 +237,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             _questionService = questionService;
             _peopleService = peopleService;
             _commentService = commentService;
-;
+            ;
             _wordingService = wordingService;
             _varNameService = varnameService;
             _questionImporterService = questionImporterService;
@@ -261,6 +260,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             OnPropertyChanged(nameof(CurrentQuestion));
             OnPropertyChanged(nameof(CurrentApprovedQuestion));
+            _referenceDataStore = referenceDataStore;
         }
 
         private void PreP_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -661,8 +661,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         async Task LoadData()
         {
             SurveyList = await _surveyService.GetAllAsync();
-            PeopleList = _peopleService.GetPeopleBasics();
-            CommentTypeList = _commentService.GetAllCommentTypes();
+            PeopleList = await _peopleService.GetPeopleBasics();
+            CommentTypeList = _referenceDataStore.CommentTypes.ToList();
 
             PrePList = await _wordingService.GetAllPreP();
             PreIList = await _wordingService.GetAllPreI();
@@ -1063,11 +1063,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        int ProcessQuestionComments(SurveyQuestion question)
+        async Task<int> ProcessQuestionComments(SurveyQuestion question)
         {
             foreach (QuestionComment comment in question.Comments)
             {
-                _commentService.InsertQuestionComment(comment);
+                await _commentService.AddCommentAsync(comment);
             }
             return 0;
         }
@@ -1090,7 +1090,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         async Task<int> ProcessDeletion(SurveyQuestion question)
         {
             // create deleted comments first
-            _commentService.BackupComments(question.ID);
+            await _commentService.BackupCommentsAsync(question.ID);
 
             foreach (QuestionComment comment in question.Comments)
             {
@@ -1106,7 +1106,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                     Authority = comment.Authority
                 };
 
-                _commentService.InsertDeletedComment(deleteComment);
+                await _commentService.InsertDeletedComment(deleteComment);
             }
 
 

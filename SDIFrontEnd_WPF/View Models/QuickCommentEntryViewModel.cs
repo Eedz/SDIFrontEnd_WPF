@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using ITC_Services;
+
 using ITCLib;
 
 using MvvmLib.ViewModels;
@@ -13,8 +13,8 @@ namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class QuickCommentEntryViewModel : WorkspaceViewModel
     {
-        private readonly IPeopleService _peopleService;
-        private readonly ICommentService _commentService;
+        private readonly IApiPeopleService _peopleService;
+        private readonly ReferenceDataStore _commentData;
         public List<Person> AllAuthors { get; set; }
         public  List<CommentType> AllCommentTypes { get; set; }
         public string NoteText { get; set; } = string.Empty;
@@ -26,10 +26,10 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public Comment NewComment;
 
-        public QuickCommentEntryViewModel(IPeopleService peopleService, ICommentService commentService)
+        public QuickCommentEntryViewModel(IApiPeopleService peopleService, ReferenceDataStore commentService)
         {
             _peopleService = peopleService ?? throw new ArgumentNullException(nameof(peopleService));
-            _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService));
+            _commentData = commentService ?? throw new ArgumentNullException(nameof(commentService));
 
             base.DisplayName = "Comment Entry";
             _ = LoadLists();
@@ -37,8 +37,8 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         private async Task LoadLists()
         {
-            AllAuthors = await _peopleService.GetPeopleBasicsAsync();
-            AllCommentTypes = _commentService.GetAllCommentTypes();
+            AllAuthors = await _peopleService.GetPeopleBasics();
+            AllCommentTypes = _commentData.CommentTypes.ToList();
             OnPropertyChanged(nameof(AllAuthors));
             OnPropertyChanged(nameof(AllCommentTypes));
         }

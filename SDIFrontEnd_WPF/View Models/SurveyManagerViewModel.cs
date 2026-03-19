@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ITC_Services;
 using ITCLib;
 using ITCReportLib;
 using MvvmLib.ViewModels;
@@ -23,8 +22,8 @@ namespace SDIFrontEnd_WPF
         private readonly WordingData _wordingData;
         private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
        
-        private readonly IPeopleService _peopleService; // Service for managing people data
-        private readonly ICommentService _commentService; // Service for managing comments
+        private readonly IApiPeopleService _peopleService; // Service for managing people data
+        private readonly IApiCommentService _commentService; // Service for managing comments
         private readonly IWindowService _windowService; // Service for managing windows and dialogs
 
         [ObservableProperty]
@@ -36,7 +35,7 @@ namespace SDIFrontEnd_WPF
         public SurveyBuilderViewModel? SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
         public SurveyManagerViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, IDialogService dialogService, ReferenceDataStore referenceDataService, WordingData wordingData,
-            IApiWordingService wordingService, IPeopleService peopleService, ICommentService commentService, IWindowService windowService)
+            IApiWordingService wordingService, IApiPeopleService peopleService, IApiCommentService commentService, IWindowService windowService)
         {
             _surveyService = surveyService;
             _questionService = questionService;
