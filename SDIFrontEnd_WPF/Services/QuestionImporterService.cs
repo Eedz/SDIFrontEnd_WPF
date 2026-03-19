@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using ITC_Services;
-using ITCLib;
+﻿using ITCLib;
 using ITCReportLib;
 using System;
 using System.Collections.Generic;
@@ -15,13 +13,13 @@ namespace SDIFrontEnd_WPF
     {
         private readonly IApiSurveyService _surveyService;
         private readonly WordingData _wordingDataService;
-        private readonly IPeopleService _peopleService;
-        private readonly ICommentService _commentService;
+        private readonly IApiPeopleService _peopleService;
+        private readonly ReferenceDataStore _commentService;
 
         public QuestionImporterService(
             IApiSurveyService surveyService,
-            IPeopleService peopleService,
-            ICommentService commentService,
+            IApiPeopleService peopleService,
+            ReferenceDataStore commentService,
             WordingData wordingDataService)
         {
             _surveyService = surveyService;
@@ -43,8 +41,8 @@ namespace SDIFrontEnd_WPF
             var questions = importer.ImportedPreviews.ToList();
             var existingQuestions = await GetExistingQuestions(surveyCode);
 
-            var people = _peopleService.GetPeopleBasics();
-            var commentTypes = _commentService.GetAllCommentTypes();
+            var people = await _peopleService.GetPeopleBasics();
+            var commentTypes = _commentService.CommentTypes;
 
             
 
@@ -110,7 +108,7 @@ namespace SDIFrontEnd_WPF
             List<QuestionCandidatePreview> questions,
             List<SurveyQuestion> existing,
             List<Person> people,
-            List<CommentType> commentTypes,
+            IEnumerable<CommentType> commentTypes,
             string sourceFilePath)
         {
 
