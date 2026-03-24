@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace SDIFrontEnd_WPF
 {
@@ -30,7 +29,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariableName>> GetAllVarNames()
         {
-            var list = await _http.GetFromJsonAsync<List<VariableNameDto>>("api/varnames");
+            var list = await _http.GetFromJsonAsync<List<VariableNameDto>>("api/varnames/all");
             return list.Select(MapToEntity).ToList();
         }
 
@@ -63,10 +62,72 @@ namespace SDIFrontEnd_WPF
             return dto == null ? new List<VariableName>() : dto.Select(MapToEntity).ToList();
         }
 
+        public async Task<bool> UpdateVariable(VariableName variable)
+        {
+            var dto = MapToDto(variable);
+            var result = await _http.PutAsJsonAsync($"api/varnames/{variable.ID}", dto);
+            return result.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> VarNameInUse(string varname)
+        {
+            var result = await _http.GetAsync($"api/varnames/exists?varName={varname}");
+            if (result.IsSuccessStatusCode)
+            {
+                var inUse = await result.Content.ReadFromJsonAsync<bool>();
+                return inUse;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+
+        public async Task<bool> DeleteVariable(string varname)
+        {
+            var result = await _http.DeleteAsync($"api/varnames/{varname}");
+            return result.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteVariable(int id)
+        {
+            var dto = await _http.DeleteAsync($"api/varnames/{id}");
+            return dto.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteVariablePrefix(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> InsertVariablePrefix(VariablePrefix prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<VariablePrefix>> GetVariablePrefixes()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> UpdateVariablePrefix(VariablePrefix prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<VariableNameSurveys>> SearchVarNameUsage(string searchTerm, int take)
+        {
+            var dto = await _http.GetFromJsonAsync<List<VariableNameSurveys>>($"api/varnames/usage?search={Uri.EscapeDataString(searchTerm)}&take={take}");
+            return dto ?? new List<VariableNameSurveys>();
+        }
+
         private VariableNameDto MapToDto(VariableName entity)
         {
             return new VariableNameDto
             {
+                ID = entity.ID,
                 VarName = entity.VarName,
                 VarLabel = entity.VarLabel,
                 Domain = new VarNameLabelDto() { LabelText = entity.Domain.LabelText, ID = entity.Domain.ID },
@@ -80,8 +141,13 @@ namespace SDIFrontEnd_WPF
         {
             return new VariableName
             {
+                ID = dto.ID,
                 VarName = dto.VarName,
                 VarLabel = dto.VarLabel,
+                DomainLabel = new VarNameLabel() { Label = dto.Domain.LabelText, ID = dto.Domain.ID },
+                TopicLabel = new VarNameLabel() { Label = dto.Topic.LabelText, ID = dto.Topic.ID },
+                ContentLabel = new VarNameLabel() { Label = dto.Content.LabelText, ID = dto.Content.ID },
+                ProductLabel = new VarNameLabel() { Label = dto.Product.LabelText, ID = dto.Product.ID },
                 Domain = new DomainLabel() { LabelText = dto.Domain.LabelText, ID = dto.Domain.ID },
                 Topic = new TopicLabel() { LabelText = dto.Topic.LabelText, ID = dto.Topic.ID },
                 Content = new ContentLabel() { LabelText = dto.Content.LabelText, ID = dto.Content.ID },
