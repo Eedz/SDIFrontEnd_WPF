@@ -3,9 +3,11 @@
                     xmlns:local="clr-namespace:SDIFrontEnd_WPF"
                     xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
                     xmlns:viewmodels="clr-namespace:SDIFrontEnd_WPF.ViewModels">
+    
     <DataTemplate DataType="{x:Type local:HomeViewModel}">
         <local:HomeView />
     </DataTemplate>
+    
     <DataTemplate DataType="{x:Type local:SurveyManagerViewModel}">
         <local:SurveyManager />
     </DataTemplate>
@@ -108,5 +110,13 @@
     <DataTemplate DataType="{x:Type viewmodels:ChangedQuestionViewModel}">
         <views:ChangedQuestionView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:VariableInformationViewModel}">
+        <views:VariableInformationView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PrefixListViewModel}">
+        <views:PrefixListView/>
+    </DataTemplate>"
     
 </ResourceDictionary>
