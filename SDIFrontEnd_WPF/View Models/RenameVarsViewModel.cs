@@ -39,12 +39,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             _surveyService = surveyService;
             _fileDialogService = fileDialogService;
 
-            _ = LoadSurveysAsync();
             RenameList.CollectionChanged += RenameList_CollectionChanged;
             VarChangeDetails = changeDetails;
         }
 
-        private async Task LoadSurveysAsync()
+        public async Task LoadSurveysAsync()
         {
             SurveyList = await _surveyService.GetAllAsync();
             OnPropertyChanged(nameof(SurveyList));

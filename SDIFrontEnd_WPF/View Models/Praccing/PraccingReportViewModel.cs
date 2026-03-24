@@ -59,12 +59,9 @@ namespace SDIFrontEnd_WPF.ViewModels
         { 
             _praccingService = praccingService ?? throw new ArgumentNullException(nameof(praccingService));
             DisplayName = "Praccing Report";
-            _ = LoadSurveysAsync();
-
-
         }
 
-        private async Task LoadSurveysAsync()
+        public async Task LoadSurveysAsync()
         {
             var surveys = await _praccingService.GetPraccingSurveys();
             SurveyList = surveys;

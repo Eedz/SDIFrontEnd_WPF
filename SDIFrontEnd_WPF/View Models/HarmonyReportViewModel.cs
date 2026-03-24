@@ -47,8 +47,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         public ObservableCollection<Study> SelectedStudies { get; } = new();
         public ObservableCollection<StudyWave> SelectedWaves { get; } = new();
 
-        public ICollectionView FilteredStudyWaves { get; }
-        public ICollectionView FilteredSurveys { get; }
+        public ICollectionView FilteredStudyWaves { get; private set; }
+        public ICollectionView FilteredSurveys { get; private set; }
 
 
         public List<string> GroupOnList { get; set; } = new List<string>()
@@ -97,30 +97,9 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             _surveyService = surveyService;
             _varNameService = varNameService;
-
-            LoadDataAsync();
-
-            SelectedGroupOnList.Add("PreA");
-            SelectedGroupOnList.Add("LitQ");
-            SelectedGroupOnList.Add("RespOptions");
-            
-            // surveys tab lists
-            FilteredStudyWaves = CollectionViewSource.GetDefaultView(WaveList);
-            FilteredStudyWaves.Filter = FilterWave;
-
-            SelectedStudies.CollectionChanged += (_, __) => FilteredStudyWaves.Refresh();
-
-            FilteredSurveys = CollectionViewSource.GetDefaultView(SurveyList);
-            FilteredSurveys.Filter = FilterSurvey;
-
-            SelectedWaves.CollectionChanged += (_, __) => FilteredSurveys.Refresh();
-
-            SelectedStudies.CollectionChanged += SelectedStudies_CollectionChanged;
-           
-            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
         }
 
-        private async void LoadDataAsync()
+        public async Task LoadDataAsync()
         {
             var allVars = await _varNameService.GetAllVarNames();
             VarNameList = new ObservableCollection<VariableName>( allVars.GroupBy(x => x.RefVarName).Select(x => x.FirstOrDefault()).OrderBy(v => v.VarName).ToList());
@@ -138,6 +117,25 @@ namespace SDIFrontEnd_WPF.ViewModels
             SelectedStudies.Add(StudyList[0]);
             SelectedWaves.Add(WaveList[0]);
             SelectedSurveys.Add(SurveyList[0]);
+
+            SelectedGroupOnList.Add("PreA");
+            SelectedGroupOnList.Add("LitQ");
+            SelectedGroupOnList.Add("RespOptions");
+
+            // surveys tab lists
+            FilteredStudyWaves = CollectionViewSource.GetDefaultView(WaveList);
+            FilteredStudyWaves.Filter = FilterWave;
+
+            FilteredSurveys = CollectionViewSource.GetDefaultView(SurveyList);
+            FilteredSurveys.Filter = FilterSurvey;
+
+            SelectedStudies.CollectionChanged += (_, __) => FilteredStudyWaves.Refresh();
+
+            SelectedWaves.CollectionChanged += (_, __) => FilteredSurveys.Refresh();
+
+            SelectedStudies.CollectionChanged += SelectedStudies_CollectionChanged;
+
+            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
         }
 
         private void SelectedSurveys_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -187,7 +185,6 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         private void SelectedWaves_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            //throw new NotImplementedException();
         }
 
         private void SelectedStudies_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -301,7 +298,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                 ["RespOptions"] = q => q.RespOptionsS,
                 ["NRCodes"] = q => q.NRCodesS,
                 ["VarLabel"] = q => q.VarName.VarLabel,
-                // … add the rest of your 13 properties
+                
             };
 
         private async Task<DataTable> GetHarmonyResults(List<VariableName> vars)

@@ -44,10 +44,9 @@ namespace SDIFrontEnd_WPF
             _surveyService = surveyService;
             this.DisplayName = "Question Search";
             _questionService = questionService;
-            _ = LoadSurveys();
         }
 
-        private async Task LoadSurveys()
+        public async Task LoadSurveys()
         {
             SurveyList = await _surveyService.GetAllAsync();
             OnPropertyChanged(nameof(SurveyList));

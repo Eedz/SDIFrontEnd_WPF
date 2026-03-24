@@ -55,6 +55,7 @@ namespace SDIFrontEnd_WPF
             apiSurveyService = _services.GetService(typeof(IApiSurveyService)) as IApiSurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey API service cannot be null");// Initialize the API survey service with the survey service
             
             _ = LoadAsync(); // TODO move this call to a command 
+            CurrentSublinks = new ObservableCollection<SublinkItem>();
         }
 
         private async Task LoadAsync()
@@ -62,7 +63,7 @@ namespace SDIFrontEnd_WPF
             var surveys = await apiSurveyService.GetAllAsync();
             AvailableSurveysToAdd.AddRange(surveys);
             CurrentUser = await _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");            
-            CurrentSublinks = new ObservableCollection<SublinkItem>();
+            
         }
 
         partial void OnSelectedMenuCategoryChanged(MenuCategory value)
@@ -107,16 +108,16 @@ namespace SDIFrontEnd_WPF
                         ActiveForm = await OpenSurveyManager(((SurveySublinkItem)SelectedSublink).SurveyId);
                         break;
                     case MenuCategory.Praccing:
-                        ActiveForm = OpenPraccingView();
+                        ActiveForm =  await OpenPraccingView();
                         break;
                     case MenuCategory.Search:
-                        ActiveForm = OpenSearchView();
+                        ActiveForm = await OpenSearchView();
                         break;
                     case MenuCategory.VarNames:
-                        ActiveForm = OpenVarNameView();
+                        ActiveForm = await OpenVarNameView();
                         break;
                     case MenuCategory.Reports:
-                        ActiveForm = OpenReportView();
+                        ActiveForm = await OpenReportView();
                         break;
                     default:
                         break;
@@ -132,77 +133,105 @@ namespace SDIFrontEnd_WPF
             return vm;
         }
 
-        private ViewModelBase OpenReportView()
+        private async Task<ViewModelBase> OpenReportView()
         {
+            ViewModelBase vm;
             switch (SelectedSublink.Key)
             {
                 case "Harmony":
-                    return _services.GetRequiredService<HarmonyReportViewModel>();
+                    vm = _services.GetRequiredService<HarmonyReportViewModel>();
+                    await ((HarmonyReportViewModel)vm).LoadDataAsync();
+                    return vm;
                 case "Variable List":
-                    return _services.GetRequiredService<QuestionSurveyMatrixViewModel>();
+                    vm = _services.GetRequiredService<QuestionSurveyMatrixViewModel>();
+                    await ((QuestionSurveyMatrixViewModel)vm).Load();
+                    return vm;
             
                 default:
-                    return null;
+                    return _services.GetRequiredService<HomeViewModel>();
             }
         }
 
-        private ViewModelBase OpenPraccingView()
+        private async Task<ViewModelBase> OpenPraccingView()
         {
+            ViewModelBase vm;
+
             switch(SelectedSublink.Key)
             {
                 case "Entry":
-                    return _services.GetRequiredService<PraccingEntryViewModel>(); 
+                    vm = _services.GetRequiredService<PraccingEntryViewModel>();
+                    await ((PraccingEntryViewModel)vm).Load();
+                    return vm;
                 case "Report":
-                    return _services.GetRequiredService<PraccingReportViewModel>();
+                    vm = _services.GetRequiredService<PraccingReportViewModel>();
+                    await ((PraccingReportViewModel)vm).LoadSurveysAsync();
+                    return vm;
                 case "Import":
-                    return _services.GetRequiredService<PraccingImportViewModel>();
+                    vm = _services.GetRequiredService<PraccingImportViewModel>();
+                   // await ((PraccingImportViewModel)vm).Load();
+                    return vm;
                 case "Sheet":
-                    return _services.GetRequiredService<PraccingSheetViewModel>();
+                    vm = _services.GetRequiredService<PraccingSheetViewModel>();
+                    await ((PraccingSheetViewModel)vm).LoadSurveys();
+                    return vm;
                 case "Form":
                     PraccingReportBlank report = new PraccingReportBlank();
                     report.CreateReport();
                     report.OutputReport();
                     return null;
                 default:
-                    return _services.GetRequiredService<PraccingEntryViewModel>();
+                    vm = _services.GetRequiredService<PraccingEntryViewModel>();
+                    await ((PraccingEntryViewModel)vm).Load();
+                    return vm;
             }
         }
 
-        private ViewModelBase OpenSearchView()
+        private async Task<ViewModelBase> OpenSearchView()
         {
+            ViewModelBase vm;
             switch (SelectedSublink.Key)
             {
                 case "Questions":
-                    return _services.GetRequiredService<QuestionSearchViewModel>();
+                    vm = _services.GetRequiredService<QuestionSearchViewModel>();
+                    await ((QuestionSearchViewModel)vm).LoadSurveys();
+                    return vm;
                 //case "ResponseSets":
                 //    return new ResponseSetSearchViewModel(_surveyService);
                 //case "Comments":
                 //    return new CommentSearchViewModel(_surveyService, _peopleService);
                 default:
-                    return _services.GetRequiredService<QuestionSearchViewModel>();
+                    vm = _services.GetRequiredService<QuestionSearchViewModel>();
+                    await ((QuestionSearchViewModel)vm).LoadSurveys();
+                    return vm;
             }
         }
 
-        private ViewModelBase OpenVarNameView()
+        private async Task<ViewModelBase> OpenVarNameView()
         {
+            ViewModelBase vm;
             switch (SelectedSublink.Key)
             {
+                case "varinfo":
+                    vm = _services.GetRequiredService<VariableInformationViewModel>();
+                    return vm;
                 case "rename_vars":
-                    return _services.GetRequiredService<RenameVarsViewModel>();
+                    vm = _services.GetRequiredService<RenameVarsViewModel>();
+                    await ((RenameVarsViewModel)vm).LoadSurveysAsync();
+                    return vm;
                     //case "varchanges":
                     //    return new VarNameChangesViewModel(_varnameService);
                     //case "varusage":
                     //    return new VarNameUsageViewModel(_varnameService, _surveyService);
-                    //case "prefixes":
-                    //    return new PrefixListViewModel(_varnameService);
-                    //case "varhistory":
-                    //    return new VarNameHistoryViewModel(_varnameService);
-
-                    break;
+                case "prefixes":
+                    vm = _services.GetRequiredService<PrefixListViewModel>();
+                    return vm;
+                    
                 case "history":
-                    return _services.GetRequiredService<QuestionHistoryManagerViewModel>();
+                    vm = _services.GetRequiredService<QuestionHistoryManagerViewModel>();
+                    await ((QuestionHistoryManagerViewModel)vm).Load();
+                    return vm;
                 default:
-                    return null;//return new VarNameRenameViewModel(_varnameService, _surveyService);
+                    return null;
             }
         }
 
@@ -224,7 +253,8 @@ namespace SDIFrontEnd_WPF
         {
             return new ObservableCollection<SublinkItem>()
             {
-                new SublinkItem ("Rename Vars", "rename_vars", MenuCategory.VarNames),
+                new SublinkItem("Variable Info", "varinfo", MenuCategory.VarNames),
+                new SublinkItem("Rename Vars", "rename_vars", MenuCategory.VarNames),
                 new SublinkItem("VarName Changes", "varchanges", MenuCategory.VarNames),
                 new SublinkItem("VarName Usage", "varusage", MenuCategory.VarNames),
                 new SublinkItem("Prefix List", "prefixes", MenuCategory.VarNames),
@@ -273,8 +303,7 @@ namespace SDIFrontEnd_WPF
 
         private async void  LoadSublinks(MenuCategory category)
         { 
-            // This method can be used to load sublinks based on the selected category
-            // For now, it just sets the SelectedSublink to null to reset the view
+           
             CurrentSublinks.Clear();
 
             IEnumerable<SublinkItem> items = category switch

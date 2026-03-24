@@ -149,18 +149,16 @@ namespace SDIFrontEnd_WPF.ViewModels
             _surveyService = surveyService;
             _matrixService = matrixService;
 
-            
-            _ = Load();
-            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
-            RefreshWindow();
-            
+                  
         }
 
 
-        private async Task Load()
+        public async Task Load()
         {
             AllQuestions = new List<SurveyQuestion>();
             AllSurveys = await _surveyService.GetAllAsync();
+            SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
+            RefreshWindow();
         }
 
 

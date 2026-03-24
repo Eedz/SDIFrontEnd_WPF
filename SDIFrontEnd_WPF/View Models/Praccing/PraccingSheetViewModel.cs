@@ -26,10 +26,9 @@ namespace SDIFrontEnd_WPF.ViewModels
         public PraccingSheetViewModel(IApiSurveyService surveyService)
         {
             _surveyService = surveyService;
-            _ = LoadSurveys();
         }
 
-        private async Task LoadSurveys()
+        public async Task LoadSurveys()
         {
             
             SurveyList = (await _surveyService.GetAllAsync()).ToList();

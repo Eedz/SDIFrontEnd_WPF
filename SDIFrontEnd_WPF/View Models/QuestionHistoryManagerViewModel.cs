@@ -49,11 +49,11 @@ namespace SDIFrontEnd_WPF.ViewModels
             _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService));
             _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
             DisplayName = "Question History Manager";
-            _ = Load();
+            
            
         }
 
-        private async Task Load()
+        public async Task Load()
         {
             SurveyList = (await _auditService.GetAuditSurveys()).Select(x => new Survey(x)).ToList();
             VarNameList = new List<VariableName>();

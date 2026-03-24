@@ -168,7 +168,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             _peopleService = peopleService;
             _dialogService = dialogService;
            
-            _ = Load();
+            
 
             // Register for the message
             WeakReferenceMessenger.Default.Register<IssueSelectedMessage>(this, (r, m) =>
@@ -182,7 +182,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             ResponseImageViewModel = new PraccingImagesViewModel();
         }
 
-        private async Task Load()
+        public async Task Load()
         {
             SurveyList = new ObservableCollection<Survey>( await _surveyService.GetAllAsync());
         }
