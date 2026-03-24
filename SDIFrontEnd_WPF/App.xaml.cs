@@ -25,16 +25,14 @@ namespace SDIFrontEnd_WPF
             base.OnStartup(e);
 
             this.DispatcherUnhandledException += Application_DispatcherUnhandledException;
+            ServiceProvider serviceProvider;
+//#if DEBUG
+//            serviceProvider = AddMockServices();
 
-
-            ServiceProvider serviceProvider = AddServices();
-
-            var surveyApi = serviceProvider.GetRequiredService<IApiSurveyService>();
-
-            var isHealthy = await surveyApi.CheckHealthAsync();
-
-            if (!isHealthy)
-            {
+//#else
+            serviceProvider = AddServices();
+            if (!(await CheckHealth(serviceProvider)))
+            {   
                 MessageBox.Show(
                     "The server is unavailable. The application will now close.",
                     "Server Error",
@@ -44,9 +42,10 @@ namespace SDIFrontEnd_WPF
                 Shutdown();
                 return;
             }
+//#endif
+
 
             var loader = serviceProvider.GetRequiredService<ReferenceDataService>();
-
             await loader.LoadAsync();
 
             var wordingLoader = serviceProvider.GetRequiredService<WordingDataService>();
@@ -66,7 +65,46 @@ namespace SDIFrontEnd_WPF
             window.Show();
         }
 
+        static async Task<bool> CheckHealth(IServiceProvider serviceProvider)
+        {
+            var surveyApi = serviceProvider.GetRequiredService<IApiSurveyService>();
 
+            var isHealthy = await surveyApi.CheckHealthAsync();
+
+            return isHealthy;
+        }
+
+        static ServiceProvider AddMockServices()
+        {
+            IServiceCollection services = new ServiceCollection();
+
+            services.AddSingleton<IFileDialogService, FileDialogService>();
+            services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IWindowService, WindowService>();
+
+            AddMockServices(services);
+
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Information);
+            });
+
+            // data storage
+            services.AddSingleton<ReferenceDataStore>();
+            services.AddSingleton<ReferenceDataService>();
+            services.AddSingleton<WordingData>();
+            services.AddSingleton<WordingDataService>();
+
+            // client services
+            services.AddTransient<QuestionImporterService>();
+            services.AddSingleton<IMatrixService, MatrixService>();
+
+            AddVMServices(services);
+
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            return serviceProvider;
+        }
 
         static ServiceProvider AddServices()
         {
@@ -76,6 +114,47 @@ namespace SDIFrontEnd_WPF
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<IWindowService, WindowService>();
 
+            AddApiServices(services);
+
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Information);
+            });
+
+            // data storage
+            services.AddSingleton<ReferenceDataStore>();
+            services.AddSingleton<ReferenceDataService>();
+            
+            services.AddSingleton<WordingData>();
+            services.AddSingleton<WordingDataService>();
+
+            // client services
+            services.AddTransient<QuestionImporterService>();
+            services.AddSingleton<IMatrixService, MatrixService>();
+
+            AddVMServices(services);
+
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            return serviceProvider;
+        }
+
+        private static void AddMockServices(IServiceCollection services)
+        {
+            services.AddSingleton<IApiSurveyService, MockSurveyService>();
+            services.AddSingleton<IApiVarNameService, MockVarNameService>();
+            services.AddSingleton<IApiQuestionService, MockQuestionService>();
+            services.AddSingleton<IApiReferenceDataService, MockReferenceDataService>();
+            services.AddSingleton<IApiWordingService, MockWordingService>();
+            services.AddSingleton<IApiUserService, MockUserService>();
+            services.AddSingleton<IApiPeopleService, MockPeopleService>();
+            services.AddSingleton<IApiCommentService, MockCommentService>();
+            services.AddSingleton<IApiPraccingService, MockPraccingService>();
+            services.AddSingleton<IApiAuditService, MockAuditService>();
+        }
+
+        private static void AddApiServices(IServiceCollection services)
+        {
             services.AddHttpClient<IApiSurveyService, ApiSurveyService>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7137/");
@@ -133,39 +212,6 @@ namespace SDIFrontEnd_WPF
                 client.BaseAddress = new Uri("https://localhost:7137/");
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
-
-#if DEBUG
-            services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionStringTest"].ConnectionString));
-#else
-            services.AddScoped<IDbConnection>(db => new Microsoft.Data.SqlClient.SqlConnection(ConfigurationManager.ConnectionStrings["ISISConnectionString"].ConnectionString));
-#endif
-            services.AddLogging(builder =>
-            {
-                builder.AddConsole();
-                builder.SetMinimumLevel(LogLevel.Information);
-            });
-
-            // data storage
-            services.AddSingleton<ReferenceDataStore>();
-            services.AddSingleton<ReferenceDataService>();
-            
-            services.AddSingleton<WordingData>();
-            services.AddSingleton<WordingDataService>();
-
-            // client services
-            services.AddTransient<QuestionImporterService>();
-            services.AddSingleton<IMatrixService, MatrixService>();
-
-            AddVMServices(services);
-
-
-            services.AddHttpClient<ApiSurveyService>(client =>
-            {
-                client.BaseAddress = new Uri("https://localhost:5001/");
-            });
-
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
-            return serviceProvider;
         }
 
         private static void AddVMServices(IServiceCollection services)
@@ -190,6 +236,8 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<QuestionSearchViewModel>();
             services.AddTransient<HarmonyReportViewModel>();
             services.AddTransient<QuestionSurveyMatrixViewModel>();
+
+            services.AddTransient<VariableInformationViewModel>();
         }
     }
 
