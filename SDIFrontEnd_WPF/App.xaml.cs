@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ITC_Contracts;
+using ITCLib;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SDIFrontEnd_WPF.Mappings;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Configuration;
@@ -109,7 +112,19 @@ namespace SDIFrontEnd_WPF
         static ServiceProvider AddServices()
         {
             IServiceCollection services = new ServiceCollection();
-            
+
+            // mapping profiles (TODO AddMappers extension)
+            services.AddTransient<IMapper<Survey, SurveyDto>, SurveyMapper>();
+            services.AddTransient<IMapper<SurveyQuestion, SurveyQuestionDto>, SurveyQuestionMapper>();
+            services.AddTransient<IMapper<Wording,WordingDto>, WordingMapper>();
+            services.AddTransient<IMapper<ResponseSet, ResponseSetDto>, ResponseSetMapper>();
+            services.AddTransient<IMapper<SurveyCohort, SurveyCohortDto>, CohortMapper>();
+            services.AddTransient<IMapper<SurveyMode, SurveyModeDto>, ModeMapper>();
+            services.AddTransient<IMapper<SurveyUserState, SurveyUserStateDto>, UserStateMapper>();
+            services.AddTransient<IMapper<SurveyLanguage, SurveyLanguageDto>, LanguageMapper>();
+            services.AddTransient<IMapper<SurveyScreenedProduct, SurveyScreenedProductDto>, ScreenedProductMapper>();
+
+
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<IWindowService, WindowService>();
