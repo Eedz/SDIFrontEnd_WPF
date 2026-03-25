@@ -1,6 +1,7 @@
 ﻿
 using ITC_Contracts;
 using ITCLib;
+using SDIFrontEnd_WPF.Mappings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,11 @@ namespace SDIFrontEnd_WPF
 {
     public  class ApiPeopleService : ApiServiceBase, IApiPeopleService
     {
-        public ApiPeopleService(HttpClient httpClient) : base(httpClient)
-        {
+        PersonMapper _mapper;
 
+        public ApiPeopleService(HttpClient httpClient, PersonMapper mapper) : base(httpClient)
+        {
+            _mapper = mapper;
             
         }
 
@@ -27,23 +30,7 @@ namespace SDIFrontEnd_WPF
                 if (response == null)
                     return new List<Person>();
 
-                var people = response.Select(dto => new Person
-                {
-                    ID = dto.ID,
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Name = dto.Name,
-                    Email = dto.Email,
-                    Username = dto.Username,
-                    OfficeNo = dto.OfficeNo,
-                    WorkPhone = dto.WorkPhone,
-                    HomePhone = dto.HomePhone,
-                    Institution = dto.Institution,
-                    Active = dto.Active,
-                    PraccID = dto.PraccID,
-                    Entry = dto.Entry,
-                    PraccEntry = dto.PraccEntry,
-                }).ToList();
+                var people = response.Select(dto => _mapper.MapToEntity(dto)).ToList();
 
                 return people;
             }
