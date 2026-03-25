@@ -7,12 +7,18 @@ using System.Net.Http;
 using ITCLib;
 using ITC_Contracts;
 using System.Net.Http.Json;
+using SDIFrontEnd_WPF.Mappings;
 namespace SDIFrontEnd_WPF
 {
     public class ApiCommentService : ApiServiceBase, IApiCommentService
     {
-        public ApiCommentService(HttpClient httpClient) : base(httpClient)
+        private readonly QuestionCommentMapper questionCommentMapper;
+        private readonly DeletedCommentMapper deletedCommentMapper;
+
+        public ApiCommentService(HttpClient httpClient, QuestionCommentMapper mapper, DeletedCommentMapper deletedCommentMapper) : base(httpClient)
         {
+            questionCommentMapper = mapper;
+            this.deletedCommentMapper = deletedCommentMapper;
         }
 
         public async Task<List<QuestionComment>> GetQuestionCommentsAsync(int questionId)
@@ -21,17 +27,7 @@ namespace SDIFrontEnd_WPF
             {
                 var response = await _http.GetFromJsonAsync<List<QuestionCommentDto>>($"api/comments/question/{questionId}");
 
-                var comments = response.Select(c => new QuestionComment
-                {
-                    ID = c.ID,
-                    QID = c.QID,
-                    Notes = new Note(c.NoteID, c.NoteText),
-                    NoteDate = c.NoteDate,
-                    Author = new Person(c.Author.Name, c.Author.ID),
-                    Authority = new Person(c.Authority.Name, c.Authority.ID),
-                    Source = c.Source,
-                    NoteType = new CommentType(c.NoteType.ID, c.NoteType.TypeName, c.NoteType.ShortForm),
-                }).ToList();
+                var comments = response.Select(c => questionCommentMapper.MapToEntity(c)).ToList();
                 return comments;
             }
             catch (Exception ex)
@@ -45,17 +41,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var commentDto = new QuestionCommentDto
-                {
-                    QID = comment.QID,
-                    NoteID = comment.Notes.ID,
-                    NoteText = comment.Notes.NoteText,
-                    NoteDate = comment.NoteDate,
-                    Author = new PersonDto { ID = comment.Author.ID, Name = comment.Author.Name },
-                    Authority = new PersonDto { ID = comment.Authority.ID, Name = comment.Authority.Name },
-                    Source = comment.Source,
-                    NoteType = new CommentTypeDto { ID = comment.NoteType.ID, TypeName = comment.NoteType.TypeName, ShortForm = comment.NoteType.ShortForm }
-                };
+                var commentDto = questionCommentMapper.MapToDto(comment);
                 var response = await _http.PostAsJsonAsync("api/comments", commentDto);
                 response.EnsureSuccessStatusCode();
                 var createdCommentId = await response.Content.ReadFromJsonAsync<int>();
@@ -86,19 +72,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var commentDto = new DeletedCommentDto
-                {
-                    Survey = comment.Survey,
-                    VarName = comment.VarName,
-                    SurvID = comment.SurvID,
-                    NoteID = comment.Notes.ID,
-                    NoteText = comment.Notes.NoteText,
-                    NoteDate = comment.NoteDate,
-                    Author = new PersonDto { ID = comment.Author.ID, Name = comment.Author.Name },
-                    Authority = new PersonDto { ID = comment.Authority.ID, Name = comment.Authority.Name },
-                    Source = comment.Source,
-                    NoteType = new CommentTypeDto { ID = comment.NoteType.ID, TypeName = comment.NoteType.TypeName, ShortForm = comment.NoteType.ShortForm }
-                };
+                var commentDto =deletedCommentMapper.MapToDto(comment);
                 var response = await _http.PostAsJsonAsync("api/comments/deleted", commentDto);
                 response.EnsureSuccessStatusCode();
                 return true;
