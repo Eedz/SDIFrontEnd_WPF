@@ -1,5 +1,6 @@
 ﻿using ITC_Contracts;
 using ITCLib;
+using SDIFrontEnd_WPF.Mappings;
 using SDIFrontEnd_WPF.Views;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,12 @@ namespace SDIFrontEnd_WPF
 {
     public class ApiWordingService : ApiServiceBase, IApiWordingService
     {
-        public ApiWordingService(HttpClient http) : base(http)
+        private readonly WordingMapper wordingMapper;
+        private readonly ResponseSetMapper responseMapper;
+        public ApiWordingService(HttpClient http, WordingMapper mapper, ResponseSetMapper respMapper) : base(http)
         {
-
+            wordingMapper = mapper;
+            responseMapper = respMapper;
         }
 
         private async Task<List<WordingDto>> GetWordingsByType(string type)
@@ -56,7 +60,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetWordingsByType("prep");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => wordingMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -64,7 +68,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetWordingsByType("prei");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => wordingMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -72,7 +76,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetWordingsByType("prea");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => wordingMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -80,7 +84,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetWordingsByType("litq");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => wordingMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -88,7 +92,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetWordingsByType("psti");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => wordingMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -96,7 +100,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetWordingsByType("pstp");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => wordingMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -104,7 +108,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetResponseSetsByType("respoptions");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => responseMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -112,7 +116,7 @@ namespace SDIFrontEnd_WPF
         {
             var response = await GetResponseSetsByType("nrcodes");
 
-            var wordings = response.Select(dto => MapToEntity(dto)).ToList();
+            var wordings = response.Select(dto => responseMapper.MapToEntity(dto)).ToList();
             return wordings;
         }
 
@@ -156,34 +160,10 @@ namespace SDIFrontEnd_WPF
             throw new NotImplementedException();
         }
 
-        private Wording MapToEntity(WordingDto dto)
-        {
-            return new Wording
-            {
-                WordID = dto.ID,
-                Type = (WordingType)dto.Type,
-                WordingText = dto.WordingText
-            };
-        }
 
-        private ResponseSet MapToEntity(ResponseSetDto dto)
-        {
-            return new ResponseSet
-            {
-                RespSetName = dto.RespSetName,
-                Type = (ResponseType)dto.Type,
-                RespList = dto.RespList
-            };
-        }
 
-        private WordingDto MapToDto(Wording entity)
-        {
-            return new WordingDto
-            {
-                ID = entity.WordID,
-                Type = (int)entity.Type,
-                WordingText = entity.WordingText
-            };
-        }
+        
+
+       
     }
 }
