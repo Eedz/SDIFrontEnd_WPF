@@ -1,5 +1,6 @@
 ﻿using ITC_Contracts;
 using ITCLib;
+using SDIFrontEnd_WPF.Mappings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +16,17 @@ namespace SDIFrontEnd_WPF
     /// </summary>
     public class ApiVarNameService : ApiServiceBase, IApiVarNameService
     {
-        public ApiVarNameService(HttpClient http) : base(http)
+        VarNameMapper _varnameMapper;
+
+        public ApiVarNameService(HttpClient http, VarNameMapper varnameMapper) : base(http)
         {
+            _varnameMapper = varnameMapper;
         }
 
         public async Task<int> InsertVariable(VariableName variable)
         {
             
-            var dto = MapToDto(variable);
+            var dto = _varnameMapper.MapToDto(variable);
             var result = await _http.PostAsJsonAsync("api/varnames", dto);
             return result.IsSuccessStatusCode ? 1 : 0;
         }
@@ -30,7 +34,7 @@ namespace SDIFrontEnd_WPF
         public async Task<List<VariableName>> GetAllVarNames()
         {
             var list = await _http.GetFromJsonAsync<List<VariableNameDto>>("api/varnames/all");
-            return list.Select(MapToEntity).ToList();
+            return list.Select(_varnameMapper.MapToEntity).ToList();
         }
 
         public async Task<List<VariableName>> GetAllVarNamesByRefList(List<string> varlist)
@@ -40,7 +44,7 @@ namespace SDIFrontEnd_WPF
             foreach (string varname in varlist)
             {
                 var varnames = await _http.GetFromJsonAsync<VariableNameDto>($"api/varnames/{varname}");
-                list.Add(MapToEntity(varnames));
+                list.Add(_varnameMapper.MapToEntity(varnames));
             }
             return list;
         }
@@ -48,7 +52,7 @@ namespace SDIFrontEnd_WPF
         public async Task<VariableName> GetVariableInfo(string varname)
         {
             var dto = await _http.GetFromJsonAsync<VariableNameDto>($"api/varnames/{varname}");
-            return dto == null ? new VariableName() : MapToEntity(dto);
+            return dto == null ? new VariableName() : _varnameMapper.MapToEntity(dto);
         }
 
         public async Task<List<VariableName>> GetVariableInfoByRef(string refvarname)
@@ -59,12 +63,12 @@ namespace SDIFrontEnd_WPF
         public async Task<List<VariableName>> SearchVarNames(string search, int take = 50)
         {
             var dto = await _http.GetFromJsonAsync<List<VariableNameDto>>($"api/varnames?search={Uri.EscapeDataString(search)}&take={take}");
-            return dto == null ? new List<VariableName>() : dto.Select(MapToEntity).ToList();
+            return dto == null ? new List<VariableName>() : dto.Select(_varnameMapper.MapToEntity).ToList();
         }
 
         public async Task<bool> UpdateVariable(VariableName variable)
         {
-            var dto = MapToDto(variable);
+            var dto = _varnameMapper.MapToDto(variable);
             var result = await _http.PutAsJsonAsync($"api/varnames/{variable.ID}", dto);
             return result.IsSuccessStatusCode;
         }
@@ -123,36 +127,6 @@ namespace SDIFrontEnd_WPF
             return dto ?? new List<VariableNameSurveys>();
         }
 
-        private VariableNameDto MapToDto(VariableName entity)
-        {
-            return new VariableNameDto
-            {
-                ID = entity.ID,
-                VarName = entity.VarName,
-                VarLabel = entity.VarLabel,
-                Domain = new VarNameLabelDto() { LabelText = entity.Domain.LabelText, ID = entity.Domain.ID },
-                Topic = new VarNameLabelDto() { LabelText = entity.Topic.LabelText, ID = entity.Topic.ID },
-                Content = new VarNameLabelDto() { LabelText = entity.Content.LabelText, ID = entity.Content.ID },
-                Product = new VarNameLabelDto() { LabelText = entity.Product.LabelText, ID = entity.Product.ID },
-            };
-        }
-
-        private VariableName MapToEntity(VariableNameDto dto)
-        {
-            return new VariableName
-            {
-                ID = dto.ID,
-                VarName = dto.VarName,
-                VarLabel = dto.VarLabel,
-                DomainLabel = new VarNameLabel() { Label = dto.Domain.LabelText, ID = dto.Domain.ID },
-                TopicLabel = new VarNameLabel() { Label = dto.Topic.LabelText, ID = dto.Topic.ID },
-                ContentLabel = new VarNameLabel() { Label = dto.Content.LabelText, ID = dto.Content.ID },
-                ProductLabel = new VarNameLabel() { Label = dto.Product.LabelText, ID = dto.Product.ID },
-                Domain = new DomainLabel() { LabelText = dto.Domain.LabelText, ID = dto.Domain.ID },
-                Topic = new TopicLabel() { LabelText = dto.Topic.LabelText, ID = dto.Topic.ID },
-                Content = new ContentLabel() { LabelText = dto.Content.LabelText, ID = dto.Content.ID },
-                Product = new ProductLabel() { LabelText = dto.Product.LabelText, ID = dto.Product.ID },
-            };
-        }
+       
     }
 }
