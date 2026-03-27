@@ -15,7 +15,7 @@ namespace SDIFrontEnd_WPF
         private readonly IMapper<QuestionComment, QuestionCommentDto> _questionCommentMapper;
         private readonly IMapper<DeletedComment, DeletedCommentDto> _deletedCommentMapper;
 
-        public ApiCommentService(HttpClient httpClient, IMapperFactory mapperFactory, ) : base(httpClient)
+        public ApiCommentService(HttpClient httpClient, IMapperFactory mapperFactory ) : base(httpClient)
         {
             _questionCommentMapper = mapperFactory.Get<QuestionComment, QuestionCommentDto>();
             _deletedCommentMapper = mapperFactory.Get<DeletedComment, DeletedCommentDto>();

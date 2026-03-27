@@ -19,7 +19,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var response = await this._http.GetFromJsonAsync<UserPrefsDto>($"api/users/{username}");
+                var response = await this._http.GetFromJsonAsync<UserPrefsDto>($"api/users?username={username}");
                 if (response == null)
                     return new UserPrefs();
 
@@ -35,7 +35,16 @@ namespace SDIFrontEnd_WPF
                     //LastUsedComment = response.LastUsedComment,
                     //SavedComments = response.SavedComments,
                     //SavedSources = response.SavedSources,
-                    //FormStates = response.FormStates
+                    FormStates = response.FormStates.Select(x=> new FormState()
+                    {
+                        ID = x.ID,
+                        Filter = x.Filter,
+                        FilterID = x.FilterID,
+                        PersonnelID = x.PersonnelID,
+                        FormName = x.FormName,
+                        FormNum = x.FormNum,
+                        RecordPosition = x.RecordPosition,
+                    }).ToList()
                 };
                 return userPrefs;
             }

@@ -6,11 +6,11 @@ namespace SDIFrontEnd_WPF.Mappings
 {
     public class PraccingIssueMapper : IMapper<PraccingIssue, PraccingIssueDto>
     {
-        private readonly PraccingResponseMapper _responseMapper;
+        private readonly IMapper<PraccingResponse, PraccingResponseDto> _responseMapper;
 
-        public PraccingIssueMapper (PraccingResponseMapper responseMapper)
+        public PraccingIssueMapper (IMapperFactory mapperFactory)
         {
-            _responseMapper = responseMapper;
+            _responseMapper = mapperFactory.Get<PraccingResponse, PraccingResponseDto>();
 
         }
         public PraccingIssueDto MapToDto(PraccingIssue entity)

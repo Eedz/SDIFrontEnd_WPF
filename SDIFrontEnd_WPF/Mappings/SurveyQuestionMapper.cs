@@ -10,7 +10,12 @@ namespace SDIFrontEnd_WPF.Mappings
 {
     public class SurveyQuestionMapper : IMapper<SurveyQuestion,SurveyQuestionDto>
     {
-        public SurveyQuestionMapper() { }
+        private readonly IMapper<QuestionComment, QuestionCommentDto> _commentMapper;
+
+        public SurveyQuestionMapper(IMapperFactory mapperFactory) 
+        { 
+            _commentMapper = mapperFactory.Get<QuestionComment, QuestionCommentDto>();
+        }
 
         public SurveyQuestion MapToEntity(SurveyQuestionDto dto)
         {
@@ -35,7 +40,7 @@ namespace SDIFrontEnd_WPF.Mappings
                 RespOptionsS = dto.RespOptionsS == null ? null : new ResponseSet() { RespSetName = dto.RespOptionsS.RespSetName, RespList = dto.RespOptionsS.RespList },
                 NRCodesS = dto.NRCodesS == null ? null : new ResponseSet() { RespSetName = dto.NRCodesS.RespSetName, RespList = dto.NRCodesS.RespList },
 
-
+                Comments = dto.Comments.Select(x=> _commentMapper.MapToEntity(x)).ToList()
 
             };
         }

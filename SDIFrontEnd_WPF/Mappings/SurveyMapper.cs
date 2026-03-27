@@ -10,19 +10,19 @@ namespace SDIFrontEnd_WPF.Mappings
 {
     public class SurveyMapper : IMapper<Survey, SurveyDto>
     {
-        private readonly CohortMapper cohortMapper;
-        private readonly ModeMapper modeMapper;
-        private readonly UserStateMapper userStateMapper;
-        private readonly LanguageMapper languageMapper;
-        private readonly ScreenedProductMapper screenedProductMapper;
+        private readonly IMapper<SurveyCohort, SurveyCohortDto> cohortMapper;
+        private readonly IMapper<SurveyMode, SurveyModeDto> modeMapper;
+        private readonly IMapper<SurveyUserState, SurveyUserStateDto> userStateMapper;
+        private readonly IMapper<SurveyLanguage, SurveyLanguageDto> languageMapper;
+        private readonly IMapper<SurveyScreenedProduct, SurveyScreenedProductDto> screenedProductMapper;
 
-        public SurveyMapper(CohortMapper cohortMapper, ModeMapper modeMapper, UserStateMapper userstateMapper, LanguageMapper languageMapper, ScreenedProductMapper screenedProductMapper)
+        public SurveyMapper(IMapperFactory mapperFactory)
         {
-            this.cohortMapper = cohortMapper;
-            this.modeMapper = modeMapper;
-            this.userStateMapper = userstateMapper;
-            this.languageMapper = languageMapper;
-            this.screenedProductMapper = screenedProductMapper;
+            this.cohortMapper = mapperFactory.Get<SurveyCohort, SurveyCohortDto>();
+            this.modeMapper = mapperFactory.Get<SurveyMode, SurveyModeDto>();
+            this.userStateMapper = mapperFactory.Get<SurveyUserState, SurveyUserStateDto>();
+            this.languageMapper = mapperFactory.Get<SurveyLanguage, SurveyLanguageDto>();
+            this.screenedProductMapper = mapperFactory.Get<SurveyScreenedProduct, SurveyScreenedProductDto>();
         }
 
         public SurveyDto MapToDto(Survey survey)
