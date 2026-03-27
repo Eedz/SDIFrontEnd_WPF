@@ -42,7 +42,7 @@ namespace SDIFrontEnd_WPF.Mappings
 
 
 
-        public static SurveyQuestionDto MapToDto(SurveyQuestion question)
+        public SurveyQuestionDto MapToDto(SurveyQuestion question)
         {
             return new SurveyQuestionDto
             {
