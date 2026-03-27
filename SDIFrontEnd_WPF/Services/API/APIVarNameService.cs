@@ -1,4 +1,5 @@
-﻿using ITC_Contracts;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using ITC_Contracts;
 using ITCLib;
 using SDIFrontEnd_WPF.Mappings;
 using System;
@@ -103,22 +104,62 @@ namespace SDIFrontEnd_WPF
 
         public async Task<bool> DeleteVariablePrefix(int id)
         {
-            throw new NotImplementedException();
+            var response = await _http.DeleteAsync($"api/varnames/prefixes/{id}");
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<int> InsertVariablePrefix(VariablePrefix prefix)
         {
-            throw new NotImplementedException();
+            var dto = new VariablePrefixDto()
+            {
+                ID = prefix.ID,
+                Prefix = prefix.Prefix,
+                PrefixName = prefix.PrefixName,
+                ProductType = prefix.ProductType,
+                RelatedPrefixes = prefix.RelatedPrefixes,
+                Description = prefix.Description,
+                Comments = prefix.Comments,
+                Inactive = prefix.Inactive
+            };
+
+            var response = await _http.PostAsJsonAsync<VariablePrefixDto>("$api/varnames/prefixes", dto);
+
+            return 0;
         }
 
         public async Task<List<VariablePrefix>> GetVariablePrefixes()
         {
-            throw new NotImplementedException();
+            var response = await _http.GetFromJsonAsync<List<VariablePrefixDto>>("$api/varnames/prefixes");
+            var prefixes = response.Select(x => new VariablePrefix()
+            {
+                ID = x.ID,
+                Prefix = x.Prefix,
+                PrefixName = x.PrefixName,
+                ProductType = x.ProductType,
+                RelatedPrefixes= x.RelatedPrefixes,
+                Description = x.Description,
+                Comments = x.Comments,
+                Inactive =x.Inactive
+            }).ToList();
+            return prefixes;
         }
 
         public async Task<int> UpdateVariablePrefix(VariablePrefix prefix)
         {
-            throw new NotImplementedException();
+            var dto = new VariablePrefixDto()
+            {
+                ID = prefix.ID,
+                Prefix = prefix.Prefix,
+                PrefixName = prefix.PrefixName,
+                ProductType = prefix.ProductType,
+                RelatedPrefixes = prefix.RelatedPrefixes,
+                Description = prefix.Description,
+                Comments = prefix.Comments,
+                Inactive = prefix.Inactive
+            };
+
+            var response = await _http.PutAsJsonAsync<VariablePrefixDto>("$api/varnames/prefixes", dto);
+            return 0;
         }
 
         public async Task<List<VariableNameSurveys>> SearchVarNameUsage(string searchTerm, int take)
