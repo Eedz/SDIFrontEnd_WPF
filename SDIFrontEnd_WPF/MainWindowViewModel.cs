@@ -54,11 +54,11 @@ namespace SDIFrontEnd_WPF
             
             apiSurveyService = _services.GetService(typeof(IApiSurveyService)) as IApiSurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey API service cannot be null");// Initialize the API survey service with the survey service
             
-            _ = LoadAsync(); // TODO move this call to a command 
+           
             CurrentSublinks = new ObservableCollection<SublinkItem>();
         }
 
-        private async Task LoadAsync()
+        public async Task LoadAsync()
         {
             var surveys = await apiSurveyService.GetAllAsync();
             AvailableSurveysToAdd.AddRange(surveys);

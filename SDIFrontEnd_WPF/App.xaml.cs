@@ -60,7 +60,7 @@ namespace SDIFrontEnd_WPF
 
             // Create the ViewModel to which the main window binds.
             var viewModel = new MainWindowViewModel(serviceProvider);
-
+            await viewModel.LoadAsync();
             // Allow all controls in the window to bind to the ViewModel by setting the 
             // DataContext, which propagates down the element tree.
             window.DataContext = viewModel;
@@ -115,6 +115,7 @@ namespace SDIFrontEnd_WPF
 
             // mapping profiles (TODO AddMappers extension)
             services.AddSingleton<IMapperFactory, MapperFactory>();
+            
             services.AddTransient<IMapper<Survey, SurveyDto>, SurveyMapper>();
             services.AddTransient<IMapper<SurveyQuestion, SurveyQuestionDto>, SurveyQuestionMapper>();
             services.AddTransient<IMapper<Wording,WordingDto>, WordingMapper>();
@@ -127,6 +128,12 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<IMapper<PraccingIssue, PraccingIssueDto>, PraccingIssueMapper>();
             services.AddTransient<IMapper<PraccingResponse, PraccingResponseDto>, PraccingResponseMapper>();
             services.AddTransient<IMapper<VariableName, VariableNameDto>, VarNameMapper>();
+            services.AddTransient<IMapper<Person, PersonDto>, PersonMapper>();
+            services.AddTransient<IMapper<QuestionComment, QuestionCommentDto>, QuestionCommentMapper>();
+            services.AddTransient<IMapper<DeletedComment, DeletedCommentDto>, DeletedCommentMapper>();
+            services.AddTransient<IMapper<AuditWording, AuditWordingDto>, AuditWordingMapper>();
+            services.AddTransient<IMapper<ChangedSurveyQuestion, ChangedSurveyQuestionDto>, ChangedQuestionMapper>();
+            
 
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IDialogService, DialogService>();

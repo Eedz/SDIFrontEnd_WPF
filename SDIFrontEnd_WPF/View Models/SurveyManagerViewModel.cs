@@ -58,8 +58,8 @@ namespace SDIFrontEnd_WPF
             CurrentSurvey = survey;
 
             AllSurveys = await _surveyService.GetAllAsync();
-
-            _ = LoadSurvey(survey);
+            OnPropertyChanged(nameof(AllSurveys));
+            await LoadSurvey(survey);
         }
 
         partial void OnCurrentSurveyChanged(Survey value)
@@ -76,7 +76,7 @@ namespace SDIFrontEnd_WPF
             DisplayName = "Survey Manager - " + survey.SurveyCode;
             var questions = await _surveyService.GetSurveyQuestions(survey.SID);
             survey.AddQuestions(questions);
-
+            
             SurveyInfo = new SurveyViewModel(survey);
             SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, _wordingData, survey);
 
