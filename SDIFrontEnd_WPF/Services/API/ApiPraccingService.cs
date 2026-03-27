@@ -1,82 +1,169 @@
-﻿using System;
+﻿using ITC_Contracts;
+using ITCLib;
+using SDIFrontEnd_WPF.Mappings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
-using ITCLib;
-
 namespace SDIFrontEnd_WPF
 {
     public class ApiPraccingService : ApiServiceBase, IApiPraccingService
     {
-        public ApiPraccingService(HttpClient httpClient) : base(httpClient)
+        PraccingIssueMapper _mapper;
+        PraccingResponseMapper _responseMapper;
+        
+
+        public ApiPraccingService(HttpClient httpClient, PraccingIssueMapper praccingMapper, PraccingResponseMapper responseMapper) : base(httpClient)
         {
+            _mapper = praccingMapper;
+            _responseMapper = responseMapper;
         }
 
-        public Task<int> DeletePraccingIssue(int id)
+        public async Task<int> DeletePraccingIssue(int id)
         {
-            throw new NotImplementedException();
+            var result = await _http.DeleteAsync($"api/praccing/{id}");
+            result.EnsureSuccessStatusCode();
+            return 0;
+            
         }
 
-        public Task<List<PraccingCategory>> GetPraccingCategories()
+        public async Task<List<PraccingCategory>> GetPraccingCategories()
         {
-            throw new NotImplementedException();
+            var result = await _http.GetFromJsonAsync<List<PraccingCategoryDto>>($"api/praccing/categories");
+            
+            if (result ==null)
+                return new List<PraccingCategory>();
+
+            return result.Select(x=>new PraccingCategory()
+            {
+                ID = x.ID,
+                Category = x.Category,
+                
+            }).ToList();
         }
 
-        public Task<List<PraccingIssue>> GetPraccingIssues(int surveyid)
+        public async Task<List<PraccingIssue>> GetPraccingIssues(int surveyid)
         {
-            throw new NotImplementedException();
+            var result = await _http.GetFromJsonAsync<List<PraccingIssueDto>>($"api/praccing?id={surveyid}");
+
+            if (result == null)
+                return new List<PraccingIssue>();
+
+            return result.Select(x => _mapper.MapToEntity(x)).ToList();
         }
 
-        public Task<PraccingIssue> AddPraccingIssue(PraccingIssue issue)
+        public async Task<PraccingIssue> AddPraccingIssue(PraccingIssue issue)
         {
-            throw new NotImplementedException();
+            var dto = _mapper.MapToDto(issue);
+            var response = await _http.PostAsJsonAsync("api/praccing", dto);
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<PraccingIssueDto>();
+            if (created == null)
+                return null;
+            var createdEntity = _mapper.MapToEntity(created);
+            return createdEntity;
         }
 
-        public Task<PraccingIssue> UpdatePraccingIssue(PraccingIssue issue)
+        public async Task<PraccingIssue> UpdatePraccingIssue(PraccingIssue issue)
         {
-            throw new NotImplementedException();
+            var dto = _mapper.MapToDto(issue);
+            var response = await _http.PutAsJsonAsync("api/praccing", dto);
+
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<PraccingIssueDto>();
+            if (created == null)
+                return null;
+            var createdEntity = _mapper.MapToEntity(created);
+            return createdEntity;
         }
 
-        public Task<PraccingResponse> AddPraccingResponse(PraccingResponse response)
+        public async Task<PraccingResponse> AddPraccingResponse(PraccingResponse issueresponse)
         {
-            throw new NotImplementedException();
+            var dto = _responseMapper.MapToDto(issueresponse);
+            var response = await _http.PostAsJsonAsync("api/praccing/responses", dto);
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<PraccingResponseDto>();
+            if (created == null)
+                return null;
+            var createdEntity = _responseMapper.MapToEntity(created);
+            return createdEntity;
         }
 
-        public Task<int> DeletePraccingResponse(int id)
+        public async Task<int> DeletePraccingResponse(int id)
         {
-            throw new NotImplementedException();
+            var response = await _http.DeleteAsync($"api/praccing/responses/{id}");
+            response.EnsureSuccessStatusCode();
+            return 0;
         }
 
-        public Task<PraccingResponse> UpdatePraccingResponse(PraccingResponse response)
+        public async Task<PraccingResponse> UpdatePraccingResponse(PraccingResponse issueresponse)
         {
-            throw new NotImplementedException();
+            var dto = _responseMapper.MapToDto(issueresponse);
+            var response = await _http.PutAsJsonAsync("api/praccing", dto);
+
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<PraccingResponseDto>();
+            if (created == null)
+                return null;
+            var createdEntity = _responseMapper.MapToEntity(created);
+            return createdEntity;
         } 
 
-        public Task<PraccingImage> AddPraccingImage(PraccingImage image)
+        public async Task<PraccingImage> AddPraccingImage(PraccingImage image)
         {
-            throw new NotImplementedException();
+            var dto = _mapper.MapToDto(image);
+            var response = await _http.PostAsJsonAsync("api/praccing/images", dto);
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<PraccingImageDto>();
+            if (created == null)
+                return null;
+            var createdEntity = _mapper.MapToEntity(created);
+            return createdEntity;
         }
 
-        public Task<int> DeletePraccingImage(int id)
+        public async Task<int> DeletePraccingImage(int id)
         {
-            throw new NotImplementedException();
+            var result = await _http.DeleteAsync($"api/praccing/images/{id}");
+            result.EnsureSuccessStatusCode();
+            return 0;
         }
 
-        public Task<PraccingImage> AddResponseImage(PraccingImage image)
+        public async Task<PraccingImage> AddResponseImage(PraccingImage image)
         {
-            throw new NotImplementedException();
+            var dto = _mapper.MapToDto(image);
+            var response = await _http.PostAsJsonAsync("api/praccing/responses/images", dto);
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<PraccingImageDto>();
+            if (created == null)
+                return null;
+            var createdEntity = _mapper.MapToEntity(created);
+            return createdEntity;
         }
 
-        public Task<int> DeletePraccingResponseImage(int id)
+        public async Task<int> DeletePraccingResponseImage(int id)
         {
-            throw new NotImplementedException();
+            var result = await _http.DeleteAsync($"api/praccing/responses/images/{id}");
+            result.EnsureSuccessStatusCode();
+            return 0;
         }
 
-        public Task<List<Survey>> GetPraccingSurveys()
+        public async Task<List<Survey>> GetPraccingSurveys()
         {
-            throw new NotImplementedException();
+            var result = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/praccing/surveys");
+
+            if (result == null)
+                return new List<Survey>();
+
+            return result.Select(x => new Survey(x.SurveyCode) { SID = x.SID }).ToList();
         }
     }
 }
