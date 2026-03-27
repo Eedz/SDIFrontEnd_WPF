@@ -123,7 +123,9 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<IMapper<SurveyUserState, SurveyUserStateDto>, UserStateMapper>();
             services.AddTransient<IMapper<SurveyLanguage, SurveyLanguageDto>, LanguageMapper>();
             services.AddTransient<IMapper<SurveyScreenedProduct, SurveyScreenedProductDto>, ScreenedProductMapper>();
-
+            services.AddTransient<IMapper<PraccingIssue, PraccingIssueDto>, PraccingIssueMapper>();
+            services.AddTransient<IMapper<PraccingResponse, PraccingResponseDto>, PraccingResponseMapper>();
+            services.AddTransient<IMapper<VariableName, VariableNameDto>, VarNameMapper>();
 
             services.AddSingleton<IFileDialogService, FileDialogService>();
             services.AddSingleton<IDialogService, DialogService>();
