@@ -14,12 +14,12 @@ namespace SDIFrontEnd_WPF
 {
     public  class ApiPeopleService : ApiServiceBase, IApiPeopleService
     {
-        PersonMapper _mapper;
+        private readonly IMapper<Person, PersonDto> _personMapper;
 
-        public ApiPeopleService(HttpClient httpClient, PersonMapper mapper) : base(httpClient)
+        public ApiPeopleService(HttpClient httpClient, IMapperFactory mapperFactory) : base(httpClient)
         {
-            _mapper = mapper;
-            
+            _personMapper = mapperFactory.Get<Person, PersonDto>();
+
         }
 
         public async Task<List<Person>> GetPeopleBasics()
@@ -30,7 +30,7 @@ namespace SDIFrontEnd_WPF
                 if (response == null)
                     return new List<Person>();
 
-                var people = response.Select(dto => _mapper.MapToEntity(dto)).ToList();
+                var people = response.Select(dto => _personMapper.MapToEntity(dto)).ToList();
 
                 return people;
             }

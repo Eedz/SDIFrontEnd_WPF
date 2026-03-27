@@ -8,13 +8,13 @@ using SDIFrontEnd_WPF.Mappings;
 namespace SDIFrontEnd_WPF;
 public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 {
-    SurveyMapper surveyMapper;
-    SurveyQuestionMapper questionMapper;
+    private readonly IMapper<Survey, SurveyDto> surveyMapper;
+    private readonly IMapper<SurveyQuestion, SurveyQuestionDto> questionMapper;
 
-    public ApiSurveyService(HttpClient http, SurveyMapper surveymapper, SurveyQuestionMapper questionmapper) : base (http)
+    public ApiSurveyService(HttpClient http, IMapperFactory mapperFactory) : base (http)
     {
-        this.surveyMapper = surveymapper;
-        questionMapper = questionmapper;
+        this.surveyMapper = mapperFactory.Get<Survey, SurveyDto>(); 
+        questionMapper = mapperFactory.Get<SurveyQuestion, SurveyQuestionDto>(); 
 
     }
 

@@ -14,12 +14,12 @@ namespace SDIFrontEnd_WPF
 {
     public class ApiWordingService : ApiServiceBase, IApiWordingService
     {
-        private readonly WordingMapper wordingMapper;
-        private readonly ResponseSetMapper responseMapper;
-        public ApiWordingService(HttpClient http, WordingMapper mapper, ResponseSetMapper respMapper) : base(http)
+        private readonly IMapper<Wording, WordingDto> wordingMapper;
+        private readonly IMapper<ResponseSet, ResponseSetDto> responseMapper;
+        public ApiWordingService(HttpClient http, IMapperFactory mapperFactory) : base(http)
         {
-            wordingMapper = mapper;
-            responseMapper = respMapper;
+            wordingMapper = mapperFactory.Get<Wording, WordingDto>(); ;
+            responseMapper = mapperFactory.Get<ResponseSet, ResponseSetDto>(); ;
         }
 
         private async Task<List<WordingDto>> GetWordingsByType(string type)

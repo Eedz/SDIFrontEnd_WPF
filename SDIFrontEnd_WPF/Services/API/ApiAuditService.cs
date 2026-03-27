@@ -12,15 +12,14 @@ namespace SDIFrontEnd_WPF
 {
     public class ApiAuditService : ApiServiceBase, IApiAuditService
     {
-        ChangedQuestionMapper _mapper;
-        AuditWordingMapper _wordingMapper;
+        IMapper<ChangedSurveyQuestion, ChangedSurveyQuestionDto> _mapper;
+        IMapper<AuditWording, AuditWordingDto> _wordingMapper;
         
 
-        public ApiAuditService(HttpClient http, ChangedQuestionMapper mapper, AuditWordingMapper wordingMapper) : base(http)
+        public ApiAuditService(HttpClient http, IMapperFactory mapperFactory) : base(http)
         {
-            _mapper = mapper;
-            _wordingMapper = wordingMapper;
-            
+            _mapper = mapperFactory.Get <ChangedSurveyQuestion, ChangedSurveyQuestionDto>();
+            _wordingMapper = mapperFactory.Get <AuditWording, AuditWordingDto>();
         }
 
         public async Task<List<string>> GetAuditSurveys()

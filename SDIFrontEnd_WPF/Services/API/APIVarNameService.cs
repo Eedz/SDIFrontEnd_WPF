@@ -16,11 +16,11 @@ namespace SDIFrontEnd_WPF
     /// </summary>
     public class ApiVarNameService : ApiServiceBase, IApiVarNameService
     {
-        VarNameMapper _varnameMapper;
+        private readonly IMapper<VariableName, VariableNameDto> _varnameMapper;
 
-        public ApiVarNameService(HttpClient http, VarNameMapper varnameMapper) : base(http)
+        public ApiVarNameService(HttpClient http, IMapperFactory mapperFactory) : base(http)
         {
-            _varnameMapper = varnameMapper;
+            _varnameMapper = mapperFactory.Get<VariableName, VariableNameDto>();
         }
 
         public async Task<int> InsertVariable(VariableName variable)

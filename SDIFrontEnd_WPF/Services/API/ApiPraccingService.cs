@@ -12,14 +12,14 @@ namespace SDIFrontEnd_WPF
 {
     public class ApiPraccingService : ApiServiceBase, IApiPraccingService
     {
-        PraccingIssueMapper _mapper;
-        PraccingResponseMapper _responseMapper;
+        private readonly IMapper<PraccingIssue, PraccingIssueDto> _issueMapper;
+        private readonly IMapper<PraccingResponse, PraccingResponseDto> _responseMapper;
         
 
-        public ApiPraccingService(HttpClient httpClient, PraccingIssueMapper praccingMapper, PraccingResponseMapper responseMapper) : base(httpClient)
+        public ApiPraccingService(HttpClient httpClient, IMapperFactory mapperFactory) : base(httpClient)
         {
-            _mapper = praccingMapper;
-            _responseMapper = responseMapper;
+            _issueMapper = mapperFactory.Get<PraccingIssue, PraccingIssueDto>();
+            _responseMapper = mapperFactory.Get<PraccingResponse, PraccingResponseDto>();
         }
 
         public async Task<int> DeletePraccingIssue(int id)
@@ -52,25 +52,25 @@ namespace SDIFrontEnd_WPF
             if (result == null)
                 return new List<PraccingIssue>();
 
-            return result.Select(x => _mapper.MapToEntity(x)).ToList();
+            return result.Select(x => _issueMapper.MapToEntity(x)).ToList();
         }
 
         public async Task<PraccingIssue> AddPraccingIssue(PraccingIssue issue)
         {
-            var dto = _mapper.MapToDto(issue);
+            var dto = _issueMapper.MapToDto(issue);
             var response = await _http.PostAsJsonAsync("api/praccing", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingIssueDto>();
             if (created == null)
                 return null;
-            var createdEntity = _mapper.MapToEntity(created);
+            var createdEntity = _issueMapper.MapToEntity(created);
             return createdEntity;
         }
 
         public async Task<PraccingIssue> UpdatePraccingIssue(PraccingIssue issue)
         {
-            var dto = _mapper.MapToDto(issue);
+            var dto = _issueMapper.MapToDto(issue);
             var response = await _http.PutAsJsonAsync("api/praccing", dto);
 
             response.EnsureSuccessStatusCode();
@@ -78,7 +78,7 @@ namespace SDIFrontEnd_WPF
             var created = await response.Content.ReadFromJsonAsync<PraccingIssueDto>();
             if (created == null)
                 return null;
-            var createdEntity = _mapper.MapToEntity(created);
+            var createdEntity = _issueMapper.MapToEntity(created);
             return createdEntity;
         }
 
@@ -118,14 +118,25 @@ namespace SDIFrontEnd_WPF
 
         public async Task<PraccingImage> AddPraccingImage(PraccingImage image)
         {
-            var dto = _mapper.MapToDto(image);
+            var dto = new PraccingImageDto(){
+                ID = image.ID,
+                PraccID = image.PraccID,
+                Path = image.Path,
+                FilePath = image.FilePath,
+            };
             var response = await _http.PostAsJsonAsync("api/praccing/images", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingImageDto>();
             if (created == null)
                 return null;
-            var createdEntity = _mapper.MapToEntity(created);
+            var createdEntity = new PraccingImage()
+            {
+                ID = created.ID,
+                PraccID = created.PraccID,
+                Path = created.Path,
+                FilePath = created.FilePath,
+            };
             return createdEntity;
         }
 
@@ -138,14 +149,26 @@ namespace SDIFrontEnd_WPF
 
         public async Task<PraccingImage> AddResponseImage(PraccingImage image)
         {
-            var dto = _mapper.MapToDto(image);
+            var dto = new PraccingImageDto()
+            {
+                ID = image.ID,
+                PraccID = image.PraccID,
+                Path = image.Path,
+                FilePath = image.FilePath,
+            };
             var response = await _http.PostAsJsonAsync("api/praccing/responses/images", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingImageDto>();
             if (created == null)
                 return null;
-            var createdEntity = _mapper.MapToEntity(created);
+            var createdEntity = new PraccingImage()
+            {
+                ID = created.ID,
+                PraccID = created.PraccID,
+                Path = created.Path,
+                FilePath = created.FilePath,
+            };
             return createdEntity;
         }
 

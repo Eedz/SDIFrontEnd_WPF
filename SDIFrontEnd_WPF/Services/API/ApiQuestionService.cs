@@ -14,11 +14,11 @@ namespace SDIFrontEnd_WPF
 {
     public class ApiQuestionService : ApiServiceBase, IApiQuestionService
     {
-        SurveyQuestionMapper _surveyQuestionMapper;
+        private readonly IMapper<SurveyQuestion, SurveyQuestionDto> _surveyQuestionMapper;
 
-        public ApiQuestionService(HttpClient http, SurveyQuestionMapper questionMapper) : base(http)
+        public ApiQuestionService(HttpClient http, IMapperFactory mapperFactory) : base(http)
         {
-            _surveyQuestionMapper = questionMapper;
+            _surveyQuestionMapper = mapperFactory.Get<SurveyQuestion, SurveyQuestionDto>();
         }
 
         public async Task<SurveyQuestion?> GetQuestionByIdAsync(int id)

@@ -114,6 +114,7 @@ namespace SDIFrontEnd_WPF
             IServiceCollection services = new ServiceCollection();
 
             // mapping profiles (TODO AddMappers extension)
+            services.AddSingleton<IMapperFactory, MapperFactory>();
             services.AddTransient<IMapper<Survey, SurveyDto>, SurveyMapper>();
             services.AddTransient<IMapper<SurveyQuestion, SurveyQuestionDto>, SurveyQuestionMapper>();
             services.AddTransient<IMapper<Wording,WordingDto>, WordingMapper>();
