@@ -130,9 +130,21 @@ namespace SDIFrontEnd_WPF
             throw new NotImplementedException();
         }
 
-        Task<List<WordingUsage>> IApiWordingService.GetWordingUsages(Wording wording)
+        public async Task<List<WordingUsage>> GetWordingUsages(Wording wording)
         {
-            throw new NotImplementedException();
+            string type = wording.FieldType.ToLower();
+            var response = await _http.GetFromJsonAsync<List<WordingUsageDto>>($"api/wordings/{wording.FieldType.ToLower()}/usages?id={wording.WordID}");
+            var wordings = response.Select(dto => new WordingUsage()
+            {
+                VarName = dto.VarName,
+                VarLabel = dto.VarLabel,
+                Qnum = dto.Qnum,
+                Locked = dto.Locked,
+                WordID = dto.WordID,
+                SurveyCode = dto.SurveyCode
+            }).ToList();
+                
+            return wordings;
         }
 
         Task<List<ResponseUsage>> IApiWordingService.GetResponseUsages(ResponseSet response)
