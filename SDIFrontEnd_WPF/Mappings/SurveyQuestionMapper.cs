@@ -40,7 +40,9 @@ namespace SDIFrontEnd_WPF.Mappings
                 RespOptionsS = dto.RespOptionsS == null ? null : new ResponseSet() { RespSetName = dto.RespOptionsS.RespSetName, RespList = dto.RespOptionsS.RespList },
                 NRCodesS = dto.NRCodesS == null ? null : new ResponseSet() { RespSetName = dto.NRCodesS.RespSetName, RespList = dto.NRCodesS.RespList },
 
-                Comments = dto.Comments.Select(x=> _commentMapper.MapToEntity(x)).ToList()
+                Comments = dto.Comments.Select(x=> _commentMapper.MapToEntity(x)).ToList(),
+                Translations = dto.Translations.Select(x => new Translation() { ID = x.ID, QID = x.QID, Bilingual = x.Bilingual, LanguageName = new Language() { LanguageName = x.LanguageName }, TranslationText = x.TranslationText }).ToList(),
+                TimeFrames = dto.TimeFrames.Select(x => new QuestionTimeFrame() { ID = x.ID, QID = x.QID, TimeFrame = x.TimeFrame }).ToList(),
 
             };
         }
