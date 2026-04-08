@@ -506,7 +506,14 @@ namespace SDIFrontEnd_WPF
 
             foreach (var r in RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord))
             {
-                _questionService.SaveQuestion(r);
+                if (r.NewRecord)
+                    _questionService.AddQuestion(r.Item);
+                else if (r.ShouldSave)
+                    _questionService.UpdateQuestion(r.Item);
+                else if (r.Deleted)
+                    _questionService.DeleteQuestion(r.Item);
+                else
+                    continue;
             }
 
             OnPropertyChanged(nameof(RecordList));
