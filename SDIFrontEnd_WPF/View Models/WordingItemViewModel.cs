@@ -65,9 +65,6 @@ namespace SDIFrontEnd_WPF.ViewModels
             if (string.IsNullOrEmpty(Wording.WordingText))
                 return;
 
-            //WordingText = (FlowDocument)XamlReader.Parse(
-            //    HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(Wording.WordingText, true));
-
             WordingText = (FlowDocument)SimpleHtmlConverter.FromHtml(Wording.WordingText);
         }
 

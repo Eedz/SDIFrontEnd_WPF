@@ -32,21 +32,22 @@ namespace SDIFrontEnd_WPF
         private SurveyQuestion question;
 
 
-        private FlowDocument currentTranslationText;
-        public FlowDocument CurrentTranslationText
+        private FlowDocument? currentTranslationText;
+        public FlowDocument? CurrentTranslationText
         {
             get => currentTranslationText;
             set
             {
                 SetProperty(ref currentTranslationText, value);
                 if (CurrentTranslation != null)
-                    CurrentTranslation.TranslationText = HtmlUtils.ConvertFlowDocumentToHtml(value);
+                    CurrentTranslation.TranslationText = SimpleHtmlConverter.ToHtml(value);
             }
         }
 
         public string ItemPosition => $"{(Translations.IndexOf(CurrentTranslation) + 1)} of {Translations.Count}";
-        public string EnglishPreP => question.PrePW.WordingText ?? string.Empty;
-        public string EnglishPstP => question.PstPW.WordingText ?? string.Empty;
+
+        public FlowDocument? EnglishPreP { get;  set; }         
+        public FlowDocument? EnglishPstP { get;  set; }
 
         /// <summary>
         /// Constructor
@@ -55,20 +56,27 @@ namespace SDIFrontEnd_WPF
         public TranslationViewModel(SurveyQuestion question)
         {
             base.DisplayName = "Translations";
-            Question = question;
-            Translations = new ObservableCollection<Translation>(question.Translations);
-            CurrentTranslation = Translations.FirstOrDefault();
-            if (CurrentTranslation!=null)
-                CurrentTranslationText = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(CurrentTranslation.TranslationText, true));
-            
+            Question = question;           
         }
 
         partial void OnQuestionChanged(SurveyQuestion value)
         {
+            EnglishPreP = SimpleHtmlConverter.FromHtml(value?.PrePW?.WordingText) ?? new FlowDocument();
+            EnglishPstP = SimpleHtmlConverter.FromHtml(value?.PstPW?.WordingText) ?? new FlowDocument();
+
             Translations = new ObservableCollection<Translation>(value.Translations);
             CurrentTranslation = Translations.FirstOrDefault();
             if (CurrentTranslation != null)
-                CurrentTranslationText = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(CurrentTranslation.TranslationText, true));
+                CurrentTranslationText = (FlowDocument)SimpleHtmlConverter.FromHtml(CurrentTranslation.TranslationText);
+            else
+                CurrentTranslationText = new FlowDocument();
+            OnPropertyChanged(nameof(CurrentTranslationText));
+        }
+
+        partial void OnCurrentTranslationChanged(Translation? oldValue, Translation? newValue)
+        {
+            if (CurrentTranslation != null)
+                CurrentTranslationText = (FlowDocument)SimpleHtmlConverter.FromHtml(CurrentTranslation.TranslationText);
             else
                 CurrentTranslationText = new FlowDocument();
             OnPropertyChanged(nameof(CurrentTranslationText));
@@ -143,7 +151,6 @@ namespace SDIFrontEnd_WPF
         public void UpdateTranslations(SurveyQuestion question)
         {
             Question = question;
-            
         }
 
     }

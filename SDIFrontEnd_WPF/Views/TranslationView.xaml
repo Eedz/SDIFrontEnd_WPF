@@ -43,7 +43,12 @@
 
         <Border Margin="5" Grid.Row="1" Effect="{StaticResource SunkenEffect}" Background="White">
             <DockPanel HorizontalAlignment="Stretch" >
-                <TextBlock Margin="3" Text="{Binding EnglishPreP}" />
+                
+                <RichTextBox Margin="0" FontWeight="Bold"
+                    VerticalScrollBarVisibility="Visible" IsDocumentEnabled="True"
+                    mvvm:RichTextBoxHelper.Document="{Binding EnglishPreP, Mode=TwoWay}" IsReadOnly="True">
+
+                </RichTextBox>
             </DockPanel>
         </Border>
 
@@ -59,7 +64,11 @@
         </DockPanel>
 
         <DockPanel Margin="5" Grid.Row="3" HorizontalAlignment="Stretch" Background="White" Effect="{StaticResource SunkenEffect}">
-            <TextBlock Margin="3" Text="{Binding EnglishPstP}" />
+            <RichTextBox Margin="0" FontWeight="Bold"
+                VerticalScrollBarVisibility="Visible" IsDocumentEnabled="True"
+                mvvm:RichTextBoxHelper.Document="{Binding EnglishPstP, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True">
+                
+            </RichTextBox>
         </DockPanel>
 
         <!-- Navigation buttons -->
