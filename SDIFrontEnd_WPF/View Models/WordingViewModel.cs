@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ITCLib;
-using Microsoft.Data.SqlClient;
 using MvvmLib.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -9,116 +8,123 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Windows.Markup;
 
-namespace SDIFrontEnd_WPF
+
+namespace SDIFrontEnd_WPF.ViewModels
 {
-    // TODO lock/unlock for editing (done)
     // TODO clipboard
-    // TODO rich text editor for wording text (done)
     // TODO breaks missing in text
-    // TODO reset state on move (done)
     public partial class WordingViewModel : WorkspaceViewModel
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
         private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
+        private readonly WordingData _wordingData;
 
         public string WordingType { get; set; } // type of wording being managed (e.g., PreP, PreI etc.)
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ItemPosition))]
-        private Wording? currentWording; // currently selected wording 
-        public ObservableCollection<Wording> Wordings { get; set; } = new ObservableCollection<Wording>();
-        [ObservableProperty]
-        private ObservableCollection<WordingUsage> usages = new ObservableCollection<WordingUsage>(); 
+        private WordingItemViewModel? currentItem;
+        public ObservableCollection<WordingItemViewModel> Items { get; set; } = new();
 
-        [ObservableProperty]
-        private bool lockedForEditing = true; // Flag indicating if the wording is locked for editing
-
-        public string ItemPosition => $"{(Wordings.IndexOf(CurrentWording) + 1)} of {Wordings.Count}";
-
-        private FlowDocument wordingText;
-        public FlowDocument WordingText
+        public string ItemPosition
         {
-            get => wordingText;
-            set
+            get
             {
-                SetProperty(ref wordingText, value);
-                CurrentWording.WordingText = HtmlUtils.ConvertFlowDocumentToHtml(value);
+                if (CurrentItem == null) return $"0 of {_allWordings.Count}";
+                int index = _allWordings.IndexOf(CurrentItem.Wording);
+                return $"{(index + 1)} of {_allWordings.Count}";
             }
         }
-        public WordingViewModel(IApiWordingService wordingService, IDialogService dialogService, string type)
+
+        private List<Wording> _allWordings = new();
+        private int? _initialWordID = null;
+
+        public WordingViewModel(WordingData wordingData, IApiWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Wording Manager";
             
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _wordingData = wordingData ?? throw new ArgumentNullException(nameof(wordingData));
             WordingType = type ?? throw new ArgumentNullException(nameof(type));
-            
-            _ = Load();
-            CurrentWording = Wordings.FirstOrDefault();
         }
 
-        private async Task Load()
+        public WordingViewModel(WordingData wordingData, IApiWordingService wordingService, IDialogService dialogService, string type, int wordID) 
+            : this(wordingData, wordingService, dialogService, type)
         {
-            switch (WordingType)
+            _initialWordID = wordID;
+        }
+
+        public async Task Load()
+        {
+            _allWordings = WordingType switch
             {
-                case "PreP": Wordings = new ObservableCollection<Wording>( await _wordingService.GetAllPreP()); break;
-                case "PreI": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPreI()); break;
-                case "PreA": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPreA()); break;
-                case "LitQ": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllLitQ()); break;
-                case "PstI": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPstI()); break;
-                case "PstP": Wordings = new ObservableCollection<Wording>(await _wordingService.GetAllPstP()); break;
-            }
+                "PreP" => _wordingData.PreP.ToList(),
+                "PreI" => _wordingData.PreI.ToList(),
+                "PreA" => _wordingData.PreA.ToList(),
+                "LitQ" => _wordingData.LitQ.ToList(),
+                "PstI" => _wordingData.PstI.ToList(),
+                "PstP" => _wordingData.PstP.ToList(),
+                _ => throw new ArgumentException($"Unknown wording type: {WordingType}")
+            };
+
+            var initial = _initialWordID.HasValue
+                ? _allWordings.FirstOrDefault(w => w.WordID == _initialWordID.Value) ?? _allWordings.FirstOrDefault()
+                : _allWordings.FirstOrDefault();
+
+            NavigateTo(initial);
         }
 
-        public WordingViewModel(IApiWordingService wordingService, IDialogService dialogService, string type, int wordID) : this(wordingService, dialogService, type)
+        /// <summary>
+        /// Create a ViewModel for the specified wording and set the CurrentItem.
+        /// </summary>
+        /// <param name="wording"></param>
+        private void NavigateTo(Wording? wording)
         {
-            CurrentWording = Wordings.FirstOrDefault(w => w.WordID == wordID);
+            if (wording == null) return;
+
+            if (CurrentItem != null)
+                CurrentItem.DeleteRequested -= OnItemDeleteRequested;
+
+            var item = new WordingItemViewModel(wording, _wordingService, _dialogService);
+            item.DeleteRequested += OnItemDeleteRequested;
+            _ = item.LoadUsagesAsync();
+            CurrentItem = item;
         }
 
-        partial void OnCurrentWordingChanged(Wording? value)
+        private void OnItemDeleteRequested(object? sender, EventArgs e)
         {
-            if (value == null || value.WordID == 0)
-            {
-                Usages.Clear();
+            if (sender is not WordingItemViewModel item)
                 return;
-            }
-            WordingText = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(value.WordingText, true));
-            _ = UpdateUsages();
-            
-            LockedForEditing = true;
+
+            item.DeleteRequested -= OnItemDeleteRequested;
+
+            int index = _allWordings.IndexOf(item.Wording);
+            _allWordings.Remove(item.Wording);
+
+            NavigateTo(_allWordings.Count > 0
+                ? _allWordings[Math.Max(0, index - 1)]
+                : null);
         }
 
-        async Task UpdateUsages()
+        partial void OnCurrentItemChanged(WordingItemViewModel? value)
         {
-            if (CurrentWording == null)
-                return;
-            Usages = new ObservableCollection<WordingUsage>(await _wordingService.GetWordingUsages(CurrentWording));
+            if (value != null)  
+                _ = value.LoadUsagesAsync();
         }
 
         [RelayCommand]
-        private void EditWording()
+        private void CopyToNew(WordingItemViewModel source)
         {
-            if (!LockedForEditing)
-            {
-                SaveChanges();
-            }
-            LockedForEditing = !LockedForEditing;
-        }
-
-        [RelayCommand]
-        private void CopyToNew(Wording wording)
-        {
-            Wording newWording = new Wording
+            var newWording = new Wording
             {
                 WordID = -1,
-                Type = wording.Type,
-                WordingText = wording.WordingText
+                Type = source.Wording.Type,
+                WordingText = source.Wording.WordingText
             };
-            Wordings.Add(newWording);
-            LockedForEditing = false;
-            CurrentWording = newWording;
+            _allWordings.Add(newWording);
+            NavigateTo(newWording);
         }
 
         [RelayCommand]
@@ -130,75 +136,47 @@ namespace SDIFrontEnd_WPF
                 Type = GetWordingType(),
                 WordingText = string.Empty
             };
-            Wordings.Add(newWording);
-            LockedForEditing = false;
-            CurrentWording = newWording;
-        }
 
-        [RelayCommand]
-        private async Task DeleteWording(Wording wording)
-        {
-            if (wording.WordID == 0) // reserved
-            {
-                _dialogService.ShowError("Cannot delete wording '0'.");
-                return;
-            }
+            _allWordings.Add(newWording);
+            NavigateTo(newWording);
 
-            if (Usages.Count > 0) // in use
-            {
-                _dialogService.ShowError("Cannot delete wording that is in use.");
-                return;
-            }
-
-            if (_dialogService.Confirm($"Are you sure you want to delete {wording.FieldType}#{wording.WordID}? This action cannot be undone." ) == false)
-            {
-                return;
-            }
-
-            if (wording.WordID == -1) // new unsaved wording
-            {
-                Wordings.Remove(wording);
-                CurrentWording = Wordings.LastOrDefault();
-                return;
-            }
-
-            if (wording.WordID > 0)
-            {
-                PreviousItem();
-                if (await _wordingService.DeleteWording(wording) == 1)
-                {
-                    Wordings.Remove(wording);
-                }
-            }           
+            //Wordings.Add(newWording);
+            //LockedForEditing = false;
+            //CurrentWording = newWording;
         }
 
         [RelayCommand]
         private void ClipSearch()
         {
             // TODO use clipboard service
-            string criteria = _dialogService.PromptForText("Enter search text", "Search");
-            var results = Wordings.Where(x => x.WordingText.Contains(criteria));
-            Wordings = new ObservableCollection<Wording>(results);
-            CurrentWording = Wordings.FirstOrDefault();
+            //string criteria = _dialogService.PromptForText("Enter search text", "Search");
+            //var results = Wordings.Where(x => x.WordingText.Contains(criteria));
+            //Wordings = new ObservableCollection<Wording>(results);
+            //CurrentWording = Wordings.FirstOrDefault();
         }
 
         [RelayCommand]
         private void TextSearch()
         {
             string criteria = _dialogService.PromptForText("Enter search text", "Search");
-            var results = Wordings.Where(x => x.WordingText.Contains(criteria));
-            Wordings = new ObservableCollection<Wording>(results);
-            CurrentWording = Wordings.FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(criteria))
+                return;
+
+            _allWordings = _allWordings.Where(w => w.WordingText.Contains(criteria)).ToList();
+            OnPropertyChanged(nameof(ItemPosition));
+            NavigateTo(_allWordings.FirstOrDefault());
         }
 
         [RelayCommand]
         private void SelectWording()
         {
-            if (!LockedForEditing || (CurrentWording != null && CurrentWording.WordID == 0))
+            bool hasUnsavedChanges = CurrentItem != null && !CurrentItem.LockedForEditing && CurrentItem.Wording.WordID == -1;
+
+            if (hasUnsavedChanges)
             {
                 if (_dialogService.Confirm("You have unsaved changes. Save first?"))
                 {
-                    SaveChanges();
+                    CurrentItem!.SaveCommand.Execute(null);
                     OnRequestClose(true);
                 }
             }
@@ -211,64 +189,30 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void PreviousItem()
         {
-            if (Wordings == null)
-                return;
-            if (CurrentWording == null)
-            {
-                CurrentWording = Wordings.FirstOrDefault();
-                return;
-            }
-            int currentIndex = Wordings.IndexOf(CurrentWording);
-            if (currentIndex > 0)
-            {
-                CurrentWording = Wordings[currentIndex - 1];
-            }
-            else
-            {
-                CurrentWording = Wordings.Last();
-            }
+            if (_allWordings.Count == 0) return;
+            if (CurrentItem == null) { NavigateTo(_allWordings.First()); return; }
+
+            int i = _allWordings.IndexOf(CurrentItem.Wording);
+            NavigateTo(_allWordings[i > 0 ? i - 1 : _allWordings.Count - 1]);
         }
 
         [RelayCommand]
         private void NextItem()
         {
-            if (Wordings == null)
-                return;
-            if (CurrentWording == null)
-            {
-                CurrentWording = Wordings.First();
-                return;
-            }
-            int currentIndex = Wordings.IndexOf(CurrentWording);
-            if (currentIndex < Wordings.Count - 1)
-            {
-                CurrentWording = Wordings[currentIndex + 1];
-            }
-            else
-            {
-                CurrentWording = Wordings.First();
-            }
+            if (_allWordings.Count == 0) return;
+            if (CurrentItem == null) { NavigateTo(_allWordings.First()); return; }
+
+            int i = _allWordings.IndexOf(CurrentItem.Wording);
+            NavigateTo(_allWordings[(i + 1) % _allWordings.Count]);
         }
 
         [RelayCommand]
-        private void FirstItem()
-        {
-            if (Wordings == null)
-                return;
-           
-            CurrentWording = Wordings.FirstOrDefault();
-        }
+        private void FirstItem() => NavigateTo(_allWordings.FirstOrDefault());
 
         [RelayCommand]
-        private void LastItem()
-        {
-            if (Wordings == null)
-                return;
-            
-            CurrentWording = Wordings.LastOrDefault();
-        }
+        private void LastItem() => NavigateTo(_allWordings.LastOrDefault());
 
-        private ITCLib.WordingType GetWordingType()
+        private WordingType GetWordingType()
         {
             switch(WordingType)
             {
@@ -282,39 +226,10 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private async Task SaveChanges()
+        protected override void OnDispose()
         {
-            if (CurrentWording == null)
-                return;
-            if (string.IsNullOrWhiteSpace(CurrentWording.WordingText))
-            {
-                _dialogService.ShowError("Wording text cannot be empty.");
-                return;
-            }
-            try
-            {
-                if (CurrentWording.WordID == -1)
-                {
-                    // New wording
-                    Wording newId = await _wordingService.CreateWording(CurrentWording);
-                }
-                else
-                {
-                    // Existing wording
-                    await _wordingService.UpdateWording(CurrentWording);
-                }
-                
-                // Refresh usages after save
-                Usages = new ObservableCollection<WordingUsage>(await _wordingService.GetWordingUsages(CurrentWording));
-            }
-            catch(SqlException sqle)
-            {
-
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowError($"Error saving wording: {ex.Message}");
-            }
+            if (CurrentItem != null)
+                CurrentItem.DeleteRequested -= OnItemDeleteRequested;
         }
     }
 }
