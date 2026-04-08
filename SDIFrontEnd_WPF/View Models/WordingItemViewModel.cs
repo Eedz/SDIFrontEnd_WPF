@@ -141,7 +141,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                 return;
             }
 
-            if (await _wordingService.DeleteWording(Wording) == 1)
+            if (await _wordingService.DeleteWording(Wording))
                 DeleteRequested?.Invoke(this, EventArgs.Empty);
         }
 
