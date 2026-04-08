@@ -118,7 +118,7 @@
     <DataTemplate DataType="{x:Type viewmodels:PrefixListViewModel}">
         <views:PrefixListView/>
     </DataTemplate>
-    
+
     <DataTemplate DataType="{x:Type viewmodels:WordingItemViewModel}">
         <views:WordingItemView/>
     </DataTemplate>

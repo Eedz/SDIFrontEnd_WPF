@@ -71,6 +71,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
     <PackageReference Include="MarkupConverter.Core" Version="1.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
