@@ -123,7 +123,8 @@ namespace SDIFrontEnd_WPF
             };
 
             var response = await _http.PostAsJsonAsync<VariablePrefixDto>("$api/varnames/prefixes", dto);
-
+            response.EnsureSuccessStatusCode();
+            var createdDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>(); 
             return 0;
         }
 
@@ -159,6 +160,8 @@ namespace SDIFrontEnd_WPF
             };
 
             var response = await _http.PutAsJsonAsync<VariablePrefixDto>("$api/varnames/prefixes", dto);
+            response.EnsureSuccessStatusCode();
+            var updatedDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>(); 
             return 0;
         }
 
