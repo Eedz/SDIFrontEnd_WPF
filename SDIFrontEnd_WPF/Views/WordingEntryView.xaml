@@ -24,7 +24,6 @@
             <RowDefinition Height="40"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
         
@@ -39,46 +38,23 @@
             <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Margin="1">
                 <Run d:Text="WordingType" Text="{Binding WordingType}"/>
                 <Run Text="# "/>
-                <Run d:Text="0" Text="{Binding CurrentWording.WordID, Converter ={StaticResource IntToNewConverter}}"/>
+                <Run d:Text="0" Text="{Binding CurrentItem.Wording.WordID, Converter ={StaticResource IntToNewConverter}}"/>
             </TextBlock>
-            <!--<Button  />-->
-            <ToggleButton DockPanel.Dock="Top" Command="{Binding EditWordingCommand}" IsChecked="{Binding LockedForEditing, Mode=OneWay}" Content="{Binding LockedForEditing, Converter={StaticResource EditSaveConverter}}" Width="40" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
         </DockPanel>
         
         <!-- Wording Text -->
         <DockPanel Grid.Row="3">
-           
-            <RichTextBox Margin="3,0,0,0" 
-                    VerticalScrollBarVisibility="Visible" AcceptsTab="True" IsDocumentEnabled="True"
-                    mvvm:RichTextBoxHelper.Document="{Binding WordingText, Mode=TwoWay}" IsReadOnly="{Binding LockedForEditing}">
-                <xctk:RichTextBoxFormatBarManager.FormatBar>
-                    <xctk:RichTextBoxFormatBar/>
-                </xctk:RichTextBoxFormatBarManager.FormatBar>
-            </RichTextBox>
+            <ContentControl Content="{Binding CurrentItem}"/>
         </DockPanel>
         
         <!-- Commands -->
         <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3, 3, 3, 3" >
-            <Button Content="Copy to New" Command="{Binding CopyToNewCommand}" CommandParameter="{Binding CurrentWording}" Height="20" Width="80" Margin="0,0,0,2"/>
+            <Button Content="Copy to New" Command="{Binding CopyToNewCommand}" CommandParameter="{Binding CurrentItem}" Height="20" Width="80" Margin="0,0,0,2"/>
             <Button Content="Add" Command="{Binding NewWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
-            <Button Content="Delete" Command="{Binding DeleteWordingCommand}" CommandParameter="{Binding CurrentWording}" Height="20" Width="80" Margin="0,0,0,2"/>
             <Button Content="Clip Search" Command="{Binding ClipSearchCommand}" Height="20" Width="80"/>
             <Button Content="Text Search" Command="{Binding TextSearchCommand}" Height="20" Width="80"/>
         </StackPanel>
         
-        <!-- Wording Usage list -->
-        <DockPanel Grid.Row="4" Grid.ColumnSpan="2">
-            <Label DockPanel.Dock="Top" Content="This wording appears in the following places" FontWeight="Bold" HorizontalAlignment="Center" Margin="10"/>
-            <DataGrid Margin="3" ItemsSource="{Binding Usages}" AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" Width="Auto"/>
-                    <DataGridTextColumn Header="Survey" Binding="{Binding SurveyCode}" Width="Auto"/>
-                    <DataGridTextColumn Header="W#" Binding="{Binding WordID}" Width="70"/>
-                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" Width="*"/>
-                    <DataGridCheckBoxColumn Header="Locked" Binding="{Binding Locked}" Width="60"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
         
         <!-- Navigation buttons -->
         <local:NavigationBar Grid.Row="5" Grid.ColumnSpan="2"
@@ -87,7 +63,7 @@
             NextItemCommand="{Binding NextItemCommand}"
             LastItemCommand="{Binding LastItemCommand}"
             ItemPosition="{Binding ItemPosition}"
-                             />
+        />
         
     </Grid>
 </UserControl>
