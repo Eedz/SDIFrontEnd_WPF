@@ -691,49 +691,49 @@ namespace SDIFrontEnd_WPF
 
         #region Wording Commands
         [RelayCommand]
-        private void OpenPreP(int wordID)
+        private async Task OpenPreP(int wordID)
         {
-            OpenWordings("PreP", wordID);
+            await OpenWordings("PreP", wordID);
         }
 
         [RelayCommand]
-        private void OpenPreI(int wordID)
+        private async Task OpenPreI(int wordID)
         {
-            OpenWordings("PreI", wordID);
+            await OpenWordings("PreI", wordID);
         }
 
         [RelayCommand]
-        private void OpenPreA(int wordID)
+        private async Task OpenPreA(int wordID)
         {
-            OpenWordings("PreA", wordID);
+            await OpenWordings("PreA", wordID);
         }
 
         [RelayCommand]
-        private void OpenLitQ(int wordID)
+        private async Task OpenLitQ(int wordID)
         {
-            OpenWordings("LitQ", wordID);
+            await OpenWordings("LitQ", wordID);
         }
 
         [RelayCommand]
-        private void OpenPstI(int wordID)
+        private async Task OpenPstI(int wordID)
         {
-            OpenWordings("PstI", wordID);
+            await OpenWordings("PstI", wordID);
         }
 
         [RelayCommand]
-        private void OpenPstP(int wordID)
+        private async Task OpenPstP(int wordID)
         {
-            OpenWordings("PstP", wordID);
+            await OpenWordings("PstP", wordID);
         }
 
         [RelayCommand]
-        private void OpenRespOptions(string respSetName)
+        private async Task OpenRespOptions(string respSetName)
         {
             OpenResponses("RespOptions", respSetName);
         }
 
         [RelayCommand]
-        private void OpenNRCodes(string respSetName)
+        private async Task OpenNRCodes(string respSetName)
         {
             OpenResponses("NRCodes", respSetName);
         }
@@ -922,15 +922,16 @@ namespace SDIFrontEnd_WPF
             Removed.Clear();
         }
 
-        private void OpenWordings(string type, int wordID)
+        private async Task OpenWordings(string type, int wordID)
         {
-            WordingViewModel wordingVM = new WordingViewModel(_wordingService, _dialogService, type, wordID);
+            WordingViewModel wordingVM = new WordingViewModel(_wordingData, _wordingService, _dialogService, type, wordID);
+            await wordingVM.Load();
             bool? result = _dialogService.ShowDialog(wordingVM);
 
             if (result.Value) // if closed with OK
             {
                 // apply wording to current question
-                SetWording(type, wordingVM.CurrentWording);
+                SetWording(type, wordingVM.CurrentItem.Wording);
             }
             else
             {
