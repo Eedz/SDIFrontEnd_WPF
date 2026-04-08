@@ -106,12 +106,12 @@ namespace SDIFrontEnd_WPF
             throw new NotImplementedException();
         }
 
-        Task<int> IApiWordingService.DeleteWording(Wording wording)
+        Task<bool> IApiWordingService.DeleteWording(Wording wording)
         {
             throw new NotImplementedException();
         }
 
-        Task<int> IApiWordingService.DeleteResponseSet(ResponseSet set)
+        Task<bool> IApiWordingService.DeleteResponseSet(ResponseSet set)
         {
             throw new NotImplementedException();
         }

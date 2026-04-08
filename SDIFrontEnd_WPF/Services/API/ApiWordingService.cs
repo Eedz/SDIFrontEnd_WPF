@@ -52,7 +52,7 @@ namespace SDIFrontEnd_WPF
                     throw new ArgumentException($"Invalid wording type: {type}");
             }
 
-            var response = await _http.GetFromJsonAsync<List<ResponseSetDto>>($"api/wordings/{type}");
+            var response = await _http.GetFromJsonAsync<List<ResponseSetDto>>($"api/responses/{type}");
             return response.ToList();
         }
 
@@ -120,20 +120,31 @@ namespace SDIFrontEnd_WPF
             return wordings;
         }
 
-        Task<Wording> IApiWordingService.UpdateWording(Wording wording)
+        public async Task<Wording> UpdateWording(Wording wording)
         {
-            throw new NotImplementedException();
+            string type = wording.FieldType.ToLower();
+            var dto = wordingMapper.MapToDto(wording);
+            var response = await _http.PutAsJsonAsync<WordingDto>($"api/wordings/{type}/{wording.WordID}/", dto);
+            response.EnsureSuccessStatusCode();
+
+            var updatedDto = await response.Content.ReadFromJsonAsync<WordingDto>();
+            return wordingMapper.MapToEntity(updatedDto);
         }
 
-        Task<ResponseSet> IApiWordingService.UpdateResponseSet(ResponseSet responseSet)
+        public async Task<ResponseSet> UpdateResponseSet(ResponseSet responseSet)
         {
-            throw new NotImplementedException();
+            string type = responseSet.FieldType.ToLower();
+            var dto = responseMapper.MapToDto(responseSet);
+            var response = await _http.PutAsJsonAsync<ResponseSetDto>($"api/responses/{type}/{responseSet.RespSetName}/", dto);
+            response.EnsureSuccessStatusCode();
+            var updatedDto = await response.Content.ReadFromJsonAsync<ResponseSetDto>();
+            return responseMapper.MapToEntity(updatedDto);
         }
 
         public async Task<List<WordingUsage>> GetWordingUsages(Wording wording)
         {
             string type = wording.FieldType.ToLower();
-            var response = await _http.GetFromJsonAsync<List<WordingUsageDto>>($"api/wordings/{wording.FieldType.ToLower()}/usages?id={wording.WordID}");
+            var response = await _http.GetFromJsonAsync<List<WordingUsageDto>>($"api/wordings/{type}/{wording.WordID}/usages");
             var wordings = response.Select(dto => new WordingUsage()
             {
                 VarName = dto.VarName,
@@ -147,29 +158,69 @@ namespace SDIFrontEnd_WPF
             return wordings;
         }
 
-        Task<List<ResponseUsage>> IApiWordingService.GetResponseUsages(ResponseSet response)
+        public async Task<List<ResponseUsage>> GetResponseUsages(ResponseSet responseset)
         {
-            throw new NotImplementedException();
+            string type = responseset.FieldType.ToLower();
+            var response = await _http.GetFromJsonAsync<List<ResponseUsageDto>>($"api/responses/{type}/{responseset.RespSetName}/usages");
+            var wordings = response.Select(dto => new ResponseUsage()
+            {
+                VarName = dto.VarName,
+                VarLabel = dto.VarLabel,
+                Qnum = dto.Qnum,
+                Locked = dto.Locked,
+                RespName = dto.RespName,
+                SurveyCode = dto.SurveyCode
+            }).ToList();
+
+            return wordings;
         }
 
-        Task<Wording> IApiWordingService.CreateWording(Wording wording)
+        public async Task<Wording> CreateWording(Wording wording)
         {
-            throw new NotImplementedException();
+            string type = wording.FieldType.ToLower();
+            var dto = wordingMapper.MapToDto(wording);
+            var response = await _http.PostAsJsonAsync($"api/wordings/{wording.FieldType}", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                var createdDto = await response.Content.ReadFromJsonAsync<WordingDto>();
+                return wordingMapper.MapToEntity(createdDto);
+            }
+            else
+            {
+                throw new Exception($"Failed to create wording: {response.ReasonPhrase}");
+            }
         }
 
-        Task<ResponseSet> IApiWordingService.CreateResponseSet(ResponseSet responseSet)
+        public async Task<ResponseSet> CreateResponseSet(ResponseSet responseSet)
         {
-            throw new NotImplementedException();
+            string type = responseSet.FieldType.ToLower();
+            var dto = responseMapper.MapToDto(responseSet);
+            var response = await _http.PostAsJsonAsync($"api/responses/{responseSet.FieldType}", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                var createdDto = await response.Content.ReadFromJsonAsync<ResponseSetDto>();
+                return responseMapper.MapToEntity(createdDto);
+            }
+            else
+            {
+                throw new Exception($"Failed to create response set: {response.ReasonPhrase}");
+            }
         }
 
-        Task<int> IApiWordingService.DeleteWording(Wording wording)
+        public async Task<bool> DeleteWording(Wording wording)
         {
-            throw new NotImplementedException();
+            string type = wording.FieldType.ToLower();
+            var response = await _http.DeleteAsync($"api/wordings/{type}/{wording.WordID}/");
+            response.EnsureSuccessStatusCode();
+            return true;
         }
 
-        Task<int> IApiWordingService.DeleteResponseSet(ResponseSet set)
+        public async Task<bool> DeleteResponseSet(ResponseSet set)
         {
-            throw new NotImplementedException();
+            string type = set.FieldType.ToLower();
+            var response = await _http.DeleteAsync($"api/responses/{type}/{set.RespSetName}/");
+            response.EnsureSuccessStatusCode();
+            return true;
         }
 
 

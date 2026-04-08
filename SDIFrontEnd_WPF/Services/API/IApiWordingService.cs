@@ -27,7 +27,7 @@ namespace SDIFrontEnd_WPF
         Task<Wording> CreateWording(Wording wording);
         Task<ResponseSet> CreateResponseSet(ResponseSet responseSet);
 
-        Task<int> DeleteWording(Wording wording);
-        Task<int> DeleteResponseSet(ResponseSet set);
+        Task<bool> DeleteWording(Wording wording);
+        Task<bool> DeleteResponseSet(ResponseSet set);
     }
 }
