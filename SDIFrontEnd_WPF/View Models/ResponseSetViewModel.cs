@@ -77,7 +77,7 @@ namespace SDIFrontEnd_WPF
         {
             if (!LockedForEditing)
             {
-                SaveChanges();
+                _ = SaveChanges();
             }
             LockedForEditing = !LockedForEditing;
         }
@@ -152,7 +152,7 @@ namespace SDIFrontEnd_WPF
             {
                 if (_dialogService.Confirm("You have unsaved changes. Save first?"))
                 {
-                    SaveChanges();
+                    _ = SaveChanges();
                     OnRequestClose(true);
                 }
             }
