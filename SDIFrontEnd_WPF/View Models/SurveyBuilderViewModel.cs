@@ -204,7 +204,7 @@ namespace SDIFrontEnd_WPF
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-                prePID = oldValue;
+                PrePID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -220,7 +220,7 @@ namespace SDIFrontEnd_WPF
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-                preIID = oldValue;
+                PreIID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -236,7 +236,7 @@ namespace SDIFrontEnd_WPF
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-                preAID = oldValue;
+                PreAID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -251,7 +251,7 @@ namespace SDIFrontEnd_WPF
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-                litQID = oldValue;
+                LitQID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -266,7 +266,7 @@ namespace SDIFrontEnd_WPF
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-                pstIID = oldValue;
+                PstIID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -281,7 +281,7 @@ namespace SDIFrontEnd_WPF
                 if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
             }
             else
-                pstPID = oldValue;
+                PstPID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
@@ -501,7 +501,7 @@ namespace SDIFrontEnd_WPF
                 }
                 else
                 {
-                    ProcessDeletes();
+                    _ = ProcessDeletes();
                 }
 
             foreach (var r in RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord))
