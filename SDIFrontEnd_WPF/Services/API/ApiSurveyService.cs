@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Office2010.Excel;
+﻿
 using ITC_Contracts;
 using ITCLib;
 using System.Net.Http;
@@ -63,7 +62,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<DeletedQuestion>> GetDeletedQuestions(int id)
     {
-        var dto = await _http.GetFromJsonAsync<List<DeletedQuestion>>($"api/surveys/{id}/deleted");
+        var dto = await _http.GetFromJsonAsync<List<DeletedQuestionDto>>($"api/surveys/{id}/deleted");
         if (dto == null) return new List<DeletedQuestion>();
         var deletedQuestions = dto.Select(x=> new DeletedQuestion()
         {
@@ -77,8 +76,21 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
             ProductLabel = x.ProductLabel,
             DeleteDate = x.DeleteDate,
             DeletedBy = x.DeletedBy,
-            DeleteNotes = x.DeleteNotes
+            DeleteNotes = x.DeleteNotes.Select(y => new DeletedComment()
+            {
+                ID = y.ID,
+                VarName = y.VarName,
+                SurvID = y.SurvID,
+                Survey = y.Survey,
+                Author = new Person() { Name = y.Author.Name },
+                Authority = new Person() { Name = y.Author.Name },
+                Notes = new Note() { NoteText = y.NoteText },
+                NoteDate = y.NoteDate,
+                Source = y.Source,
+                NoteType = new CommentType() {  ID = y.NoteType.ID, TypeName = y.NoteType.TypeName }
+            }).ToList()
         });
+        
         return deletedQuestions.ToList();
     }
 
