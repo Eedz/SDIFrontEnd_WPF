@@ -5,12 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Width="800" Height="600" Background="BlanchedAlmond">
+             d:DesignHeight="450" d:DesignWidth="800" Width="800" Height="400" Background="BlanchedAlmond">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
@@ -18,33 +18,34 @@
         <TextBlock Text="Deleted Variables" FontSize="26" HorizontalAlignment="Center" Margin="5"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <TextBlock Text="Go To Var:" VerticalAlignment="Center" Margin="5"/>
-            <ComboBox ItemsSource="{Binding Questions}" DisplayMemberPath="VarName"/>
+            <ComboBox ItemsSource="{Binding Questions}" DisplayMemberPath="VarName" Width="100" Height="23"/>
             
         </StackPanel>
         <!-- Details -->
-        <Border Grid.Row="2">
-            <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedQuestion}">
-                <StackPanel Orientation="Vertical">
+        <Border Grid.Row="2" HorizontalAlignment="Left" Margin="3">
+            <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedQuestion}" >
+                <StackPanel>
                     <TextBlock d:Text="VarName" Text="{Binding VarName}"/>
                     <TextBlock d:Text="VarLabel" Text="{Binding VarLabel}" Width="200"/>
                     <TextBlock d:Text="01/01/2001" Text="{Binding DeleteDate}"/>
-                    <TextBlock d:Text="Deleted By Eddie B" Text="{Binding DeletedBy}"/> 
+                    <TextBlock d:Text="Deleted By Eddie B" Text="{Binding DeletedBy, StringFormat={}Deleted by {0}}"/> 
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel}"/>
-                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel}"/>
-                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel}"/>
+                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel, StringFormat={}Domain: {0}}"/>
+                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel, StringFormat={}Topic:     {0}}"/>
+                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel, StringFormat={}Content: {0}}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
         <!-- Comments -->
         <Border Grid.Row="3">
-            <StackPanel>
+            <StackPanel Margin="3">
                 <TextBlock Text="Comments:"/>
-                <!--<views:CommentsListView ItemsSource="{Binding Comments}"/>-->
+                <local:CommentsListView Comments="{Binding SelectedQuestion.DeleteNotes}" />
             </StackPanel>
         </Border>
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            
             <Button Content="&lt;&lt;&lt;" Command="{Binding FirstItemCommand}" Width="50" Margin="5,0"/>
             <Button Content="&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
             <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
