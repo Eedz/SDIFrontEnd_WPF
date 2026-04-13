@@ -18,32 +18,35 @@
         <TextBlock Text="Deleted Variables" FontSize="26" HorizontalAlignment="Center" Margin="5"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <TextBlock Text="Go To Var:" VerticalAlignment="Center" Margin="5"/>
-            <ComboBox ItemsSource="{Binding Questions}" DisplayMemberPath="VarName" Width="100" Height="23"/>
+            <ComboBox ItemsSource="{Binding Questions}" SelectedItem="{Binding SelectedQuestion}" DisplayMemberPath="VarName" Width="100" Height="23"/>
             
         </StackPanel>
         <!-- Details -->
-        <Border Grid.Row="2" HorizontalAlignment="Left" Margin="3">
+        <Border Grid.Row="2" HorizontalAlignment="Left" Margin="5">
             <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedQuestion}" >
                 <StackPanel>
                     <TextBlock d:Text="VarName" Text="{Binding VarName}"/>
-                    <TextBlock d:Text="VarLabel" Text="{Binding VarLabel}" Width="200"/>
+                    
                     <TextBlock d:Text="01/01/2001" Text="{Binding DeleteDate}"/>
                     <TextBlock d:Text="Deleted By Eddie B" Text="{Binding DeletedBy, StringFormat={}Deleted by {0}}"/> 
                 </StackPanel>
-                <StackPanel>
-                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel, StringFormat={}Domain: {0}}"/>
-                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel, StringFormat={}Topic:     {0}}"/>
-                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel, StringFormat={}Content: {0}}"/>
+                <StackPanel Margin="10,0">
+                    <TextBlock d:Text="VarLabel" Text="{Binding VarLabel}" Width="200"/>
+                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel, StringFormat={}Content:  {0}}"/>
+                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel, StringFormat={}Topic:      {0}}"/>
+                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel, StringFormat={}Domain:  {0}}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
         <!-- Comments -->
-        <Border Grid.Row="3">
-            <StackPanel Margin="3">
-                <TextBlock Text="Comments:"/>
+
+        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Effect="{StaticResource SunkenEffect}" Grid.Row="3" Margin="5">
+            <TextBlock DockPanel.Dock="Top" Text="Comments:"/>
+            <Border >
                 <local:CommentsListView Comments="{Binding SelectedQuestion.DeleteNotes}" />
-            </StackPanel>
-        </Border>
+            </Border>
+        </DockPanel>
+       
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
             
             <Button Content="&lt;&lt;&lt;" Command="{Binding FirstItemCommand}" Width="50" Margin="5,0"/>
