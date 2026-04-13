@@ -19,15 +19,19 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0">
-            <Run Text="Country filter: "/>
-            <ComboBox ItemsSource="{Binding CountryList}" SelectedItem="{Binding CountryFilter}"/>
-        </TextBlock>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <TextBlock Text="{Binding SelectedQuestion.SurveyCode}" Margin="5,0"/>
-            <TextBlock Text="{Binding SelectedQuestion.Qnum}" Margin="5,0"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.VarName}" Margin="5,0"/>
-            <TextBlock Text="{Binding SelectedQuestion.VarName.VarLabel}" Margin="5,0"/>
+        <StackPanel Grid.Row="0" Margin="5" Orientation="Horizontal">
+            <TextBlock Text="Country filter: "/>
+            <ComboBox ItemsSource="{Binding CountryList}" SelectedItem="{Binding CountryFilter}" Width="60"/>
+            <Line Width="10" Height="10" Stroke="Black"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5">
+            <TextBlock Text="{Binding SelectedQuestion.SurveyCode}" Margin="5,0" FontWeight="Bold"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="{Binding SelectedQuestion.Qnum, StringFormat={}Q#{0}}" Margin="5,0" FontWeight="Bold"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.VarName}" Margin="5,0" FontWeight="Bold"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.VarLabel}" Margin="5,0" FontWeight="Bold"/>
         </StackPanel>
         <Grid Grid.Row="2" Grid.Column="0" >
             <Grid.ColumnDefinitions>
