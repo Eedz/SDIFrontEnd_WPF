@@ -21,6 +21,8 @@ namespace SDIFrontEnd_WPF.Mappings
         {
             return new SurveyQuestion
             {
+                ID = dto.ID,
+                SurveyCode = dto.SurveyCode,
                 VarName = new VariableName(dto.VarName.VarName)
                 {
                     VarLabel = dto.VarName.VarLabel,
@@ -53,6 +55,8 @@ namespace SDIFrontEnd_WPF.Mappings
         {
             return new SurveyQuestionDto
             {
+                ID = question.ID,
+                SurveyCode = question.SurveyCode,
                 VarName = new VariableNameDto
                 {
                     VarName = question.VarName.VarName,
