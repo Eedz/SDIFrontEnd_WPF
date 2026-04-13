@@ -75,8 +75,17 @@
             
             </StackPanel>
             <StackPanel Grid.Row="3" Margin="5" >
-                <ComboBox Width="80" HorizontalAlignment="Left" ItemsSource="{Binding ListItems}" SelectedItem="{Binding SelectedItem}"/>
-                <TextBox d:Text="Selected wording text" Height="50" Text="{Binding SelectedItemText, Mode=OneWay}" Margin="0,5,0,0" IsReadOnly="True"/>
+                <ComboBox Width="80" HorizontalAlignment="Left" ItemsSource="{Binding ListItems}" SelectedItem="{Binding SelectedItem}"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True"/>
+                <StackPanel Height="80">
+                    <FlowDocumentScrollViewer FontSize="10" Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                        <FlowDocumentScrollViewer.Document>
+                            <Binding Path="SelectedItemText" Converter="{StaticResource HtmlToFlow}" />
+                        </FlowDocumentScrollViewer.Document>
+                    </FlowDocumentScrollViewer>
+                </StackPanel>
                 <Button Content="Apply" HorizontalAlignment="Right" Command="{Binding ApplyWordingCommand}" Margin="0,5" Width="50"/>
             </StackPanel>
         </StackPanel>
@@ -159,16 +168,40 @@
             <TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding CurrentQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
 
             <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-            <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding CurrentQuestion.VarName.Topic}" DisplayMemberPath="LabelText"/>
+            <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" 
+                      ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding CurrentQuestion.VarName.TopicLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
 
             <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-            <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding CurrentQuestion.VarName.Content}" DisplayMemberPath="LabelText"/>
+            <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" 
+                      ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding CurrentQuestion.VarName.ContentLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
 
             <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-            <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding CurrentQuestion.VarName.Domain}" DisplayMemberPath="LabelText"/>
+            <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" 
+                      ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding CurrentQuestion.VarName.DomainLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
 
             <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-            <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding CurrentQuestion.VarName.Product}" DisplayMemberPath="LabelText"/>
+            <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" 
+                      ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding CurrentQuestion.VarName.ProductLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
 
         </Grid>
 
