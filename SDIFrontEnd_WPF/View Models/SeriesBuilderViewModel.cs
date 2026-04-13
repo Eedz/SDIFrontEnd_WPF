@@ -16,7 +16,7 @@ namespace SDIFrontEnd_WPF.ViewModels
     public partial class SeriesBuilderViewModel : WorkspaceViewModel
     {
         private readonly ReferenceDataStore _referenceData;
-        private readonly IApiWordingService _wordingService;
+        private readonly WordingData _wordingService;
 
         [ObservableProperty]
         private SurveyQuestion? currentQuestion;
@@ -63,9 +63,9 @@ namespace SDIFrontEnd_WPF.ViewModels
                 {
                     return ((ResponseSet)SelectedItem).RespList;
                 }
-                else if (SelectedItem is VariableLabel)
+                else if (SelectedItem is VarNameLabel)
                 {
-                    return ((VariableLabel)SelectedItem).LabelText;
+                    return ((VarNameLabel)SelectedItem).Label;
                 }
                 else
                 {
@@ -94,36 +94,32 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string CurrentQuestionText => CurrentQuestion == null ? string.Empty : CurrentQuestion.GetQuestionTextHTML(true);
 
         #region Constructor
-        public SeriesBuilderViewModel(ReferenceDataStore referenceData, IApiWordingService wordingService)
+        public SeriesBuilderViewModel(ReferenceDataStore referenceData, WordingData wordingData)
         {
             base.DisplayName = "Series Builder";
 
             _referenceData = referenceData;
-            _wordingService = wordingService;
-
-
-
-            _ = Load();
+            _wordingService = wordingData;
 
             NewQuestions = new ObservableCollection<SurveyQuestion>();
         }
         #endregion
 
-        async Task Load()
+        public void Load()
         {
             ContentLabels = _referenceData.ContentLabels.ToList();
             TopicLabels = _referenceData.TopicLabels.ToList();
             DomainLabels = _referenceData.DomainLabels.ToList();
             ProductLabels = _referenceData.ProductLabels.ToList();
 
-            PrePs = await _wordingService.GetAllPreP();
-            PreIs = await _wordingService.GetAllPreI();
-            PreAs = await _wordingService.GetAllPreA();
-            LitQs = await _wordingService.GetAllLitQ();
-            PstIs = await _wordingService.GetAllPstI();
-            PstPs = await _wordingService.GetAllPstP();
-            RespOptions = await _wordingService.GetAllRespOptions();
-            NRCodes = await _wordingService.GetAllNonResponses();
+            PrePs = _wordingService.PreP.ToList();
+            PreIs = _wordingService.PreI.ToList();
+            PreAs = _wordingService.PreA.ToList();
+            LitQs = _wordingService.LitQ.ToList();
+            PstIs = _wordingService.PstI.ToList();
+            PstPs = _wordingService.PstP.ToList();
+            RespOptions = _wordingService.RO.ToList();
+            NRCodes = _wordingService.NR.ToList();
         }
 
         partial void OnCurrentQuestionChanged(SurveyQuestion? value)
@@ -330,9 +326,9 @@ namespace SDIFrontEnd_WPF.ViewModels
             {
                 UpdateResponseSet((ResponseSet)SelectedItem);
             }
-            else if (SelectedItem is VariableLabel)
+            else if (SelectedItem is VarNameLabel)
             {
-                UpdateLabel((VariableLabel)SelectedItem);
+                UpdateLabel((VarNameLabel)SelectedItem);
             }
             else
             {
@@ -443,10 +439,13 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        private void UpdateLabel(VariableLabel label)
+        private void UpdateLabel(VarNameLabel label)
         {
             switch (SelectedField)
             {
+                case "Content":
+                    UpdateContentLabel(label);
+                    break;
                 case "Topic":
                     UpdateTopicLabel(label);
                     break;
@@ -467,35 +466,35 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        private void UpdateContentLabel(VariableLabel label)
+        private void UpdateContentLabel(VarNameLabel label)
         {
             foreach (SurveyQuestion question in NewQuestions)
             {
-                question.VarName.Content = new ContentLabel(label.ID, label.LabelText);
+                question.VarName.ContentLabel = new VarNameLabel(label.ID, label.Label);
             }
         }
 
-        private void UpdateTopicLabel(VariableLabel label)
+        private void UpdateTopicLabel(VarNameLabel label)
         {
             foreach (SurveyQuestion question in NewQuestions)
             {
-                question.VarName.Topic = new TopicLabel(label.ID, label.LabelText);
+                question.VarName.TopicLabel = new VarNameLabel(label.ID, label.Label);
             }
         }
 
-        private void UpdateDomainLabel(VariableLabel label)
+        private void UpdateDomainLabel(VarNameLabel label)
         {
             foreach (SurveyQuestion question in NewQuestions)
             {
-                question.VarName.Domain = new DomainLabel(label.ID, label.LabelText);
+                question.VarName.DomainLabel = new VarNameLabel(label.ID, label.Label);
             }
         }
 
-        private void UpdateProductLabel(VariableLabel label)
+        private void UpdateProductLabel(VarNameLabel label)
         {
             foreach (SurveyQuestion question in NewQuestions)
             {
-                question.VarName.Product = new ProductLabel(label.ID, label.LabelText);
+                question.VarName.ProductLabel = new VarNameLabel(label.ID, label.Label);
             }
         }
 
