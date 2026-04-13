@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace SDIFrontEnd_WPF
 {
-    // TODO styling
     public partial class RelatedQuestionsViewModel : WorkspaceViewModel
     {
         private List<SurveyQuestion> _questions;
@@ -31,32 +30,18 @@ namespace SDIFrontEnd_WPF
         public string ItemPosition => $"{FilteredQuestions.IndexOf(SelectedQuestion) + 1} of {FilteredQuestions.Count}";
 
         public List<string> CountryList => Questions
-                .Select(x => Regex.Match(x.SurveyCode, @"^[A-Za-z]+").Value) // extract letters at start
+                .Select(x => Regex.Match(x.SurveyCode, @"^[0-9]*[A-Za-z]+").Value) // extract letters at start
                 .Where(code => !string.IsNullOrEmpty(code))
                 .Distinct()
                 .OrderBy(x => x)
                 .ToList();
 
-
-        private string countryFilter;
-        public string CountryFilter { get => countryFilter; set
-            {
-                SetProperty(ref countryFilter, value);
-                if (!string.IsNullOrEmpty(value))
-                {
-                    FilteredQuestions = Questions.Where(x => x.SurveyCode.StartsWith(countryFilter)).ToList();
-                }
-                else
-                {
-                    FilteredQuestions = Questions;
-                }
-
-                SelectedQuestion = FilteredQuestions.FirstOrDefault();
-                OnPropertyChanged(nameof(FilteredQuestions));
-                OnPropertyChanged(nameof(SelectedQuestion));
-                OnPropertyChanged(nameof(ItemPosition));
-            }
-        }
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ItemPosition))]
+        [NotifyPropertyChangedFor(nameof(FilteredQuestions))]
+        [NotifyPropertyChangedFor(nameof(SelectedQuestion))]
+        private string? countryFilter;
+        
 
         public RelatedQuestionsViewModel(List<SurveyQuestion> questions)
         {
@@ -82,6 +67,22 @@ namespace SDIFrontEnd_WPF
                 FilteredQuestions = Questions;
 
             OnPropertyChanged(nameof(FilteredQuestions));
+        }
+
+        
+
+        partial void OnCountryFilterChanged(string? oldValue, string? newValue)
+        {
+            if (!string.IsNullOrEmpty(newValue))
+            {
+                FilteredQuestions = _questions.Where(x => x.SurveyCode.StartsWith(newValue)).ToList();
+                SelectedQuestion = FilteredQuestions.FirstOrDefault();
+            }
+            else
+            {
+                FilteredQuestions = Questions;
+                SelectedQuestion = FilteredQuestions.FirstOrDefault();
+            }
         }
 
         public void UpdateQuestions(List<SurveyQuestion> question)
