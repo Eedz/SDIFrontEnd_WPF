@@ -49,7 +49,10 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<SurveyQuestion>> FindQuestionsByRefVarName(string refvarname)
     {
-        return new List<SurveyQuestion>();
+        var dto = await _http.GetFromJsonAsync<List<SurveyQuestionDto>>($"api/questions/by-ref/{refvarname}");
+        if (dto == null) return new List<SurveyQuestion>();
+        var questions = dto.Select(x => questionMapper.MapToEntity(x));
+        return questions.ToList();
     }
 
     public async Task<List<SurveyQuestion>> GetSurveyQuestions(int id)
