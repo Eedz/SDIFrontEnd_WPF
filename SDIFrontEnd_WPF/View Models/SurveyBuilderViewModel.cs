@@ -455,7 +455,8 @@ namespace SDIFrontEnd_WPF
 
             // open SeriesBuilder viewmodel in new window
             // get list of questions to add 
-            SeriesBuilderViewModel vm = new SeriesBuilderViewModel(_referenceDataService, _wordingService);
+            SeriesBuilderViewModel vm = new SeriesBuilderViewModel(_referenceDataService, _wordingData);
+            vm.Load();
             bool? result = _dialogService.ShowDialog(vm);
 
             if (result.Value)
