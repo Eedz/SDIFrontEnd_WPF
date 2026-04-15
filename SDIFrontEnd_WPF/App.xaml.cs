@@ -260,6 +260,7 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<QuestionSurveyMatrixViewModel>();
 
             services.AddTransient<VariableInformationViewModel>();
+            services.AddTransient<PrefixListViewModel>();
         }
     }
 
