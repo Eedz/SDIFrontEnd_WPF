@@ -15,52 +15,47 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
 
+        <!-- Title -->
         <TextBlock Text="Response Entry" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="1" Grid.Row="0"/>
-        <DockPanel Grid.Row="1">
-            <TextBlock VerticalAlignment="Center" Margin="1">
-                <Run d:Text="WordingType" Text="{Binding ResponseType}"/>
-                <Run Text=": "/>
-                <Run d:Text="0" Text="{Binding CurrentWording.RespSetName}"/>
-            </TextBlock>
+        
+        <!-- Select -->
+        <Button Grid.Row="1" HorizontalAlignment="Stretch" Content="Select Response" Height="30" Margin="20,5,0,5" Command="{Binding SelectWordingCommand}"/>
 
-            <Button HorizontalAlignment="Stretch" Content="Select Response" Height="30" Margin="20,5,0,5" Command="{Binding SelectWordingCommand}"/>
-
-        </DockPanel>
+        <!-- Type, ID -->
         <DockPanel Grid.Row="2">
-            <Button DockPanel.Dock="Top" Content="Edit" Height="30" Width="40" HorizontalAlignment="Right" />
-            <TextBox Text="{Binding CurrentWording.RespOptions, UpdateSourceTrigger=PropertyChanged}" 
-                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="5" Grid.Row="2" />
+            <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Margin="1">
+                <Run d:Text="Wording Type" Text="{Binding ResponseType}"/>
+                <Run Text=": "/>
+                <Run d:Text="0" Text="{Binding CurrentItem.ResponseSet.RespSetName}"/>
+            </TextBlock>
+        </DockPanel>
+        
+        <!-- Wording Text -->
+        <DockPanel Grid.Row="3">
+            <ContentControl Content="{Binding CurrentItem}"/>
         </DockPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3, 30, 3, 3">
-            <Button Content="Copy to New" Command="{Binding NewWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
+        <!-- Commands -->
+        <StackPanel Grid.Row="2" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3, 30, 3, 3">
+            <Button Content="Copy to New" Command="{Binding CopyToNewCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
             <Button Content="Add" Command="{Binding NewWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
-            <Button Content="Delete" Command="{Binding SaveWordingCommand}" Height="20" Width="80" Margin="0,0,0,2"/>
-            <Button Content="Clip Search" Command="{Binding DeleteWordingCommand}" Height="20" Width="80"/>
-            <Button Content="Text Search" Command="{Binding DeleteWordingCommand}" Height="20" Width="80"/>
-        </StackPanel>
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
-            <Label Content="This wording appears in the following places" FontWeight="Bold" HorizontalAlignment="Center" Margin="10"/>
-            <DataGrid Margin="3" ItemsSource="{Binding WordingUsages}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" Width="Auto"/>
-                    <DataGridTextColumn Header="Survey" Binding="{Binding SurveyCode}" Width="AUto"/>
-                    <DataGridTextColumn Header="W#" Binding="{Binding RespSetName}" Width="70"/>
-                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" Width="*"/>
-                    <DataGridTextColumn Header="Locked" Binding="{Binding Locked}" Width="60"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            
+            <Button Content="Clip Search" Command="{Binding ClipSearchCommand}" Height="20" Width="80"/>
+            <Button Content="Text Search" Command="{Binding TextSearchCommand}" Height="20" Width="80"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5" Orientation="Horizontal" >
-            <Button Content="&lt;&lt;&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
-            <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
-            <Button Content="&gt;&gt;&gt;" Command="{Binding NextItemCommand}" Width="50" Margin="5,0"/>
-        </StackPanel>
+        <!-- Navigation buttons -->
+        <local:NavigationBar Grid.Row="4" Grid.ColumnSpan="2"
+            FirstItemCommand="{Binding FirstItemCommand}"
+            PreviousItemCommand="{Binding PreviousItemCommand}"
+            NextItemCommand="{Binding NextItemCommand}"
+            LastItemCommand="{Binding LastItemCommand}"
+            ItemPosition="{Binding ItemPosition}"
+        />  
     </Grid>
 </UserControl>
