@@ -89,38 +89,46 @@
             <TextBlock  HorizontalAlignment="Center" Text="{Binding SectionCount}" FontSize ="10" d:Text="Current Question's section count"/>
         </StackPanel>
         <!-- Question List -->
-        <DataGrid Grid.Row="1" Grid.Column="0" Grid.RowSpan="2"
-            ItemsSource="{Binding RecordList}"
-            SelectedItem="{Binding SelectedQuestionRecord}"
-            ScrollViewer.VerticalScrollBarVisibility="Visible" 
-                  VirtualizingStackPanel.IsVirtualizing="True"
-            AutoGenerateColumns="False" 
-            HeadersVisibility="Column"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-                  AllowDrop="True"
-            IsReadOnly="True"
-            Margin="5"
-            GridLinesVisibility="None"
-            SelectionUnit="FullRow"
-            mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestionRecords}"
-            mvvmLib:DataGridHelper.ScrollOnSelected="True"
-            mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
-            RowStyle="{StaticResource QuestionRowColor}">
+        <DockPanel  Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" >
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="5,0">
+                <TextBlock Text="Go To" DockPanel.Dock="Top"/>
+                <ComboBox Margin="3,0" ItemsSource="{Binding QuestionList}" SelectedItem="{Binding GoToVar}" DisplayMemberPath="VarName" Width="90"/>
+            </StackPanel>
+            <DataGrid Height="Auto"
+                ItemsSource="{Binding RecordList}"
+                SelectedItem="{Binding SelectedQuestionRecord}"
+                ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                AutoGenerateColumns="False" 
+                HeadersVisibility="Column"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                AllowDrop="True"
+                IsReadOnly="True"
+                Margin="5"
+                GridLinesVisibility="None"
+                SelectionUnit="FullRow"
+                mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestionRecords}"
+                mvvmLib:DataGridHelper.ScrollOnSelected="True"
+                mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
+                RowStyle="{StaticResource QuestionRowColor}">
 
-            <i:Interaction.Behaviors>
-                <behaviors:DataGridReorderBehavior MoveCommand="{Binding ReorderCommand}" />
-            </i:Interaction.Behaviors>
+                <i:Interaction.Behaviors>
+                    <behaviors:DataGridReorderBehavior MoveCommand="{Binding ReorderCommand}" />
+                </i:Interaction.Behaviors>
 
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Qnum" Binding="{Binding Item.Qnum}" Width="60"/>
-                <DataGridTextColumn Header="VarName" Binding="{Binding Item.VarName.VarName}" Width="Auto"/>
-                <DataGridTextColumn Header="VarLabel" Binding="{Binding Item.VarName.VarLabel}" Width="300"/>
-                <DataGridTextColumn Header="RespName" Binding="{Binding Item.RespOptionsS.RespSetName}" Width="Auto"/>
-            </DataGrid.Columns>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Qnum" Binding="{Binding Item.Qnum}" Width="60"/>
+                    <DataGridTextColumn Header="VarName" Binding="{Binding Item.VarName.VarName}" Width="Auto"/>
+                    <DataGridTextColumn Header="VarLabel" Binding="{Binding Item.VarName.VarLabel}" Width="300"/>
+                    <DataGridTextColumn Header="RespName" Binding="{Binding Item.RespOptionsS.RespSetName}" Width="Auto"/>
+                </DataGrid.Columns>
 
-            
-        </DataGrid>
+
+            </DataGrid>
+        </DockPanel>
+        
         <!-- Question View -->
         <DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="5" LastChildFill="True" HorizontalAlignment="Stretch">
             <local:NavigationBar DockPanel.Dock="Bottom" 
@@ -151,16 +159,16 @@
                     <TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding SelectedQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
 
                     <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Topic}" DisplayMemberPath="LabelText"/>
+                    <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.TopicLabel}" DisplayMemberPath="Label"/>
 
                     <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-                    <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Content}" DisplayMemberPath="LabelText"/>
+                    <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.ContentLabel}" DisplayMemberPath="Label"/>
 
                     <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-                    <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Domain}" DisplayMemberPath="LabelText"/>
+                    <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.DomainLabel}" DisplayMemberPath="Label"/>
 
                     <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-                    <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.Product}" DisplayMemberPath="LabelText"/>
+                    <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.ProductLabel}" DisplayMemberPath="Label"/>
 
                 </Grid>
             </Border>
@@ -215,8 +223,8 @@
                         <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
                     </StackPanel>
                     
-                    <!-- # comments, translations -->
-                    <StackPanel Grid.Row="8">
+                    <!-- # comments, translations, Time Frames -->
+                    <StackPanel Grid.Row="8" Margin="3">
                         <TextBlock>
                             <Run  d:Text="0" Text="{Binding SelectedQuestion.Comments.Count, Mode=OneWay}" />
                             <Run  Text=" comments."/>
@@ -225,7 +233,10 @@
                             <Run  d:Text="0" Text="{Binding SelectedQuestion.Translations.Count, Mode=OneWay}" />
                             <Run  Text=" translations."/>
                         </TextBlock>
+                        <TextBlock Text="Time Frames" FontWeight="Bold" />
+                        <ListBox Height="80" ItemsSource="{Binding SelectedQuestion.TimeFrames}"></ListBox>
                     </StackPanel>
+                    
                     <!-- question text -->
                     <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
                         <FlowDocumentScrollViewer.Document>
