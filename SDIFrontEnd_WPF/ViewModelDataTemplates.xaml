@@ -122,4 +122,8 @@
     <DataTemplate DataType="{x:Type viewmodels:WordingItemViewModel}">
         <views:WordingItemView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:ResponseSetItemViewModel}">
+        <views:ResponseSetItemView/>
+    </DataTemplate>
 </ResourceDictionary>
