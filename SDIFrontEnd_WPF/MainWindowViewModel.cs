@@ -22,7 +22,7 @@ namespace SDIFrontEnd_WPF
         private readonly IApiUserService _userService;
         private readonly IApiSurveyService apiSurveyService; // Service for managing surveys via API calls
 
-        private UserPrefs CurrentUser;
+        private UserPrefs? CurrentUser;
 
         public IEnumerable<MenuCategory> MenuCategories => Enum.GetValues(typeof(MenuCategory)).Cast<MenuCategory>();
 
@@ -72,7 +72,7 @@ namespace SDIFrontEnd_WPF
             OnPropertyChanged(nameof(IsSurveyCategory));
         }
 
-        partial void OnSelectedSublinkChanged(SublinkItem value)
+        partial void OnSelectedSublinkChanged(SublinkItem? value)
         {
             // TODO decide if viewmodels should be disposed
             //if (ActiveForm is IDisposable disposable)
@@ -127,7 +127,9 @@ namespace SDIFrontEnd_WPF
 
         private async Task<ViewModelBase> OpenSurveyManager(int surveyId)
         {
-            Survey survey = await apiSurveyService.GetSurveyByIdAsync(surveyId);
+            Survey? survey = await apiSurveyService.GetSurveyByIdAsync(surveyId);
+            if (survey == null)
+                return _services.GetRequiredService<HomeViewModel>(); // return to home if survey can't be found
             var vm = _services.GetRequiredService<SurveyManagerViewModel>();
             vm.Load(survey);
             return vm;
@@ -135,6 +137,9 @@ namespace SDIFrontEnd_WPF
 
         private async Task<ViewModelBase> OpenReportView()
         {
+            if (SelectedSublink == null)
+                return _services.GetRequiredService<HomeViewModel>();
+
             ViewModelBase vm;
             switch (SelectedSublink.Key)
             {
@@ -152,8 +157,11 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private async Task<ViewModelBase> OpenPraccingView()
+        private async Task<ViewModelBase?> OpenPraccingView()
         {
+            if (SelectedSublink == null)
+                return _services.GetRequiredService<HomeViewModel>();
+
             ViewModelBase vm;
 
             switch(SelectedSublink.Key)
@@ -188,6 +196,9 @@ namespace SDIFrontEnd_WPF
 
         private async Task<ViewModelBase> OpenSearchView()
         {
+            if (SelectedSublink == null)
+                return _services.GetRequiredService<HomeViewModel>();
+
             ViewModelBase vm;
             switch (SelectedSublink.Key)
             {
@@ -206,8 +217,11 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private async Task<ViewModelBase> OpenVarNameView()
+        private async Task<ViewModelBase?> OpenVarNameView()
         {
+            if (SelectedSublink == null)
+                return _services.GetRequiredService<HomeViewModel>();
+
             ViewModelBase vm;
             switch (SelectedSublink.Key)
             {
@@ -224,6 +238,7 @@ namespace SDIFrontEnd_WPF
                     //    return new VarNameUsageViewModel(_varnameService, _surveyService);
                 case "prefixes":
                     vm = _services.GetRequiredService<PrefixListViewModel>();
+                    await ((PrefixListViewModel)vm).Load();
                     return vm;
                     
                 case "history":
@@ -237,6 +252,9 @@ namespace SDIFrontEnd_WPF
 
         private async Task<ObservableCollection<SublinkItem>> GetSurveyEditorList()
         {
+            if (CurrentUser == null)
+                return new ObservableCollection<SublinkItem>();
+
             var list = Enumerable.Range(1, 3)
                 .Select(i => CurrentUser.GetFilterID("frmSurveyEntry", i))
                 .ToList();
