@@ -49,6 +49,9 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private ObservableCollection<SurveyQuestion>? selectedQuestions;
 
+        [ObservableProperty]
+        private SurveyQuestion? goToVar;
+
         public ObservableCollection<QuestionComment> Comments => new ObservableCollection<QuestionComment>(SelectedQuestion?.Comments ?? new List<QuestionComment>());
 
         [ObservableProperty]
@@ -172,6 +175,16 @@ namespace SDIFrontEnd_WPF
                 _ = UpdateRelatedQuestions(question.VarName.RefVarName);
             }
 
+        }
+
+
+        partial void OnGoToVarChanged(SurveyQuestion? value)
+        {
+            if (value == null)
+                return;
+            var record = _recordList.FirstOrDefault(r => r.Item == value);
+            if (record != null && record.Item.ID != SelectedQuestionRecord.Item.ID)
+                SelectedQuestionRecord = record;
         }
 
         async Task UpdateRelatedQuestions(string refVarName)
@@ -932,6 +945,9 @@ namespace SDIFrontEnd_WPF
 
         private async Task OpenWordings(string type, int wordID)
         {
+            // TODO 
+            //bool? result = await _dialogService.ShowDialogAsync<WordingViewModel>(async x=> await x.Load());
+
             WordingViewModel wordingVM = new WordingViewModel(_wordingData, _wordingService, _dialogService, type, wordID);
             await wordingVM.Load();
             bool? result = _dialogService.ShowDialog(wordingVM);
@@ -948,9 +964,10 @@ namespace SDIFrontEnd_WPF
         }
 
 
-        private void OpenResponses(string type, string setname)
+        private async Task OpenResponses(string type, string setname)
         {
-            ResponseSetViewModel wordingVM = new ResponseSetViewModel(_wordingService, _dialogService, type, setname);
+            ResponseSetViewModel wordingVM = new ResponseSetViewModel(_wordingData, _wordingService, _dialogService, type, setname);
+            await wordingVM.Load();
             bool? result = _dialogService.ShowDialog(wordingVM);
 
             if (result.Value) // if closed with OK
