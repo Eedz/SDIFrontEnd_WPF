@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using ITCLib;
 using MvvmLib.ViewModels;
+using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,71 +16,97 @@ namespace SDIFrontEnd_WPF
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
         private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
+        private readonly WordingData _wordingData;
 
-        public bool NewSet { get; set; }
         public string ResponseType { get; set; } // Type of wording being managed (e.g., PreP, PreI etc.)
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ItemPosition))]
-        private ResponseSet? currentResponse;
-        public ObservableCollection<ResponseSet> Responses { get; set; } = new ObservableCollection<ResponseSet>(); // Collection of wordings for the UI
-        [ObservableProperty]
-        private ObservableCollection<ResponseUsage> usages = new ObservableCollection<ResponseUsage>(); // Collection of wordings for the UI
+        private ResponseSetItemViewModel? currentItem;
+        public ObservableCollection<ResponseSetItemViewModel> Items { get; set; } = new();
 
-        [ObservableProperty]
-        private bool lockedForEditing = true; // Flag indicating if the wording is locked for editing
+        public string ItemPosition
+        {
+            get
+            {
+                if (CurrentItem == null) return $"0 of {_allWordings.Count}";
+                int index = _allWordings.IndexOf(CurrentItem.ResponseSet);
+                return $"{(index + 1)} of {_allWordings.Count}";
+            }
+        }
 
-        public string ItemPosition => $"{(Responses.IndexOf(CurrentResponse) + 1)} of {Responses.Count}";
+        private List<ResponseSet> _allWordings = new();
+        private string? _initialSet= null;       
 
-        public ResponseSetViewModel(IApiWordingService wordingService, IDialogService dialogService, string type)
+        public ResponseSetViewModel(WordingData wordingData, IApiWordingService wordingService, IDialogService dialogService, string type)
         {
             DisplayName = "Response Set Manager";
 
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-            ResponseType = type ?? throw new ArgumentNullException(nameof(type));
-            _ = Load();
-            CurrentResponse = Responses.FirstOrDefault();
+            _wordingData = wordingData;
+
+            ResponseType = type ?? throw new ArgumentNullException(nameof(type));           
         }
 
-        async Task Load()
+        public ResponseSetViewModel(WordingData wordingData, IApiWordingService wordingService, IDialogService dialogService, string type, string respset) : 
+            this(wordingData, wordingService, dialogService, type)
         {
-            switch (ResponseType)
+            _initialSet = respset;
+        }
+
+        public async Task Load()
+        {
+            _allWordings = ResponseType switch
             {
-                case "RespOptions": Responses = new ObservableCollection<ResponseSet>(await _wordingService.GetAllRespOptions()); break;
-                case "NRCodes": Responses = new ObservableCollection<ResponseSet>(await _wordingService.GetAllNonResponses()); break;
-            }
+                "RespOptions" => _wordingData.RO.ToList(),
+                "NRCodes" => _wordingData.NR.ToList(),
+                _ => new List<ResponseSet>()
+            };
+
+            var initial = _initialSet == null
+                ? _allWordings.FirstOrDefault()
+                : _allWordings.FirstOrDefault(w => w.RespSetName == _initialSet) ?? _allWordings.FirstOrDefault();
+
+            NavigateTo(initial);
         }
 
-        public ResponseSetViewModel(IApiWordingService wordingService, IDialogService dialogService, string type, string wordID) : this(wordingService, dialogService, type)
+        /// <summary>
+        /// Create a ViewModel for the specified wording and set the CurrentItem.
+        /// </summary>
+        /// <param name="wording"></param>
+        private void NavigateTo(ResponseSet? wording)
         {
-            CurrentResponse = Responses.FirstOrDefault(w => w.RespSetName == wordID);
+            if (wording == null) return;
+
+            if (CurrentItem != null)
+                CurrentItem.DeleteRequested -= OnItemDeleteRequested;
+
+            var item = new ResponseSetItemViewModel(wording, _wordingService, _dialogService);
+            item.DeleteRequested += OnItemDeleteRequested;
+            _ = item.LoadUsagesAsync();
+            CurrentItem = item;
         }
 
-        partial void OnCurrentResponseChanged(ResponseSet? value)
+        private void OnItemDeleteRequested(object? sender, EventArgs e)
         {
-            _ = UpdateUsages();
-            NewSet = CurrentResponse.RespSetName == string.Empty;
-        }
-
-        async Task UpdateUsages()
-        {
-            if (CurrentResponse == null)
+            if (sender is not ResponseSetItemViewModel item)
                 return;
 
-            if (CurrentResponse.RespSetName == "0") 
-                Usages.Clear();
-            else 
-                Usages = new ObservableCollection<ResponseUsage>(await _wordingService.GetResponseUsages(CurrentResponse));
+            item.DeleteRequested -= OnItemDeleteRequested;
+
+            int index = _allWordings.IndexOf(item.ResponseSet);
+            _allWordings.Remove(item.ResponseSet);
+
+            NavigateTo(_allWordings.Count > 0
+                ? _allWordings[Math.Max(0, index - 1)]
+                : null);
         }
 
-        [RelayCommand]
-        private void EditResponseSet()
+        partial void OnCurrentItemChanged(ResponseSetItemViewModel? value)
         {
-            if (!LockedForEditing)
-            {
-                _ = SaveChanges();
-            }
-            LockedForEditing = !LockedForEditing;
+            if (value != null)
+                _ = value.LoadUsagesAsync();
         }
 
         [RelayCommand]
@@ -91,8 +118,8 @@ namespace SDIFrontEnd_WPF
                 Type = respSet.Type,
                 RespList = respSet.RespList
             };
-            Responses.Add(newWording);
-            CurrentResponse = newWording;
+            _allWordings.Add(newWording);
+            NavigateTo(newWording);
         }
 
         [RelayCommand]
@@ -104,55 +131,43 @@ namespace SDIFrontEnd_WPF
                 Type = GetResponseType(),
                 RespList = string.Empty
             };
-            Responses.Add(newWording);
-            CurrentResponse = newWording;
+            _allWordings.Add(newWording);
+            NavigateTo(newWording);
         }
-
-        [RelayCommand]
-        private async Task DeleteWording(ResponseSet wording)
-        {
-            if (wording.RespSetName == "0")
-            {
-                _dialogService.ShowError("Cannot delete response set '0'.");
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(wording.RespSetName) && Usages.Count==0)
-            {
-                await _wordingService.DeleteResponseSet(wording);
-            }
-           
-            Responses.Remove(wording);
-            CurrentResponse = Responses.FirstOrDefault();
-        }
+     
 
         [RelayCommand]
         private void ClipSearch()
         {
             // TODO use clipboard service
-            string criteria = _dialogService.PromptForText("Enter search text", "Search");
-            var results = Responses.Where(x => x.RespList.Contains(criteria));
-            Responses = new ObservableCollection<ResponseSet>(results);
-            CurrentResponse = Responses.FirstOrDefault();
+            //string criteria = _dialogService.PromptForText("Enter search text", "Search");
+            //var results = _allWordings.Where(x => x.RespList.Contains(criteria));
+            //_allWordings = new ObservableCollection<ResponseSet>(results);
+            
         }
 
         [RelayCommand]
         private void TextSearch()
         {
             string criteria = _dialogService.PromptForText("Enter search text", "Search");
-            var results = Responses.Where(x => x.RespList.Contains(criteria));
-            Responses = new ObservableCollection<ResponseSet>(results);
-            CurrentResponse = Responses.FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(criteria))
+                return;
+
+            _allWordings = _allWordings.Where(w => w.RespList.Contains(criteria)).ToList();
+            OnPropertyChanged(nameof(ItemPosition));
+            NavigateTo(_allWordings.FirstOrDefault());
         }
 
         [RelayCommand]
         private void SelectWording()
         {
-            if (!LockedForEditing || (CurrentResponse != null && CurrentResponse.RespSetName != "0"))
+            bool hasUnsavedChanges = CurrentItem != null && !CurrentItem.LockedForEditing && string.IsNullOrEmpty(CurrentItem.ResponseSet.RespSetName);
+
+            if (hasUnsavedChanges)
             {
                 if (_dialogService.Confirm("You have unsaved changes. Save first?"))
                 {
-                    _ = SaveChanges();
+                    CurrentItem!.SaveCommand.Execute(null);
                     OnRequestClose(true);
                 }
             }
@@ -165,44 +180,28 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void PreviousItem()
         {
-            if (Responses == null)
-                return;
-            if (CurrentResponse == null)
-            {
-                CurrentResponse = Responses.FirstOrDefault();
-                return;
-            }
-            int currentIndex = Responses.IndexOf(CurrentResponse);
-            if (currentIndex > 0)
-            {
-                CurrentResponse = Responses[currentIndex - 1];
-            }
-            else
-            {
-                CurrentResponse = Responses.Last();
-            }
+            if (_allWordings.Count == 0) return;
+            if (CurrentItem == null) { NavigateTo(_allWordings.First()); return; }
+
+            int i = _allWordings.IndexOf(CurrentItem.ResponseSet);
+            NavigateTo(_allWordings[i > 0 ? i - 1 : _allWordings.Count - 1]);
         }
 
         [RelayCommand]
         private void NextItem()
         {
-            if (Responses == null)
-                return;
-            if (CurrentResponse == null)
-            {
-                CurrentResponse = Responses.First();
-                return;
-            }
-            int currentIndex = Responses.IndexOf(CurrentResponse);
-            if (currentIndex < Responses.Count - 1)
-            {
-                CurrentResponse = Responses[currentIndex + 1];
-            }
-            else
-            {
-                CurrentResponse = Responses.First();
-            }
+            if (_allWordings.Count == 0) return;
+            if (CurrentItem == null) { NavigateTo(_allWordings.First()); return; }
+
+            int i = _allWordings.IndexOf(CurrentItem.ResponseSet);
+            NavigateTo(_allWordings[(i + 1) % _allWordings.Count]);
         }
+
+        [RelayCommand]
+        private void FirstItem() => NavigateTo(_allWordings.FirstOrDefault());
+
+        [RelayCommand]
+        private void LastItem() => NavigateTo(_allWordings.LastOrDefault());
 
         private ITCLib.ResponseType GetResponseType()
         {
@@ -214,47 +213,10 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private async Task SaveChanges()
+        protected override void OnDispose()
         {
-            if (CurrentResponse == null)
-                return;
-            if (string.IsNullOrWhiteSpace(CurrentResponse.RespList))
-            {
-                _dialogService.ShowError("Text cannot be empty.");
-                return;
-            }
-            try
-            {
-                if (string.IsNullOrEmpty(CurrentResponse.RespSetName))
-                {
-                    _dialogService.ShowError("Response Set Name cannot be empty.");
-                    return;
-                }
-                
-                bool taken = Responses.Any(x => x.RespSetName == CurrentResponse.RespSetName);
-
-                if (taken && NewSet)
-                {
-                    _dialogService.ShowError("Response Set Name already taken.");
-                    return;
-                    
-                }else if (taken && !NewSet)
-                {
-                    await _wordingService.UpdateResponseSet(CurrentResponse);                    
-                }
-                else
-                {
-                    await _wordingService.CreateResponseSet(CurrentResponse);
-                }
-                LockedForEditing = true;
-                // Refresh usages after save
-                await UpdateUsages();
-                
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowError($"Error saving wording: {ex.Message}");
-            }
+            if (CurrentItem != null)
+                CurrentItem.DeleteRequested -= OnItemDeleteRequested;
         }
     }
 }
