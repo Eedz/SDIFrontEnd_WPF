@@ -7,6 +7,7 @@ using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,12 +77,45 @@ namespace SDIFrontEnd_WPF
             DisplayName = "Survey Manager - " + survey.SurveyCode;
             var questions = await _surveyService.GetSurveyQuestions(survey.SID);
             survey.AddQuestions(questions);
-            
+            await GetSurveyImageInfo(survey.Questions.SelectMany(q => q.Images).ToList(), survey);
             SurveyInfo = new SurveyViewModel(survey);
             SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, _wordingData, survey);
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
+        }
+
+        private async Task GetSurveyImageInfo(List<SurveyImage> images, Survey survey)
+        {
+            string folder = "\\\\psychfile\\psych$\\psych-lab-gfong\\SMG\\Survey Images\\" + survey.SurveyCodePrefix + " Images\\" + survey.SurveyCode;
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+            foreach (string file in from s in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
+                                    where s.EndsWith(".png") || s.EndsWith(".jpg")
+                                    select s)
+            {
+                int iWidth = 0;
+                int iHeight = 0;
+                using (System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(file))
+                {
+                    iWidth = (int)Math.Round(bmp.Width * 9525m);
+                    iHeight = (int)Math.Round(bmp.Height * 9525m);
+                }
+                string filename = file.Substring(file.LastIndexOf("\\") + 1);
+                if (images.Any((SurveyImage x) => x.ImageName.Equals(filename)))
+                {
+                    foreach (SurveyImage surveyImage in images.Where((SurveyImage x) => x.ImageName.Equals(filename)))
+                    {
+                        surveyImage.Width = iWidth;
+                        surveyImage.Height = iHeight;
+                        surveyImage.FilePath = file;
+                        surveyImage.ImagePath = file;
+                        surveyImage.SetParts();
+                    }
+                }
+            }
         }
 
         [RelayCommand]
