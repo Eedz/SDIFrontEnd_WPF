@@ -122,7 +122,7 @@ namespace SDIFrontEnd_WPF
                 Inactive = prefix.Inactive
             };
 
-            var response = await _http.PostAsJsonAsync<VariablePrefixDto>("$api/varnames/prefixes", dto);
+            var response = await _http.PostAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes", dto);
             response.EnsureSuccessStatusCode();
             var createdDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>(); 
             return 0;
@@ -130,7 +130,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariablePrefix>> GetVariablePrefixes()
         {
-            var response = await _http.GetFromJsonAsync<List<VariablePrefixDto>>("$api/varnames/prefixes");
+            var response = await _http.GetFromJsonAsync<List<VariablePrefixDto>>($"api/varnames/prefixes");
             var prefixes = response.Select(x => new VariablePrefix()
             {
                 ID = x.ID,
@@ -159,7 +159,7 @@ namespace SDIFrontEnd_WPF
                 Inactive = prefix.Inactive
             };
 
-            var response = await _http.PutAsJsonAsync<VariablePrefixDto>("$api/varnames/prefixes", dto);
+            var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes", dto);
             response.EnsureSuccessStatusCode();
             var updatedDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>(); 
             return 0;
