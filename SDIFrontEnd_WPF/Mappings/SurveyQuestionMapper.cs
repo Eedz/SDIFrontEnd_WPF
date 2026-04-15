@@ -30,6 +30,10 @@ namespace SDIFrontEnd_WPF.Mappings
                     Topic = new TopicLabel() { LabelText = dto.VarName.Topic.LabelText, ID = dto.VarName.Topic.ID },
                     Content = new ContentLabel() { LabelText = dto.VarName.Content.LabelText, ID = dto.VarName.Content.ID },
                     Product = new ProductLabel() { LabelText = dto.VarName.Product.LabelText, ID = dto.VarName.Product.ID },
+                    DomainLabel = new VarNameLabel(dto.VarName.Domain.ID, dto.VarName.Domain.LabelText),
+                    TopicLabel = new VarNameLabel(dto.VarName.Topic.ID, dto.VarName.Topic.LabelText),
+                    ContentLabel = new VarNameLabel(dto.VarName.Content.ID, dto.VarName.Content.LabelText),
+                    ProductLabel = new VarNameLabel(dto.VarName.Product.ID, dto.VarName.Product.LabelText)
                 },
                 Qnum = dto.Qnum,
                 AltQnum = dto.AltQnum,
@@ -45,7 +49,7 @@ namespace SDIFrontEnd_WPF.Mappings
                 Comments = dto.Comments.Select(x=> _commentMapper.MapToEntity(x)).ToList(),
                 Translations = dto.Translations.Select(x => new Translation() { ID = x.ID, QID = x.QID, Bilingual = x.Bilingual, LanguageName = new Language() { LanguageName = x.LanguageName }, TranslationText = x.TranslationText }).ToList(),
                 TimeFrames = dto.TimeFrames.Select(x => new QuestionTimeFrame() { ID = x.ID, QID = x.QID, TimeFrame = x.TimeFrame }).ToList(),
-
+                Images = dto.Images.Select(x=>new SurveyImage() { ID = x.ID, QID = x.QID, FilePath = x.FilePath, ImagePath = x.FilePath, ImageName = x.ImageName }).ToList()
             };
         }
 
@@ -61,10 +65,10 @@ namespace SDIFrontEnd_WPF.Mappings
                 {
                     VarName = question.VarName.VarName,
                     VarLabel = question.VarName.VarLabel,
-                    Domain = new VarNameLabelDto { LabelText = question.VarName.Domain.LabelText, ID = question.VarName.Domain.ID },
-                    Topic = new VarNameLabelDto { LabelText = question.VarName.Topic.LabelText, ID = question.VarName.Topic.ID },
-                    Content = new VarNameLabelDto { LabelText = question.VarName.Content.LabelText, ID = question.VarName.Content.ID },
-                    Product = new VarNameLabelDto { LabelText = question.VarName.Product.LabelText, ID = question.VarName.Product.ID },
+                    Domain = new VarNameLabelDto { LabelText = question.VarName.DomainLabel.Label, ID = question.VarName.DomainLabel.ID },
+                    Topic = new VarNameLabelDto { LabelText = question.VarName.TopicLabel.Label, ID = question.VarName.TopicLabel.ID },
+                    Content = new VarNameLabelDto { LabelText = question.VarName.ContentLabel.Label, ID = question.VarName.ContentLabel.ID },
+                    Product = new VarNameLabelDto { LabelText = question.VarName.ProductLabel.Label, ID = question.VarName.ProductLabel.ID },
                 },
                 Qnum = question.Qnum,
                 AltQnum = question.AltQnum,
