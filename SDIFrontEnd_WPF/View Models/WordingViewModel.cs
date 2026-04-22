@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 namespace SDIFrontEnd_WPF.ViewModels
 {
     // TODO clipboard
-    // TODO breaks missing in text
     public partial class WordingViewModel : WorkspaceViewModel
     {
         private readonly IDialogService _dialogService; // Service for displaying dialogs to the user
