@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.VarNameUsageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="300" Height="450" Width="350">
+    <Grid>
+        <ListBox ItemsSource="{Binding Records}"
+                 
+                 >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Black" BorderThickness="2">
+                        <StackPanel Margin="3" Width="325" Height="200">
+                            <TextBlock d:Text="VarName" Text="{Binding VarName}" HorizontalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock d:Text="SurveyList" Text="{Binding SurveyList}" HorizontalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock d:Text="QuestionText" TextWrapping="Wrap" Text="{Binding CondensedPlainWording}"/>
+                        </StackPanel>   
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
