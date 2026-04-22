@@ -1,4 +1,5 @@
 ﻿using ITCLib;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using MvvmLib;
 using MvvmLib.ViewModels;
@@ -23,11 +24,19 @@ namespace SDIFrontEnd_WPF
 
         SurveyQuestion PickQuestion(IEnumerable<SurveyQuestion> candidates);
         bool? ShowDialog(WorkspaceViewModel viewModel);
+        Task<bool?> ShowDialogAsync<TViewModel>(Func<TViewModel, Task>? configure = null) where TViewModel : WorkspaceViewModel;
         void ShowWindow(WorkspaceViewModel viewModel);
     }
 
     public class  DialogService : IDialogService 
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public DialogService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
         public string OpenFile(string filter)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -111,6 +120,55 @@ namespace SDIFrontEnd_WPF
                 Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
 
+            };
+
+            // Keep a strong reference to the handler so we can unsubscribe
+            EventHandler<DialogResultEventArgs>? handler = null;
+
+            handler = (s, args) =>
+            {
+                // Detach to break the ViewModel → Window reference chain
+                viewModel.RequestClose -= handler;
+
+                // If you use a custom EventArgs with a DialogResult
+                window.DialogResult = args.DialogResult;
+                window.Close();
+            };
+
+            viewModel.RequestClose += handler;
+
+            // Clean up after the dialog closes (no matter how it closes)
+            window.Closed += (s, e) =>
+            {
+                // Dispose if the VM implements IDisposable
+                if (viewModel is IDisposable disposable)
+                    disposable.Dispose();
+            };
+
+            //viewModel.RequestClose += (s, args) =>
+            //{
+            //    window.DialogResult = args.DialogResult; // or false based on your logic
+            //    window.Close();
+            //};
+
+            return window.ShowDialog();
+        }
+
+        public async Task<bool?> ShowDialogAsync<TViewModel>(Func<TViewModel, Task>? configure = null) where TViewModel : WorkspaceViewModel
+        {
+            var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
+
+            if (configure != null)
+                await configure(viewModel);
+
+            var window = new Window
+            {
+                Title = viewModel.DisplayName ?? string.Empty,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                Content = new ContentControl { Content = viewModel },
+                DataContext = viewModel,
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
 
             // Keep a strong reference to the handler so we can unsubscribe
