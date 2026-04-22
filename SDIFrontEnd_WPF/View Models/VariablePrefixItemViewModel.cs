@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DocumentFormat.OpenXml.Wordprocessing;
 using ITCLib;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ namespace SDIFrontEnd_WPF.View_Models
     public partial class VariablePrefixItemViewModel : ViewModelBase
     {
 
-        
+
 
         public VariablePrefix Model { get; }
         private VariablePrefix _original;
@@ -31,7 +30,7 @@ namespace SDIFrontEnd_WPF.View_Models
         {
             Model = model;
             Ranges = new ObservableCollection<VariableRange>(model.Ranges);
-            
+
             _original = new VariablePrefix()
             {
                 ID = model.ID,
@@ -89,6 +88,33 @@ namespace SDIFrontEnd_WPF.View_Models
             }
         }
 
-        
+        public string Description
+        {
+            get => Model.Description;
+            set
+            {
+                if (Model.Description != value)
+                {
+                    Model.Description = value;
+                    IsDirty = true;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool Inactive
+        {
+            get => Model.Inactive;
+            set
+            {
+                if (Model.Inactive != value)
+                {
+                    Model.Inactive = value;
+                    IsDirty = true;
+                    OnPropertyChanged();
+                }
+            }
+
+        }
     }
 }
