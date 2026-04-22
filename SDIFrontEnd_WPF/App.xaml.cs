@@ -3,6 +3,7 @@ using ITCLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SDIFrontEnd_WPF.Mappings;
+using SDIFrontEnd_WPF.Services;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Configuration;
@@ -35,7 +36,7 @@ namespace SDIFrontEnd_WPF
 //#else
             serviceProvider = AddServices();
             if (!(await CheckHealth(serviceProvider)))
-            {   
+            {
                 MessageBox.Show(
                     "The server is unavailable. The application will now close.",
                     "Server Error",
@@ -45,7 +46,7 @@ namespace SDIFrontEnd_WPF
                 Shutdown();
                 return;
             }
-//#endif
+            //#endif
 
 
             var loader = serviceProvider.GetRequiredService<ReferenceDataService>();
@@ -67,11 +68,24 @@ namespace SDIFrontEnd_WPF
 
         static async Task<bool> CheckHealth(IServiceProvider serviceProvider)
         {
-            var surveyApi = serviceProvider.GetRequiredService<IApiSurveyService>();
+            try
+            {
+                var surveyApi = serviceProvider.GetRequiredService<IApiSurveyService>();
 
-            var isHealthy = await surveyApi.CheckHealthAsync();
-
-            return isHealthy;
+                var isHealthy = await surveyApi.GetSurveyByIdAsync(6);
+                return isHealthy != null;
+            }
+            catch (HttpRequestException)
+            {
+                return false;
+            }
+            catch (TaskCanceledException)
+            {
+                return false;
+            }
+            
+                
+            //return isHealthy;
         }
 
         static ServiceProvider AddMockServices()
@@ -112,7 +126,8 @@ namespace SDIFrontEnd_WPF
 
             // mapping profiles (TODO AddMappers extension)
             services.AddSingleton<IMapperFactory, MapperFactory>();
-            
+            services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+
             services.AddTransient<IMapper<Survey, SurveyDto>, SurveyMapper>();
             services.AddTransient<IMapper<SurveyQuestion, SurveyQuestionDto>, SurveyQuestionMapper>();
             services.AddTransient<IMapper<Wording,WordingDto>, WordingMapper>();
@@ -177,61 +192,68 @@ namespace SDIFrontEnd_WPF
 
         private static void AddApiServices(IServiceCollection services)
         {
+#if RELEASE
+            var baseUrl = ConfigurationManager.AppSettings["ApiBaseUrl"]
+                    ?? throw new InvalidOperationException("ApiBaseUrl is not configured in App.config");
+            #else
+            var baseUrl = "https://localhost:7137/";
+#endif
+
             services.AddHttpClient<IApiSurveyService, ApiSurveyService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
             services.AddHttpClient<IApiVarNameService, ApiVarNameService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiQuestionService, ApiQuestionService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
             services.AddHttpClient<IApiReferenceDataService, ApiReferenceDataService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiWordingService, ApiWordingService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiUserService, ApiUserService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiPeopleService, ApiPeopleService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiCommentService, ApiCommentService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiPraccingService, ApiPraccingService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             services.AddHttpClient<IApiAuditService, ApiAuditService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7137/");
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
         }
