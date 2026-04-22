@@ -13,6 +13,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         public ObservableCollection<VariablePrefixItemViewModel> Records { get; } = new();
 
         private readonly IApiVarNameService _service;
+        private readonly IDialogService _dialogService;
+        private readonly IApiQuestionService _questionService;
 
         [ObservableProperty]
         private VariablePrefixItemViewModel? selectedRecord;
@@ -20,19 +22,62 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private ObservableCollection<VariableNameSurveys> usages = new();
 
+        public ObservableCollection<VariableNameSurveys> FilteredUsages
+        {
+            get
+            {
+                if (FilterOnRange && SelectedRange != null)
+                {
+                    return new ObservableCollection<VariableNameSurveys>(
+                        Usages.Where(x => x.NumberInt() >= SelectedRange.LowerInt() &&
+                        x.NumberInt() <= SelectedRange.UpperInt()));
+                }
+                else
+                {
+                    return Usages;
+                }
+            }
+        }
+
         [ObservableProperty]
         private VariableRange? selectedRange;
 
-        public PrefixListViewModel(IApiVarNameService varnameService)
+        [ObservableProperty]
+        private bool filterOnRange;
+
+        [ObservableProperty]
+        private VariableNameSurveys? selectedUsage;
+
+        
+
+        public PrefixListViewModel(IApiVarNameService varnameService, IDialogService dialogService, IApiQuestionService questionService)
         {
             _service = varnameService;
+            _dialogService = dialogService;
+            _questionService = questionService;
+        }        
 
-            
+        partial void OnSelectedRecordChanged(VariablePrefixItemViewModel? value)
+        {
+            if (value == null) return;
+
+            _ = LoadUsagesAsync();
+            OnPropertyChanged(nameof(FilteredUsages));
         }
 
-        private async Task Load()
+        partial void OnFilterOnRangeChanged(bool oldValue, bool newValue)
         {
-            var prefixes = await  _service.GetVariablePrefixes();
+            OnPropertyChanged(nameof(FilteredUsages));
+        }
+
+        partial void OnSelectedRangeChanged(VariableRange? oldValue, VariableRange? newValue)
+        {
+            OnPropertyChanged(nameof(FilteredUsages));
+        }
+
+        public async Task Load()
+        {
+            var prefixes = await _service.GetVariablePrefixes();
 
             foreach (var prefix in prefixes)
             {
@@ -40,26 +85,16 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
         }
 
-        partial void OnSelectedRecordChanged(VariablePrefixItemViewModel? value)
-        {
-            if (value == null) return;
-
-            LoadUsagesAsync();
-        }
-
-        private async void LoadUsagesAsync()
+        private async Task LoadUsagesAsync()
         {
             if (SelectedRecord == null) return;
 
-            var result = await _service.SearchVarNameUsage(SelectedRecord.Prefix,1000);
+            var result = await _service.SearchVarNameUsage(SelectedRecord.Prefix, 1000);
 
             Usages = new ObservableCollection<VariableNameSurveys>(result);
+            OnPropertyChanged(nameof(FilteredUsages));  
         }
-
-        // -----------------------
-        // Commands
-        // -----------------------
-
+            
         [RelayCommand]
         private void AddPrefix()
         {
@@ -108,6 +143,27 @@ namespace SDIFrontEnd_WPF.ViewModels
             if (SelectedRecord == null || SelectedRange == null) return;
 
             SelectedRecord.Ranges.Remove(SelectedRange);
+        }
+
+        [RelayCommand]
+        private async Task ShowWordings()
+        {
+            if (SelectedRecord == null) return;
+
+            var questions = await _service.GetVarNameQuestions(SelectedUsage.VarName);
+
+            
+
+            var vm = new VarNameUsageViewModel(questions);
+            
+
+            _dialogService.ShowDialog(vm);
+        }
+
+        [RelayCommand]
+        private async Task Print()
+        {
+            
         }
     }
 }
