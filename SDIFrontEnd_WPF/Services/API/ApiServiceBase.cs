@@ -18,7 +18,8 @@ public abstract class ApiServiceBase
     {
         try
         {
-            var response = await _http.GetAsync("https://localhost:7137/health");
+            var response = await _http.GetAsync("api/health");
+            var status = response.StatusCode;
             return response.IsSuccessStatusCode;
         }
         catch
