@@ -129,5 +129,10 @@ namespace SDIFrontEnd_WPF
                 Product = new ProductLabel() { LabelText = dto.Product.LabelText, ID = dto.Product.ID },
             };
         }
+
+        public Task<List<QuestionUsage>> GetVarNameQuestions(string varname)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

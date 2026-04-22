@@ -29,6 +29,7 @@ namespace SDIFrontEnd_WPF
         Task<int> InsertVariablePrefix(VariablePrefix prefix);
 
         Task<List<VariablePrefix>> GetVariablePrefixes();
+        Task<List<QuestionUsage>> GetVarNameQuestions(string varname);
 
     }
 }

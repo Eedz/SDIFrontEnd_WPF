@@ -26,7 +26,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<int> InsertVariable(VariableName variable)
         {
-            
+
             var dto = _varnameMapper.MapToDto(variable);
             var result = await _http.PostAsJsonAsync("api/varnames", dto);
             return result.IsSuccessStatusCode ? 1 : 0;
@@ -124,7 +124,7 @@ namespace SDIFrontEnd_WPF
 
             var response = await _http.PostAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes", dto);
             response.EnsureSuccessStatusCode();
-            var createdDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>(); 
+            var createdDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>();
             return 0;
         }
 
@@ -137,10 +137,18 @@ namespace SDIFrontEnd_WPF
                 Prefix = x.Prefix,
                 PrefixName = x.PrefixName,
                 ProductType = x.ProductType,
-                RelatedPrefixes= x.RelatedPrefixes,
+                RelatedPrefixes = x.RelatedPrefixes,
                 Description = x.Description,
                 Comments = x.Comments,
-                Inactive =x.Inactive
+                Inactive = x.Inactive,
+                Ranges = x.Ranges.Select(r => new VariableRange()
+                {
+                    ID = r.ID,
+                    PrefixID = r.PrefixID,
+                    Lower = r.Lower,
+                    Upper = r.Upper,
+                    Description = r.Description
+                }).ToList()
             }).ToList();
             return prefixes;
         }
@@ -161,16 +169,68 @@ namespace SDIFrontEnd_WPF
 
             var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes", dto);
             response.EnsureSuccessStatusCode();
-            var updatedDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>(); 
+            var updatedDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>();
             return 0;
         }
 
         public async Task<List<VariableNameSurveys>> SearchVarNameUsage(string searchTerm, int take)
         {
-            var dto = await _http.GetFromJsonAsync<List<VariableNameSurveys>>($"api/varnames/usage?search={Uri.EscapeDataString(searchTerm)}&take={take}");
-            return dto ?? new List<VariableNameSurveys>();
+            var dto = await _http.GetFromJsonAsync<List<VarNameUsageDto>>($"api/varnames/usage?search={Uri.EscapeDataString(searchTerm)}&take={take}");
+            var usages = new List<VariableNameSurveys>();
+            dto.ForEach(x => usages.Add(new VariableNameSurveys()
+            {
+                ID = x.ID,
+                VarName = x.VarName,
+                VarLabel = x.VarLabel,
+                DomainLabel = new VarNameLabel() { Label = x.Domain.LabelText, ID = x.Domain.ID },
+                TopicLabel = new VarNameLabel() { Label = x.Topic.LabelText, ID = x.Topic.ID },
+                ContentLabel = new VarNameLabel() { Label = x.Content.LabelText, ID = x.Content.ID },
+                ProductLabel = new VarNameLabel() { Label = x.Product.LabelText, ID = x.Product.ID },
+                Domain = new DomainLabel() { LabelText = x.Domain.LabelText, ID = x.Domain.ID },
+                Topic = new TopicLabel() { LabelText = x.Topic.LabelText, ID = x.Topic.ID },
+                Content = new ContentLabel() { LabelText = x.Content.LabelText, ID = x.Content.ID },
+                Product = new ProductLabel() { LabelText = x.Product.LabelText, ID = x.Product.ID },
+                SurveyList = x.SurveyList
+            }));
+            return usages;
         }
 
-       
+        public async Task<List<QuestionUsage>> GetVarNameQuestions(string varname)
+        {
+            var dto = await _http.GetFromJsonAsync<List<QuestionUsageDto>>($"api/varnames/usage/{varname}");
+            var questions = dto.Select(x => new QuestionUsage
+            {
+                ID = x.ID,
+                SurveyCode = x.SurveyCode,
+                VarName = new VariableName(x.VarName.VarName)
+                {
+                    VarLabel = x.VarName.VarLabel,
+                    Domain = new DomainLabel() { LabelText = x.VarName.Domain?.LabelText, ID = x.VarName.Domain?.ID ?? 0 },
+                    Topic = new TopicLabel() { LabelText = x.VarName.Topic?.LabelText, ID = x.VarName.Topic?.ID ?? 0 },
+                    Content = new ContentLabel() { LabelText = x.VarName.Content?.LabelText, ID = x.VarName.Content?.ID ?? 0 },
+                    Product = new ProductLabel() { LabelText = x.VarName.Product?.LabelText, ID = x.VarName.Product?.ID ?? 0 },
+                    DomainLabel = new VarNameLabel(x.VarName.Domain?.ID ?? 0, x.VarName.Domain?.LabelText),
+                    TopicLabel = new VarNameLabel(x.VarName.Topic?.ID ?? 0, x.VarName.Topic?.LabelText),
+                    ContentLabel = new VarNameLabel(x.VarName.Content?.ID ?? 0, x.VarName.Content?.LabelText),
+                    ProductLabel = new VarNameLabel(x.VarName.Product?.ID ?? 0, x.VarName.Product?.LabelText)
+                },
+                Qnum = x.Qnum,
+                AltQnum = x.AltQnum,
+                PrePW = x.PrePW == null ? null : new Wording() { WordID = x.PrePW.ID, WordingText = x.PrePW.WordingText },
+                PreIW = x.PreIW == null ? null : new Wording() { WordID = x.PreIW.ID, WordingText = x.PreIW.WordingText },
+                PreAW = x.PreAW == null ? null : new Wording() { WordID = x.PreAW.ID, WordingText = x.PreAW.WordingText },
+                LitQW = x.LitQW == null ? null : new Wording() { WordID = x.LitQW.ID, WordingText = x.LitQW.WordingText },
+                PstIW = x.PstIW == null ? null : new Wording() { WordID = x.PstIW.ID, WordingText = x.PstIW.WordingText },
+                PstPW = x.PstPW == null ? null : new Wording() { WordID = x.PstPW.ID, WordingText = x.PstPW.WordingText },
+                RespOptionsS = x.RespOptionsS == null ? null : new ResponseSet() { RespSetName = x.RespOptionsS.RespSetName, RespList = x.RespOptionsS.RespList },
+                NRCodesS = x.NRCodesS == null ? null : new ResponseSet() { RespSetName = x.NRCodesS.RespSetName, RespList = x.NRCodesS.RespList },
+                SurveyList = x.SurveyList
+            }).ToList();
+
+            return questions;
+        }
     }
+
+       
+    
 }
