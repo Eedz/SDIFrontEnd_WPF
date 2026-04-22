@@ -8,61 +8,108 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
 
-        <!-- LEFT: Prefix list -->
-        <StackPanel Grid.Column="0">
+        <TextBlock Grid.ColumnSpan="2" Text="Prefix List" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
 
-            <Button Content="Add" Command="{Binding AddPrefixCommand}" />
-            <Button Content="Delete" Command="{Binding DeletePrefixCommand}" Margin="0,5,0,10"/>
+        <!-- Prefix list -->
+        <DockPanel Grid.Column="0" Grid.Row="1">
 
+            <Button Content="Add" Command="{Binding AddPrefixCommand}" DockPanel.Dock="Top"/>
+            <Button Content="Delete" Command="{Binding DeletePrefixCommand}" Margin="0,5,0,10" DockPanel.Dock="Top"/>
+            <TextBlock Text="Prefixes" FontWeight="Bold" Margin="3" DockPanel.Dock="Top"/>
             <ListBox ItemsSource="{Binding Records}"
                      SelectedItem="{Binding SelectedRecord}"
-                     DisplayMemberPath="Item.Prefix"/>
-        </StackPanel>
+                     DisplayMemberPath="Prefix"/>
+        </DockPanel>
 
-        <!-- RIGHT: Details -->
-        <Grid Grid.Column="1" Margin="10,0,0,0">
+        <!-- Details -->
+        <Grid Grid.Column="1" Grid.Row="1" Margin="10,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.25*"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="200"/>
                 <RowDefinition Height="*"/>
+
             </Grid.RowDefinitions>
 
             <!-- Fields -->
-            <StackPanel Orientation="Vertical">
+            <Border >
+                <StackPanel Orientation="Vertical" Width="300" Background="White" HorizontalAlignment="Left" Effect="{StaticResource SunkenEffect}">
+                    <TextBlock Margin="2" >
+                        <Run Text="ID: "/>
+                        <Run Text="{Binding SelectedRecord.ID, Mode=OneWay}"/>
+                    </TextBlock>
+                    <TextBox Margin="2" Text="{Binding SelectedRecord.Prefix, UpdateSourceTrigger=PropertyChanged}" d:Text="Prefix"/>
+                    <TextBox Margin="2" Text="{Binding SelectedRecord.PrefixName, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Margin="2" Text="{Binding SelectedRecord.ProductType, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Height="60" Margin="2" Text="{Binding SelectedRecord.Description, UpdateSourceTrigger=PropertyChanged}" />
+                    <CheckBox Margin="2" Content="Inactive" IsChecked="{Binding SelectedRecord.Inactive}"/>
 
-                <TextBox Text="{Binding SelectedRecord.Prefix, UpdateSourceTrigger=PropertyChanged}" d:Text="Prefix"/>
-                <TextBox Text="{Binding SelectedRecord.PrefixName, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBox Text="{Binding SelectedRecord.ProductType, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBox Text="{Binding SelectedRecord.Description, UpdateSourceTrigger=PropertyChanged}" />
-
-                <CheckBox Content="Inactive"
-                          IsChecked="{Binding SelectedRecord.Inactive}"/>
-
-                <Button Content="Save" Command="{Binding SaveCommand}" Margin="0,5,0,0"/>
-            </StackPanel>
-
+                    <Button  Content="Save" Command="{Binding SaveCommand}" Margin="0,5,2,5" HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Border>
+            <!--<StackPanel Grid.Column="2" >
+                <Button Content="Print" Command="{Binding PrintCommand}"/>
+                <CheckBox Content="Include Ranges" IsChecked="{Binding IncludeRangesInReport}"/>
+            </StackPanel>-->
+            
             <!-- Ranges -->
-            <DataGrid Grid.Row="1"
-                      ItemsSource="{Binding SelectedRecord.Item.Ranges}"
-                      SelectedItem="{Binding SelectedRange}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="True">
+            <DockPanel Grid.Row="1" Grid.ColumnSpan="2"  Margin="5">
+                <StackPanel Margin="5" DockPanel.Dock="Left">
+                
+                    <CheckBox IsChecked="{Binding FilterOnRange}" Content="Filter On" Height="30" HorizontalAlignment="Right" 
+                              VerticalContentAlignment="Center" Margin="0,0,5,0"/>
+             
+                    <DataGrid Width="325" ItemsSource="{Binding SelectedRecord.Ranges}"
+                          SelectedItem="{Binding SelectedRange}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="True">
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Lower" Binding="{Binding Lower}" />
-                    <DataGridTextColumn Header="Upper" Binding="{Binding Upper}" />
-                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" />
-                </DataGrid.Columns>
-            </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Lower" Binding="{Binding Lower}" />
+                            <DataGridTextColumn Header="Upper" Binding="{Binding Upper}" />
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}"  />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+                <!-- Usages -->
+                <DockPanel Margin="5" >
+                    <Button DockPanel.Dock="Top" Command="{Binding ShowWordingsCommand}" Content="Show Wordings" Height="30" Width="100" HorizontalAlignment="Left"/>
+                    <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding FilteredUsages}"
+                              SelectedItem="{Binding SelectedUsage}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
 
-            <!-- Usages -->
-            <DataGrid Grid.Row="2"
-                      ItemsSource="{Binding Usages}"
-                      AutoGenerateColumns="True"/>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Surveys" Binding="{Binding SurveyList}" Width="450" >
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" />
+                            <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" />
+                            <DataGridTextColumn Header="Content" Binding="{Binding ContentLabel.Label}" />
+                            <DataGridTextColumn Header="Topic" Binding="{Binding TopicLabel.Label}" />
+                            <DataGridTextColumn Header="Domain" Binding="{Binding DomainLabel.Label}" />
+                            <DataGridTextColumn Header="Product" Binding="{Binding ProductLabel.Label}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </DockPanel>
         </Grid>
     </Grid>
 </UserControl>
