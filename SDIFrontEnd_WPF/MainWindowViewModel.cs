@@ -245,6 +245,9 @@ namespace SDIFrontEnd_WPF
                     vm = _services.GetRequiredService<QuestionHistoryManagerViewModel>();
                     await ((QuestionHistoryManagerViewModel)vm).Load();
                     return vm;
+                case "labels":
+                    vm = _services.GetRequiredService<LabelLibraryViewModel>();
+                    return vm;
                 default:
                     return null;
             }
@@ -277,6 +280,7 @@ namespace SDIFrontEnd_WPF
                 new SublinkItem("VarName Usage", "varusage", MenuCategory.VarNames),
                 new SublinkItem("Prefix List", "prefixes", MenuCategory.VarNames),
                 new SublinkItem("VarName History", "history", MenuCategory.VarNames),
+                new SublinkItem("Label Library", "labels", MenuCategory.VarNames),
             };
         }
 
