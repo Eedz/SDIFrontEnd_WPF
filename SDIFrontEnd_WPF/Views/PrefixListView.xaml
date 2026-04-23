@@ -77,7 +77,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Lower" Binding="{Binding Lower}" />
                             <DataGridTextColumn Header="Upper" Binding="{Binding Upper}" />
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}"  />
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
@@ -93,19 +93,19 @@
                               VirtualizingPanel.VirtualizationMode="Recycling">
 
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Surveys" Binding="{Binding SurveyList}" Width="450" >
+                            <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" />
+                            <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" />
+                            <DataGridTextColumn Header="Topic" Binding="{Binding TopicLabel.Label}" />
+                            <DataGridTextColumn Header="Content" Binding="{Binding ContentLabel.Label}" />
+                            <DataGridTextColumn Header="Product" Binding="{Binding ProductLabel.Label}" />
+                            <DataGridTextColumn Header="Domain" Binding="{Binding DomainLabel.Label}" />
+                            <DataGridTextColumn Header="Surveys" Binding="{Binding SurveyList}" Width="*" >
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="TextWrapping" Value="Wrap" />
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" />
-                            <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" />
-                            <DataGridTextColumn Header="Content" Binding="{Binding ContentLabel.Label}" />
-                            <DataGridTextColumn Header="Topic" Binding="{Binding TopicLabel.Label}" />
-                            <DataGridTextColumn Header="Domain" Binding="{Binding DomainLabel.Label}" />
-                            <DataGridTextColumn Header="Product" Binding="{Binding ProductLabel.Label}" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>
