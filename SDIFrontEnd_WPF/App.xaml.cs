@@ -256,6 +256,12 @@ namespace SDIFrontEnd_WPF
                 client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
+
+            services.AddHttpClient<IApiLabelService, ApiLabelService>(client =>
+            {
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
         }
 
         private static void AddVMServices(IServiceCollection services)
@@ -283,6 +289,7 @@ namespace SDIFrontEnd_WPF
 
             services.AddTransient<VariableInformationViewModel>();
             services.AddTransient<PrefixListViewModel>();
+            services.AddTransient<LabelLibraryViewModel>();
         }
     }
 
