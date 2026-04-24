@@ -93,7 +93,7 @@
                               VirtualizingPanel.VirtualizationMode="Recycling">
 
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" />
+                            <DataGridTextColumn Header="refVarName" Binding="{Binding RefVarName}" />
                             <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel}" />
                             <DataGridTextColumn Header="Topic" Binding="{Binding TopicLabel.Label}" />
                             <DataGridTextColumn Header="Content" Binding="{Binding ContentLabel.Label}" />
