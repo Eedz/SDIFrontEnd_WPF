@@ -70,8 +70,11 @@
                   ItemsSource="{Binding AvailableSurveysToAdd}"
                   SelectedItem="{Binding SelectedNewSurvey, Mode=TwoWay}"
                   DisplayMemberPath="SurveyCode"
+                          Margin="8"
                    />
-                <Button Content="+" Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" />
+                <Button Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" Width="20" Height="20">
+                    <Image Source="/Images/add.png"/>
+                </Button>
             </StackPanel>
         </StackPanel>
         <Border Grid.Row="2" Grid.ColumnSpan="2" BorderThickness="2" BorderBrush="AliceBlue">
