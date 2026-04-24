@@ -164,10 +164,16 @@ namespace SDIFrontEnd_WPF
                 RelatedPrefixes = prefix.RelatedPrefixes,
                 Description = prefix.Description,
                 Comments = prefix.Comments,
-                Inactive = prefix.Inactive
+                Inactive = prefix.Inactive,
+                Ranges = prefix.Ranges.Select(x=>new VariableRangeDto() 
+                { 
+                    PrefixID = prefix.ID, 
+                    Lower = x.Lower, 
+                    Upper = x.Upper, 
+                    Description = x.Description }).ToList()
             };
 
-            var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes", dto);
+            var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes/{prefix.ID}", dto);
             response.EnsureSuccessStatusCode();
             var updatedDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>();
             return 0;
@@ -181,6 +187,7 @@ namespace SDIFrontEnd_WPF
             {
                 ID = x.ID,
                 VarName = x.VarName,
+                RefVarName = Utilities.ChangeCC(x.VarName),
                 VarLabel = x.VarLabel,
                 DomainLabel = new VarNameLabel() { Label = x.Domain.LabelText, ID = x.Domain.ID },
                 TopicLabel = new VarNameLabel() { Label = x.Topic.LabelText, ID = x.Topic.ID },
