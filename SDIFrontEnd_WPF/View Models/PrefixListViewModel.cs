@@ -106,18 +106,25 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand]
-        private void DeletePrefix()
+        private async Task DeletePrefix()
         {
             if (SelectedRecord == null) return;
 
-            _service.DeleteVariablePrefix(SelectedRecord.ID);
-            Records.Remove(SelectedRecord);
+            if (_dialogService.Confirm("Are you sure you want to delete this prefix? (This will not delete any variable names with this prefix)"))
+            {
+                if (await _service.DeleteVariablePrefix(SelectedRecord.ID))
+                    Records.Remove(SelectedRecord);
+                else
+                    _dialogService.ShowMessage("Failed to delete the prefix.");
+
+            }
         }
 
         [RelayCommand]
         private void Save()
         {
             if (SelectedRecord == null) return;
+            SelectedRecord.Model.Ranges = SelectedRecord.Ranges.ToList();
             if (SelectedRecord.IsNew)
                 _service.InsertVariablePrefix(SelectedRecord.Model);
             else if (SelectedRecord.IsDirty)
