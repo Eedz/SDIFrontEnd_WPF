@@ -7,6 +7,7 @@
              xmlns:converters ="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
              xmlns:mvvm="clr-namespace:MvvmLib;assembly=MvvmLib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:main="clr-namespace:SDIFrontEnd_WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Width="400" Height="600" Background="AliceBlue">
     <UserControl.Resources>
@@ -31,7 +32,7 @@
             <RowDefinition Height="60"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" HorizontalAlignment="Stretch" >
@@ -73,11 +74,13 @@
 
         <!-- Navigation buttons -->
         <StackPanel Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5" Orientation="Horizontal" >
-            <Button Content="&lt;&lt;&lt;" Command="{Binding FirstItemCommand}" Width="50" Margin="5,0"/>
-            <Button Content="&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
-            <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
-            <Button Content="&gt;" Command="{Binding NextItemCommand}" Width="50" Margin="5,0"/>
-            <Button Content="&gt;&gt;&gt;" Command="{Binding LastItemCommand}" Width="50" Margin="5,0"/>
+            <main:NavigationBar 
+                FirstItemCommand="{Binding FirstItemCommand}"
+                PreviousItemCommand="{Binding PreviousItemCommand}"
+                NextItemCommand="{Binding NextItemCommand}"
+                LastItemCommand="{Binding LastItemCommand}"
+                ItemPosition="{Binding ItemPosition}"/>
+           
         </StackPanel>
     </Grid>
 </UserControl>

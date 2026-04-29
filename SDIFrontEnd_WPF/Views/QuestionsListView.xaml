@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
              xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             xmlns:main ="clr-namespace:SDIFrontEnd_WPF"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="600" Width="600" Height="400" Background="LightSalmon">
     <UserControl.Resources>
@@ -17,7 +18,7 @@
             <RowDefinition Height="30"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*" />
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Margin="5" Orientation="Horizontal">
             <TextBlock Text="Country filter: "/>
@@ -84,11 +85,11 @@
         </Grid>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
-            <Button Content="&lt;&lt;&lt;" Command="{Binding FirstItemCommand}" Width="50" Margin="5,0"/>
-            <Button Content="&lt;" Command="{Binding PreviousItemCommand}" Width="50" Margin="5,0"/>
-            <TextBlock d:Text="0 of 0" Text="{Binding ItemPosition}"/>
-            <Button Content="&gt;" Command="{Binding NextItemCommand}" Width="50" Margin="5,0"/>
-            <Button Content="&gt;&gt;&gt;" Command="{Binding LastItemCommand}" Width="50" Margin="5,0"/>
+            <main:NavigationBar NextItemCommand="{Binding NextItemCommand}" 
+                                PreviousItemCommand="{Binding PreviousItemCommand}" 
+                                FirstItemCommand="{Binding FirstItemCommand}" 
+                                LastItemCommand="{Binding LastItemCommand}" 
+                                ItemPosition="{Binding ItemPosition}" />
         </StackPanel>
     </Grid>
 </UserControl>
