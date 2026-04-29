@@ -1,9 +1,13 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:SDIFrontEnd_WPF">
+                    xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+                    xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
+                    xmlns:viewmodels="clr-namespace:SDIFrontEnd_WPF.ViewModels">
+    
     <DataTemplate DataType="{x:Type local:HomeViewModel}">
         <local:HomeView />
     </DataTemplate>
+    
     <DataTemplate DataType="{x:Type local:SurveyManagerViewModel}">
         <local:SurveyManager />
     </DataTemplate>
@@ -20,5 +24,117 @@
     <DataTemplate DataType="{x:Type local:SurveyEditorViewModel}">
         <local:SurveyInfoEditorView />
     </DataTemplate>
-    
+
+    <DataTemplate DataType="{x:Type viewmodels:WordingViewModel}">
+        <local:WordingEntryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:ResponseSetViewModel}">
+        <local:ResponseSetView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:TranslationViewModel}">
+        <views:TranslationView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:RelatedQuestionsViewModel}">
+        <views:QuestionsListView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:DeletedQuestionsViewModel}">
+        <views:DeletedVarsListView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuickCommentEntryViewModel}">
+        <views:QuickCommentEntryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:SeriesBuilderViewModel}">
+        <views:SeriesBuilder/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:TranslationImporterViewModel}">
+        <views:TranslationImporterView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:HarmonyReportViewModel}">
+        <views:HarmonyReportView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuestionSurveyMatrixViewModel}">
+        <views:QuestionGrid/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingEntryViewModel}">
+        <views:PraccingEntryView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:PraccingIssueViewModel}">
+        <views:PraccingIssueView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingImagesViewModel}">
+        <views:PraccingImagesView />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:PraccingResponseViewModel}">
+        <views:PraccingResponseView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingReportViewModel}">
+        <views:PraccingReportView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingSheetViewModel}">
+        <views:PraccingSheetView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:RenameVarsViewModel}">
+        <views:RenameVarsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:VarNameChangeViewModel}">
+        <views:VarNameChangeView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuestionHistoryManagerViewModel}">
+        <views:QuestionHistoryManagerView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:QuestionHistoryViewModel}">
+        <views:QuestionHistoryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:WordingHistoryViewModel}">
+        <views:WordingHistoryView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:ChangedQuestionViewModel}">
+        <views:ChangedQuestionView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:VariableInformationViewModel}">
+        <views:VariableInformationView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PrefixListViewModel}">
+        <views:PrefixListView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:WordingItemViewModel}">
+        <views:WordingItemView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:ResponseSetItemViewModel}">
+        <views:ResponseSetItemView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:VarNameUsageViewModel}">
+        <views:VarNameUsageView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:LabelLibraryViewModel}">
+        <views:LabelLibraryView/>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:TopicContentReportViewModel}">
+        <views:TopicContentReportView/>
+    </DataTemplate>
 </ResourceDictionary>

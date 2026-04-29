@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.DeletedVarsListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:main="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Width="800" Height="400" Background="BlanchedAlmond">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Deleted Variables" FontSize="26" HorizontalAlignment="Center" Margin="5"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="Go To Var:" VerticalAlignment="Center" Margin="5"/>
+            <ComboBox ItemsSource="{Binding Questions}" SelectedItem="{Binding SelectedQuestion}" DisplayMemberPath="VarName" Width="100" Height="23"/>
+            
+        </StackPanel>
+        <!-- Details -->
+        <Border Grid.Row="2" HorizontalAlignment="Left" Margin="5">
+            <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedQuestion}" >
+                <StackPanel>
+                    <TextBlock d:Text="VarName" Text="{Binding VarName}"/>
+                    
+                    <TextBlock d:Text="01/01/2001" Text="{Binding DeleteDate}"/>
+                    <TextBlock d:Text="Deleted By Eddie B" Text="{Binding DeletedBy, StringFormat={}Deleted by {0}}"/> 
+                </StackPanel>
+                <StackPanel Margin="10,0">
+                    <TextBlock d:Text="VarLabel" Text="{Binding VarLabel}" Width="200"/>
+                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel, StringFormat={}Content:  {0}}"/>
+                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel, StringFormat={}Topic:      {0}}"/>
+                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel, StringFormat={}Domain:  {0}}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <!-- Comments -->
+
+        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Effect="{StaticResource SunkenEffect}" Grid.Row="3" Margin="5">
+            <TextBlock DockPanel.Dock="Top" Text="Comments:"/>
+            <Border >
+                <local:CommentsListView Comments="{Binding SelectedQuestion.DeleteNotes}" />
+            </Border>
+        </DockPanel>
+       
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            <main:NavigationBar NextItemCommand="{Binding NextItemCommand}" 
+                                PreviousItemCommand="{Binding PreviousItemCommand}" 
+                                FirstItemCommand="{Binding FirstItemCommand}" 
+                                LastItemCommand="{Binding LastItemCommand}" 
+                                ItemPosition="{Binding ItemPosition}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

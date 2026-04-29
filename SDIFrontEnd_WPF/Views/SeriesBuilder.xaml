@@ -1,0 +1,214 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.SeriesBuilder"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="725" Width="750" Height="450" >
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
+            <converters:QuestionTypeToBrushConverter x:Key="QuestionTypeToBrushConverter"/>
+            <converters:QuestionTypeToFontWeightConverter x:Key="QuestionTypeToFontWeightConverter"/>
+            <converters:QuestionStatusToBackgroundConverter x:Key="QuestionStatusToBackgroundConverter"/>
+
+            <Style x:Key="QuestionRowStyle" TargetType="DataGridRow">
+                <Setter Property="Foreground" Value="{Binding QuestionType, Converter={StaticResource QuestionTypeToBrushConverter}}"/>
+                <Setter Property="FontWeight" Value="{Binding QuestionType, Converter={StaticResource QuestionTypeToFontWeightConverter}}"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.ColumnSpan="3" Text="Series Builder" FontSize="26" HorizontalAlignment="Center" Margin="5"/>
+
+        <StackPanel Grid.Row="1"  Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            <TextBlock Text="Enter VarName: " />
+            <TextBox x:Name="NewVarName" Width="100"/>
+            <Button Width="20" Content="+" Command="{Binding AddQuestionCommand}" CommandParameter="{Binding Text, ElementName=NewVarName}" VerticalContentAlignment="Center"/>
+            <Button Width="20" Content="X" Command="{Binding RemoveQuestionCommand}" CommandParameter="{Binding CurrentQuestion}"/>
+        </StackPanel>
+
+        <DataGrid Grid.Row="2"
+            ItemsSource="{Binding NewQuestions}"
+            SelectedItem="{Binding CurrentQuestion}"
+            ScrollViewer.VerticalScrollBarVisibility="Visible" 
+            VirtualizingStackPanel.IsVirtualizing="False"
+            AutoGenerateColumns="False" 
+            HeadersVisibility="Column"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            IsReadOnly="True"
+            Margin="5"
+            GridLinesVisibility="None"
+            SelectionUnit="FullRow"
+            RowStyle="{StaticResource QuestionRowStyle}">  
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Q#" Binding="{Binding QnumSuffix}" Width="40"/>
+                <DataGridTextColumn Header="VarName" Binding="{Binding VarName.VarName}" Width="70"/>
+                <DataGridTextColumn Header="LitQ" Binding="{Binding LitQW.WordingText}" Width="200"/>
+                
+            </DataGrid.Columns>
+
+            
+        </DataGrid>
+
+        <StackPanel Grid.Row="3" Margin="5">
+            <StackPanel Orientation="Horizontal" >
+                <TextBlock Text="Set wording for all members"/>
+                <ComboBox Width="90" Margin="5,0" ItemsSource="{Binding FieldList}" SelectedItem="{Binding SelectedField}"/>
+            
+            </StackPanel>
+            <StackPanel Grid.Row="3" Margin="5" >
+                <ComboBox Width="80" HorizontalAlignment="Left" ItemsSource="{Binding ListItems}" SelectedItem="{Binding SelectedItem}"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True"/>
+                <StackPanel Height="80">
+                    <FlowDocumentScrollViewer FontSize="10" Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                        <FlowDocumentScrollViewer.Document>
+                            <Binding Path="SelectedItemText" Converter="{StaticResource HtmlToFlow}" />
+                        </FlowDocumentScrollViewer.Document>
+                    </FlowDocumentScrollViewer>
+                </StackPanel>
+                <Button Content="Apply" HorizontalAlignment="Right" Command="{Binding ApplyWordingCommand}" Margin="0,5" Width="50"/>
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock Text="Member Wordings" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" Margin="5"/>
+
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                <TextBlock Text="PreP" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentPreP}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="1" >
+                <TextBlock Text="PreI" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentPreI}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="2"  >
+                <TextBlock Text="PreA" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentPreA}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="3" >
+                <TextBlock Text="LitQ" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentLitQ}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="4" >
+                <TextBlock Text="ROs" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentRespOptions}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="5" >
+                <TextBlock Text="NRs" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentNRCodes}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="6" >
+                <TextBlock Text="PstI" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentPstI}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="7" >
+                <TextBlock Text="PstP" Width="30" Margin="5,3,0,0"/>
+                <TextBox Text="{Binding CurrentPstP}" Width="60" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+
+            
+            <!-- question text -->
+            <FlowDocumentScrollViewer FontSize="10" Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                <FlowDocumentScrollViewer.Document>
+                    <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
+                </FlowDocumentScrollViewer.Document>
+            </FlowDocumentScrollViewer>
+
+        </Grid>
+
+        <Grid Margin="5" Grid.Row="3" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="65"></ColumnDefinition>
+                <ColumnDefinition Width="275"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition ></RowDefinition>
+                <RowDefinition ></RowDefinition>
+                <RowDefinition ></RowDefinition>
+                <RowDefinition ></RowDefinition>
+                <RowDefinition ></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="12" />
+            <TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding CurrentQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
+
+            <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" 
+                      ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding CurrentQuestion.VarName.TopicLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
+
+            <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+            <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" 
+                      ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding CurrentQuestion.VarName.ContentLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
+
+            <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+            <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" 
+                      ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding CurrentQuestion.VarName.DomainLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
+
+            <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+            <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" 
+                      ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding CurrentQuestion.VarName.ProductLabel}" DisplayMemberPath="Label"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      IsEditable="True"
+IsTextSearchEnabled="True"/>
+
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="5" Width="50"/>
+            <Button Content="Save" Command="{Binding SaveCommand}" Margin="5,5,20,5" Width="50"/>
+        </StackPanel>
+
+    </Grid>
+</UserControl>

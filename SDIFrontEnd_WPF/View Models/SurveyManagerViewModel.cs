@@ -1,13 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using ITC_Services;
 using ITCLib;
-using Microsoft.Extensions.DependencyInjection;
+using ITCReportLib;
 using MvvmLib.ViewModels;
+using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,34 +16,51 @@ namespace SDIFrontEnd_WPF
 
     public partial class SurveyManagerViewModel : ViewModelBase
     {
-        private readonly ISurveyService _surveyService;
+        private readonly IApiSurveyService _surveyService;
+        private readonly IApiQuestionService _questionService; // Service for managing questions and their properties
         private readonly IDialogService _dialogService;
-        private readonly IReferenceDataService _referenceDataService; 
-        private readonly LookupProvider _lookupProvider; // Provides access to reference data like modes, user states, etc.
+        private readonly ReferenceDataStore _referenceDataService;
+        private readonly WordingData _wordingData;
+        private readonly IApiWordingService _wordingService; // Service for managing question wordings and translations
+       
+        private readonly IApiPeopleService _peopleService; // Service for managing people data
+        private readonly IApiCommentService _commentService; // Service for managing comments
+        private readonly IWindowService _windowService; // Service for managing windows and dialogs
 
         [ObservableProperty]
-        private Survey currentSurvey; // The currently selected survey being managed
+        private Survey? currentSurvey; // The currently selected survey
 
-        public List<Survey> AllSurveys { get; private set; } // List of all surveys available in the system
+        public List<Survey>? AllSurveys { get; private set; } // List of all surveys
 
-        public SurveyViewModel SurveyInfo { get; set; } // ViewModel for displaying basic survey information
-        public SurveyBuilderViewModel SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
+        public SurveyViewModel? SurveyInfo { get; set; } // ViewModel for displaying basic survey information
+        public SurveyBuilderViewModel? SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
-        public SurveyViewModel? EditSurvey { get; set; } // TODO make this a different viewmodel for editing survey info
-
-
-
-        public SurveyManagerViewModel(IServiceProvider services, Survey survey)
+        public SurveyManagerViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, IDialogService dialogService, ReferenceDataStore referenceDataService, WordingData wordingData,
+            IApiWordingService wordingService, IApiPeopleService peopleService, IApiCommentService commentService, IWindowService windowService)
         {
-            _surveyService = services.GetService(typeof(ISurveyService)) as ISurveyService ?? throw new ArgumentNullException(nameof(services), "Survey service cannot be null");
-            _dialogService = services.GetService(typeof(IDialogService)) as IDialogService ?? throw new ArgumentNullException(nameof(services), "Dialog service cannot be null");
-            _lookupProvider = services.GetService(typeof(LookupProvider)) as LookupProvider ?? throw new ArgumentNullException(nameof(services), "Lookup provider cannot be null");
-            _referenceDataService = services.GetService(typeof(IReferenceDataService)) as IReferenceDataService ?? throw new ArgumentNullException(nameof(services), "Reference data service cannot be null");
-            AllSurveys = _surveyService.GetAllSurveys();
-            CurrentSurvey = survey ?? throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
-            DisplayName = "Survey Manager - " + CurrentSurvey.SurveyCode;
-            SurveyInfo = new SurveyViewModel(CurrentSurvey);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _referenceDataService, CurrentSurvey.Questions);
+            _surveyService = surveyService;
+            _questionService = questionService;
+            _dialogService = dialogService;
+            
+            _referenceDataService = referenceDataService;
+            _wordingService = wordingService;
+            _peopleService = peopleService;
+            _commentService = commentService;
+            _windowService = windowService;
+            _wordingData = wordingData;
+
+        }
+
+        public async void Load(Survey survey)
+        {
+            if (survey == null)
+                throw new ArgumentNullException(nameof(survey), "Survey cannot be null");
+            
+            CurrentSurvey = survey;
+
+            AllSurveys = await _surveyService.GetAllAsync();
+            OnPropertyChanged(nameof(AllSurveys));
+            await LoadSurvey(survey);
         }
 
         partial void OnCurrentSurveyChanged(Survey value)
@@ -51,159 +68,105 @@ namespace SDIFrontEnd_WPF
             if (value == null)
                 throw new ArgumentNullException(nameof(value), "Current survey cannot be null");
 
-            DisplayName = "Survey Manager - " + value.SurveyCode;
+            _ = LoadSurvey(value);
+        }
 
-            value.AddQuestions(_surveyService.GetQuestionsForSurvey(value.SID));
-
-            SurveyInfo = new SurveyViewModel(value);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _referenceDataService, value.Questions);
+        [RelayCommand]
+        private async Task LoadSurvey(Survey survey)
+        {
+            DisplayName = "Survey Manager - " + survey.SurveyCode;
+            var questions = await _surveyService.GetSurveyQuestions(survey.SID);
+            survey.AddQuestions(questions);
+            await GetSurveyImageInfo(survey.Questions.SelectMany(q => q.Images).ToList(), survey);
+            SurveyInfo = new SurveyViewModel(survey);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, _wordingData, survey);
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
         }
 
-        [RelayCommand]
-        private void AddSurveyQuestion()
+        private async Task GetSurveyImageInfo(List<SurveyImage> images, Survey survey)
         {
-            // enter VarName
-            // if exists, ask user if they want to copy wordings or labels
-            string newVarName = _dialogService.PromptForText("Enter VarName", "New Survey Question");
-
-            if (string.IsNullOrWhiteSpace(newVarName))
+            string folder = "\\\\psychfile\\psych$\\psych-lab-gfong\\SMG\\Survey Images\\" + survey.SurveyCodePrefix + " Images\\" + survey.SurveyCode;
+            if (!Directory.Exists(folder))
+            {
                 return;
-
-            var existingQuestions = _surveyService.FindQuestionsByRefVarName(newVarName);
-            SurveyQuestion selectedSource = null;
-
-            if (existingQuestions.Count > 0)
-            {
-                selectedSource = _dialogService.PickQuestion(existingQuestions);
-
-                SurveyQuestion newQuestion;
-
-                if (selectedSource == null)
-                {
-                    newQuestion = new SurveyQuestion(newVarName);
-                    newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-                }
-                else
-                {
-                    newQuestion = selectedSource;
-                    newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-                    newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
-                    newQuestion.Qnum = "0";
-                }
-
-
-                CurrentSurvey.Questions.Add(newQuestion);
             }
-            else
+            foreach (string file in from s in Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
+                                    where s.EndsWith(".png") || s.EndsWith(".jpg")
+                                    select s)
             {
-                var newQuestion = new SurveyQuestion(newVarName);
-                newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-
-
-
-                CurrentSurvey.Questions.Add(newQuestion);
+                int iWidth = 0;
+                int iHeight = 0;
+                using (System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(file))
+                {
+                    iWidth = (int)Math.Round(bmp.Width * 9525m);
+                    iHeight = (int)Math.Round(bmp.Height * 9525m);
+                }
+                string filename = file.Substring(file.LastIndexOf("\\") + 1);
+                if (images.Any((SurveyImage x) => x.ImageName.Equals(filename)))
+                {
+                    foreach (SurveyImage surveyImage in images.Where((SurveyImage x) => x.ImageName.Equals(filename)))
+                    {
+                        surveyImage.Width = iWidth;
+                        surveyImage.Height = iHeight;
+                        surveyImage.FilePath = file;
+                        surveyImage.ImagePath = file;
+                        surveyImage.SetParts();
+                    }
+                }
             }
-
-            // SurveyBuilder.Refresh(); // assumes method to refresh the view
         }
 
         [RelayCommand]
-        private void RemoveSurveyQuestion()
+        private async Task EditSurveyInfo()
         {
-            // ask user to document
-            // ask user to save comments
-            // delete
-            CurrentSurvey.RemoveQuestion(SurveyBuilder.SelectedQuestion);
-
-        }
-
-        [RelayCommand]
-        private void SaveChanges()
-        {
-
-        }
-
-        [RelayCommand]
-        private void LoadSurvey(string surveyCode)
-        {
-
-        }
-
-        [RelayCommand]
-        private void EditSurveyInfo()
-        {
-            var editorVM = new SurveyEditorViewModel(CurrentSurvey.Clone(), _lookupProvider); // clone to avoid editing original directly
+            var survey = await _surveyService.GetSurveyByIdAsync(CurrentSurvey.SID);
+            var editorVM = new SurveyEditorViewModel(survey, _referenceDataService); 
 
             bool? save = _dialogService.ShowDialog(editorVM);
 
             if (save == true)
             {
-                var deletedStates = CurrentSurvey.UserStates.Except(editorVM.Survey.UserStates).ToList();
-                var deletedProducts = CurrentSurvey.ScreenedProducts.Except(editorVM.Survey.ScreenedProducts).ToList();
-                var deletedLanguages = CurrentSurvey.LanguageList.Except(editorVM.Survey.LanguageList).ToList();
-
-                var addedStates = editorVM.Survey.UserStates.Except(CurrentSurvey.UserStates).ToList();
-                var addedProducts = editorVM.Survey.ScreenedProducts.Except(CurrentSurvey.ScreenedProducts).ToList();
-                var addedLanguages = editorVM.Survey.LanguageList.Except(CurrentSurvey.LanguageList).ToList();
-
-                _surveyService.DeleteSurveyUserStates(deletedStates);
-                _surveyService.DeleteSurveyScreenedProducts(deletedProducts);
-                _surveyService.DeleteSurveyLanguages(deletedLanguages);
-
-                _surveyService.AddSurveyUserStates(addedStates);
-                _surveyService.AddSurveyScreenedProducts(addedProducts);
-                _surveyService.AddSurveyLanguages(addedLanguages);
-
-                // save changes back to the current survey
-                //_surveyService.UpdateSurvey(editorVM.Survey);
-                deletedStates.ForEach(x => CurrentSurvey.UserStates.Remove(x));
-                deletedProducts.ForEach(x => CurrentSurvey.ScreenedProducts.Remove(x));
-                deletedLanguages.ForEach(x => CurrentSurvey.LanguageList.Remove(x));
-
-                addedStates.ForEach(x => CurrentSurvey.UserStates.Add(x));
-                addedProducts.ForEach(x => CurrentSurvey.ScreenedProducts.Add(x));
-                addedLanguages.ForEach(x => CurrentSurvey.LanguageList.Add(x));
-
-                OnPropertyChanged(nameof(CurrentSurvey));
+                var saved = await _surveyService.UpdateSurvey(editorVM.Survey);
+                CurrentSurvey = saved;
+              
                 SurveyInfo = new SurveyViewModel(editorVM.Survey);
                 OnPropertyChanged(nameof(SurveyInfo));
-
             }
-
         }
 
         [RelayCommand]
-        private void CopyPreviousWordings()
+        private void ImportTranslations() 
         {
-            // get previous question in survey
-            var previousQuestion = SurveyBuilder.QuestionList[SurveyBuilder.QuestionList.IndexOf(SurveyBuilder.SelectedQuestion) - 1];
-                
-            SurveyBuilder.SelectedQuestion.PrePW = new Wording(previousQuestion.PrePW.WordID, WordingType.PreP, previousQuestion.PrePW.WordingText);
-            SurveyBuilder.SelectedQuestion.PreIW = new Wording(previousQuestion.PreIW.WordID, WordingType.PreI, previousQuestion.PreIW.WordingText);
-            SurveyBuilder.SelectedQuestion.PreAW = new Wording(previousQuestion.PreAW.WordID, WordingType.PreA, previousQuestion.PreAW.WordingText);
-
-            SurveyBuilder.SelectedQuestion.PstIW = new Wording(previousQuestion.PstIW.WordID, WordingType.PstI, previousQuestion.PstIW.WordingText);
-            SurveyBuilder.SelectedQuestion.PstPW = new Wording(previousQuestion.PstPW.WordID, WordingType.PstP, previousQuestion.PstPW.WordingText);
-            SurveyBuilder.SelectedQuestion.RespOptionsS = new ResponseSet(previousQuestion.RespOptionsS.RespSetName, ResponseType.RespOptions, previousQuestion.RespOptionsS.RespList);
-            SurveyBuilder.SelectedQuestion.NRCodesS = new ResponseSet(previousQuestion.NRCodesS.RespSetName, ResponseType.NRCodes, previousQuestion.PrePW.WordingText);
-
-            OnPropertyChanged(nameof(SurveyBuilder.SelectedQuestion));
-            OnPropertyChanged(nameof(SurveyBuilder.CurrentQuestionText));
+            TranslationImporterViewModel vm = new TranslationImporterViewModel(_surveyService, _questionService, _referenceDataService, _dialogService);
+            Task.Run(()=>vm.LoadAsync());
+            vm.SelectedSurvey = CurrentSurvey;
+            vm.SelectedLanguage = CurrentSurvey.LanguageList.FirstOrDefault()?.SurvLanguage;
+            _dialogService.ShowWindow(vm);
         }
 
         [RelayCommand]
-        private void ViewComments()
+        private void ImportQuestions() 
         {
-            SurveyBuilder.ViewCommentsCommand.Execute(null);
+            this._windowService.ShowQuestionImporterWindow();
         }
 
         [RelayCommand]
-        private void ViewTranslations()
+        private void ExportSAS()
         {
-            SurveyBuilder.ViewTranslationsCommand.Execute(null);
+            SyntaxReport report = new SyntaxReport();
+            report.UseQnum = true;
+            report.OutputPath = @"\\psychfile\psych$\psych-lab-gfong\SMG\SDI\Data Templates\";
+            report.CreateSyntax(CurrentSurvey, SyntaxFormat.SAS);
+            _dialogService.ShowMessage("SAS syntax exported successfully.", "Export Complete");
+        }
+
+        [RelayCommand]  
+        private void ExportQuestions()
+        {
+            
+
         }
     }
 }

@@ -17,13 +17,13 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="150"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
@@ -46,23 +46,11 @@
             </ListBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
-            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" >
-                <ContentControl.Resources>
-                    <Style TargetType="ContentControl">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ContentControl">
-                                    <Border BorderBrush="Black" BorderThickness="1" Padding="5">
-                                        <ContentPresenter/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ContentControl.Resources>
+        <DockPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
+            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Stretch">
+                
             </ContentControl>
-        </StackPanel>
+        </DockPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="0" Background="LightGray">
             <ListBox Grid.Row="1" Grid.Column="0"
@@ -82,8 +70,11 @@
                   ItemsSource="{Binding AvailableSurveysToAdd}"
                   SelectedItem="{Binding SelectedNewSurvey, Mode=TwoWay}"
                   DisplayMemberPath="SurveyCode"
+                          Margin="8"
                    />
-                <Button Content="+" Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" />
+                <Button Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" Width="20" Height="20">
+                    <Image Source="/Images/add.png"/>
+                </Button>
             </StackPanel>
         </StackPanel>
         <Border Grid.Row="2" Grid.ColumnSpan="2" BorderThickness="2" BorderBrush="AliceBlue">

@@ -9,15 +9,90 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+    <None Remove="add.png" />
+    <None Remove="Images\Checkmark.png" />
+    <None Remove="Images\delete.png" />
+    <None Remove="Images\edit.png" />
+    <None Remove="Images\GlyphLeft.png" />
+    <None Remove="Images\GlyphRight.png" />
+    <None Remove="Images\GoToFirst.png" />
+    <None Remove="Images\GoToLast.png" />
+    <None Remove="Images\leftarrow.png" />
+    <None Remove="Images\Refresh.png" />
+    <None Remove="Images\rightarrow.png" />
+    <None Remove="Images\Trash.png" />
+    <None Remove="leftdoublearrow.png" />
+    <None Remove="rightdoublearrow.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\add.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Checkmark.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\delete.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\edit.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\GlyphLeft.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\GlyphRight.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\GoToFirst.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\GoToLast.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\leftarrow.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\leftdoublearrow.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Refresh.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\rightarrow.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\rightdoublearrow.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\Trash.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
+    <PackageReference Include="MarkupConverter.Core" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\ITCLib\ITCLib\ITCLib.csproj" />
-    <ProjectReference Include="..\..\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess\ITC_DataAccess.csproj" />
-    <ProjectReference Include="..\..\ITC_Services\ITC_Services\ITC_Services.csproj" />
+    <ProjectReference Include="..\..\ITCReportLib\ITCReportLib\ITCReportLib.csproj" />
+    <ProjectReference Include="..\..\ITC_Contracts\ITC_Contracts\ITC_Contracts.csproj" />
     <ProjectReference Include="..\..\MvvmLib\MvvmLib\MvvmLib.csproj" />
+    <ProjectReference Include="..\..\OpenXmlToHtml\OpenXmlToHtml.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\TranslationImporterView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,135 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.PraccingEntryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF"
+             xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="1000" d:DesignWidth="1300" Height="1000" Width="1300" Background="#F2E8A0">
+    <UserControl.Resources>
+        <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlowDocumentConverter" />
+        <!--<DataTemplate DataType="{x:Type local:PraccingIssueViewModel}">
+            <local:PraccingIssueView />
+        </DataTemplate>-->
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition />
+           
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="125"/>
+            <RowDefinition Height="700"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        
+        <Label Content="Praccing Issues - Entry" FontSize="24" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" />
+        <!-- Navigation/Add -->
+        <Border Grid.Column="0" Grid.Row="1" Margin="10,0,0,0" BorderBrush="Gray" BorderThickness="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Margin="5,5,0,0">
+                        <Label Content="Go to Survey"></Label>
+                        <Label>Go To Issue</Label>
+                    </StackPanel>
+                    <StackPanel Margin="5,10,0,0" Width="120" >
+                        <StackPanel  Orientation="Horizontal">
+                            <ComboBox  Width="100" ItemsSource="{Binding SurveyList}" SelectedItem="{Binding CurrentSurvey}"/>
+                            <Button Width="20" Command="{Binding RefreshCommand}"  Padding="0">
+                                <Image Source="pack://application:,,,/Resources/Refresh.png" Stretch="Fill"/>
+                            </Button>
+                        </StackPanel>
+                        <ComboBox ItemsSource="{Binding Records}" DisplayMemberPath="Item.IssueNo" SelectedItem="{Binding SelectedRecord}" Width="100" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,5,10,5" >
+                    <Button Command="{Binding AddIssueCommand}" Width="100">Add Issue</Button>
+                    <Button Command="{Binding BrowseIssuesCommand}"  Width="100">Browse Issues</Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,5,10,0">
+                    <ToggleButton Command="{Binding FilterUnresolvedCommand}" IsChecked="{Binding IsFiltered}" 
+                        CommandParameter="{Binding IsFiltered}" Content="Filter Unresolved" Width="100" />                                            
+                    <StackPanel Orientation="Horizontal">
+                        <ToggleButton Command="{Binding TrySearchingCommand}" IsChecked="{Binding IsSearching}" Content="Filter Text" Width="100" />
+                        <Popup IsOpen="{Binding IsSearchVisible}" Width="80" HorizontalOffset="100" VerticalOffset="-30">
+                            <Border>
+                                <StackPanel>
+                                    <TextBox x:Name="Criteria" Margin="5,5,5,0" Text="{Binding FilterString}"/>
+                                    <Button Content="Search" Command="{Binding FilterIssuesCommand}" CommandParameter="{Binding FilterString}" Margin="5,0,5,5"/>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        
+
+        <!-- Summary -->
+        <StackPanel Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="1">
+            <Label HorizontalAlignment="Center" FontWeight="Bold">Issues Summary</Label>
+            <StackPanel >
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock Margin="0,0,10,0" >
+                        <Run Text="{Binding UnresolvedIssues, Mode=OneWay}"></Run>
+                        <Run Text=" unresolved."></Run>
+                    </TextBlock>
+
+                    <TextBlock>
+                        <Run Text="{Binding TotalIssues, Mode=OneWay}"/>
+                        <Run Text=" total issue(s)."/>
+                    </TextBlock>
+                    
+                </StackPanel>
+                
+                
+                <Line X1="0" Y1="0" X2="1" Y2="0"
+                    Stroke="Black" StrokeThickness="2"
+                    Stretch="Fill"
+                    HorizontalAlignment="Stretch" Margin="30,2,30,2"/>
+                <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding CategorySummaries}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Margin="0,0,15,0" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+
+        <ContentControl  Grid.Row="2" Grid.ColumnSpan="3" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" >
+            <views:PraccingIssueView DataContext="{Binding IssueVM}" />
+        </ContentControl>
+
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Grid.ColumnSpan="3" HorizontalAlignment="Center" Margin="0,5,0,0">
+            <StackPanel.Resources>
+                <Style TargetType="Button" >
+                    <Setter Property="Margin" Value="10,0,10,0"/>
+                    <Setter Property="Width" Value="50"/>
+                    
+                </Style>
+            </StackPanel.Resources>
+            <Button Command="{Binding FirstIssueCommand}">&lt;&lt;</Button>
+            <Button Command="{Binding PreviousIssueCommand}">&lt;</Button>
+            <TextBlock>
+                <Run Text="{Binding CurrentIndex, Mode=OneWay}"/>
+                <Run Text=" of "/>
+                <Run Text="{Binding TotalIssues, Mode=OneWay}"/>
+            </TextBlock> 
+            
+            <Button Command="{Binding NextIssueCommand}">&gt;</Button>
+            <Button Command="{Binding LastIssueCommand}">&gt;&gt;</Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.QuestionsListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             xmlns:main ="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600" Width="600" Height="400" Background="LightSalmon">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="5" Orientation="Horizontal">
+            <TextBlock Text="Country filter: "/>
+            <ComboBox ItemsSource="{Binding CountryList}" SelectedItem="{Binding CountryFilter}" Width="60"/>
+            <Line Width="10" Height="10" Stroke="Black"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5">
+            <TextBlock Text="{Binding SelectedQuestion.SurveyCode}" Margin="5,0" FontWeight="Bold"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="{Binding SelectedQuestion.Qnum, StringFormat={}Q#{0}}" Margin="5,0" FontWeight="Bold"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.VarName}" Margin="5,0" FontWeight="Bold"/>
+            <TextBlock Text="|"/>
+            <TextBlock Text="{Binding SelectedQuestion.VarName.VarLabel}" Margin="5,0" FontWeight="Bold"/>
+        </StackPanel>
+        <Grid Grid.Row="2" Grid.Column="0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition MaxHeight="25"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                <TextBox Text="{Binding SelectedQuestion.PrePW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="1" >
+                <TextBox Text="{Binding SelectedQuestion.PreIW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="2"  >
+                <TextBox Text="{Binding SelectedQuestion.PreAW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="3" >
+                <TextBox Text="{Binding  SelectedQuestion.LitQW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="4" >
+                <TextBox Text="{Binding SelectedQuestion.RespOptionsS.RespSetName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="5" >
+                <TextBox Text="{Binding SelectedQuestion.NRCodesS.RespSetName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="6" >
+                <TextBox Text="{Binding SelectedQuestion.PstIW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Row="7" >
+                <TextBox Text="{Binding SelectedQuestion.PstPW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            </StackPanel>
+           
+            <!-- question text -->
+            <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                <FlowDocumentScrollViewer.Document>
+                    <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
+                </FlowDocumentScrollViewer.Document>
+            </FlowDocumentScrollViewer>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            <main:NavigationBar NextItemCommand="{Binding NextItemCommand}" 
+                                PreviousItemCommand="{Binding PreviousItemCommand}" 
+                                FirstItemCommand="{Binding FirstItemCommand}" 
+                                LastItemCommand="{Binding LastItemCommand}" 
+                                ItemPosition="{Binding ItemPosition}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

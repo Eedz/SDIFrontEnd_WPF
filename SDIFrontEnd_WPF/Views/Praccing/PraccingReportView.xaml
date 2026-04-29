@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.PraccingReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:behaviors="clr-namespace:MvvmLib.Behaviors;assembly=MvvmLib"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="650" Background="#ECDE74">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="365"></ColumnDefinition>
+            <ColumnDefinition Width="275"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="380"></RowDefinition>
+            <RowDefinition Height="150"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Praccing Issues Report" FontSize="26"/>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <TextBlock Text="Survey"/>
+            <ComboBox ItemsSource="{Binding SurveyList}" SelectedItem="{Binding SelectedSurvey}" Width="100" Margin="4"/>
+        </StackPanel>
+        
+        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Margin="1">
+        <StackPanel Height="380">
+            <TextBlock Text="Filters" FontWeight="Bold" Margin="4,0,0,0"/>
+            <StackPanel Orientation="Horizontal"  Margin="0,4,0,0" Height="150">
+                <TextBlock Text="Date"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding DateList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedDates}"/>
+                    <TextBlock Text="From"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox Width="130" ItemsSource="{Binding FromList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedFrom}"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Height="150">
+                    <TextBlock Text="To"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding ToList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedTo}"/>
+                    <TextBlock Text="Category"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox Width="130" ItemsSource="{Binding CategoryList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedCategory}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Status" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <ComboBox ItemsSource="{Binding StatusList}" SelectedItem="{Binding SelectedStatus}" Width="100"/>
+            </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Language" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <ComboBox ItemsSource="{Binding LanguageList}" SelectedItem="{Binding SelectedLanguage}" Width="100"/>
+            </StackPanel>
+        </StackPanel>
+        </Border>
+        
+        <StackPanel Grid.Row="3">
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                <TextBlock Text="Sort by" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <ComboBox ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSortOption}" Width="100"/>
+            </StackPanel>
+            <CheckBox Content="Include Pracc Instructions" IsChecked="{Binding IncludeInstructions}"/>
+            <CheckBox Content="Include Empty Row" IsChecked="{Binding IncludeEmptyRow}"/>
+            <CheckBox Content="Include Qnums" IsChecked="{Binding IncludeQnum}"/>
+            <CheckBox Content="Include Prev. Names" IsChecked="{Binding IncludePrevNames}"/>
+        </StackPanel>
+
+        <Border Grid.Row="2" Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="1">
+            <StackPanel >
+                <TextBlock Text="Last Update Filters" FontWeight="Bold" Margin="4,0,0,0"/>
+                <StackPanel Orientation="Horizontal"  Margin="0,4,0,0" Height="150">
+                    <TextBlock Text="Date"  Width="30" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding LastUpdateDateList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedLUDates}"/>
+                    <TextBlock Text="From"  Width="30" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox Width="100" ItemsSource="{Binding LastUpdateFromList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedLUFrom}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Height="150">
+                    <TextBlock Text="To"  Width="30" TextAlignment="Right" Margin="0,0,4,0"/>
+                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding LastUpdateToList}" SelectionMode ="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedLUTo}"/>
+
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <StackPanel Grid.Row="3" Grid.Column="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" 
+                        VerticalAlignment="Center" Margin="0,30,20,0">
+                <Button Content="Folder" Margin="0,0,5,0" Command="{Binding OpenReportsFolderCommand}"/>
+                <Button Content="Generate" Command="{Binding GenerateReportCommand}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
