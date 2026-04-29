@@ -1,5 +1,4 @@
-﻿
-using ITC_Contracts;
+﻿using ITC_Contracts;
 using ITCLib;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -158,5 +157,39 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         var response = await _http.DeleteAsync($"api/surveys/{id}");
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<bool> InsertTranslation(Translation translation)
+    {
+        var dto = new TranslationDto()
+        {
+            ID = translation.ID,
+            QID = translation.QID,
+            TranslationText = translation.TranslationText,
+            LanguageName = translation.LanguageName.LanguageName,
+            Bilingual = translation.Bilingual,
+
+        };
+
+        var response = await _http.PostAsJsonAsync($"api/questions/{dto.QID}/translations/{dto.ID}", dto);
+        response.EnsureSuccessStatusCode();
+        return true;
+    }
+     public async Task<bool> UpdateTranslation(Translation translation)
+    {
+        var dto = new TranslationDto()
+        {
+            ID = translation.ID,
+            QID= translation.QID,
+            TranslationText = translation.TranslationText,
+            LanguageName = translation.LanguageName.LanguageName,
+            Bilingual = translation.Bilingual,
+            
+        };
+
+        var response = await _http.PutAsJsonAsync($"api/questions/{dto.QID}/translations/{dto.ID}", dto);
+        response.EnsureSuccessStatusCode();
+        return true;
+    }
+    
 }
 

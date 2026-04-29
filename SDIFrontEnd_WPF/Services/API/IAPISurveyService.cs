@@ -25,5 +25,8 @@ namespace SDIFrontEnd_WPF
 
         Task<List<Survey>> GetSurveysByVar(string varname);
         Task<List<Survey>> GetSurveysByRefVar(string varname);
+
+        Task<bool> UpdateTranslation(Translation translation);
+        Task<bool> InsertTranslation(Translation translation);
     }
 }
