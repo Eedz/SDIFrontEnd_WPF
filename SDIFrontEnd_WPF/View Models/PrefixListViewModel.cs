@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using ITCLib;
 using System.Collections.ObjectModel;
 using MvvmLib.ViewModels;
-using SDIFrontEnd_WPF.View_Models;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
