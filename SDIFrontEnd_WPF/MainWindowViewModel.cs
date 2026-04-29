@@ -151,7 +151,10 @@ namespace SDIFrontEnd_WPF
                     vm = _services.GetRequiredService<QuestionSurveyMatrixViewModel>();
                     await ((QuestionSurveyMatrixViewModel)vm).Load();
                     return vm;
-            
+                case "tc":
+                    vm = _services.GetRequiredService<TopicContentReportViewModel>();
+                    await ((TopicContentReportViewModel)vm).Load();
+                    return vm;
                 default:
                     return _services.GetRequiredService<HomeViewModel>();
             }
@@ -314,11 +317,10 @@ namespace SDIFrontEnd_WPF
                 new SublinkItem("Comparison", "Comparison", MenuCategory.Reports),
                 new SublinkItem("Translation", "Translation", MenuCategory.Reports),
                 new SublinkItem("Website", "Website", MenuCategory.Reports),
-                new SublinkItem("External", "External", MenuCategory.Reports),
                 new SublinkItem("Variable List", "Variable List", MenuCategory.Reports),
                 new SublinkItem("Harmony", "Harmony", MenuCategory.Reports),
                 new SublinkItem("Parallel Vars", "Parallel Vars", MenuCategory.Reports),
-                new SublinkItem("Topic/Content", "Topic/Content", MenuCategory.Reports),
+                new SublinkItem("Topic/Content", "tc", MenuCategory.Reports),
                 
             };
         }

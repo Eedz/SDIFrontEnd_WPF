@@ -290,6 +290,7 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<VariableInformationViewModel>();
             services.AddTransient<PrefixListViewModel>();
             services.AddTransient<LabelLibraryViewModel>();
+            services.AddTransient<TopicContentReportViewModel>();
         }
     }
 
