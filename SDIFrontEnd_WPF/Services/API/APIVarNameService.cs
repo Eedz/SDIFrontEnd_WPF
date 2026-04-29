@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using ITC_Contracts;
+﻿using ITC_Contracts;
 using ITCLib;
 using SDIFrontEnd_WPF.Mappings;
 using System;
