@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MvvmLib.ViewModels;
 
-namespace SDIFrontEnd_WPF.View_Models
+namespace SDIFrontEnd_WPF.ViewModels
 {
     public partial class VariablePrefixItemViewModel : ViewModelBase
     {
@@ -42,6 +42,16 @@ namespace SDIFrontEnd_WPF.View_Models
                 Comments = model.Comments,
                 Inactive = model.Inactive
             };
+
+            Ranges.CollectionChanged += (s, e) =>
+                {
+                    IsDirty = true;
+                    if (e.NewItems != null)
+                        foreach (var item in e.NewItems)
+                        {
+                            ((VariableRange)item).PrefixID = ID;
+                        }
+                };
         }
 
         public int ID { get => Model.ID; }
