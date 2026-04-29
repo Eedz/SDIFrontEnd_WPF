@@ -12,20 +12,24 @@ namespace SDIFrontEnd_WPF
     public partial class SelectableItem<T> : ObservableObject
     {
         [ObservableProperty]
-        private bool _isSelected;
+        private bool isSelected;
 
-        public T Value { get; }
-        
+        public T? Value { get; }
+        public bool IsAll { get; }
 
         public SelectableItem(T value)
         {
             Value = value;
+            IsAll = false;
         }
 
+        public SelectableItem(bool isAll)
+        {
+            IsAll = isAll;
+        }
         public override string ToString()
         {
-            // For display in ListBox
-            return Value?.ToString() ?? "";
+            return IsAll ? "<All>" : Value?.ToString() ?? "";
         }
     }
 
@@ -44,7 +48,7 @@ namespace SDIFrontEnd_WPF
 
             if (includeAll)
             {
-                AllItem = new SelectableItem<T>((T)(object)"<All>");
+                AllItem = new SelectableItem<T>(isAll: true);
                 Items.Add(AllItem);
             }
 
@@ -62,24 +66,24 @@ namespace SDIFrontEnd_WPF
             if (e.PropertyName != nameof(SelectableItem<T>.IsSelected)) return;
             if (_suppress) return;
 
-            var changed = (SelectableItem<T>)sender;
+            var changed = (SelectableItem<T>)sender!;
 
             _suppress = true;
 
             if (AllItem != null)
             {
-                if (changed == AllItem && AllItem.IsSelected)
+                if (changed.IsAll && AllItem.IsSelected)
                 {
-                    // <All> selected → unselect all others
+                    // <All> selected -> unselect all others
                     foreach (var item in Items)
                     {
-                        if (item != AllItem)
+                        if (!item.IsAll)
                             item.IsSelected = false;
                     }
                 }
-                else if (changed != AllItem && changed.IsSelected)
+                else if (!changed.IsAll && changed.IsSelected)
                 {
-                    // A normal item selected → deselect <All>
+                    // A normal item selected -> deselect <All>
                     AllItem.IsSelected = false;
                 }
             }
@@ -88,8 +92,8 @@ namespace SDIFrontEnd_WPF
         }
 
         public IEnumerable<T> SelectedValues =>
-            Items.Where(i => i.IsSelected && i != AllItem).Select(i => i.Value);
+            Items.Where(i => i.IsSelected && !i.IsAll).Select(i => i.Value!);
 
-        public bool IsAllSelected => AllItem != null && AllItem.IsSelected;
+        public bool IsAllSelected => AllItem?.IsSelected == true;
     }
 }
