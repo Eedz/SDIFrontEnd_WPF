@@ -134,4 +134,7 @@
     <DataTemplate DataType="{x:Type viewmodels:LabelLibraryViewModel}">
         <views:LabelLibraryView/>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:TopicContentReportViewModel}">
+        <views:TopicContentReportView/>
+    </DataTemplate>
 </ResourceDictionary>
