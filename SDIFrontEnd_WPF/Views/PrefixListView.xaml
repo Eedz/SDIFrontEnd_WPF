@@ -16,7 +16,7 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="2" Text="Prefix List" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
+        <TextBlock Grid.ColumnSpan="2" Text="Prefix List" HorizontalAlignment="Left" Style="{StaticResource TitleTextBlockStyle}"/>
 
         <!-- Prefix list -->
         <DockPanel Grid.Column="0" Grid.Row="1">
