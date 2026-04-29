@@ -140,7 +140,12 @@ namespace SDIFrontEnd_WPF.ViewModels
         {
             foreach(Translation t in Imported)
             {
-                //_surveyService.UpdateTranslation(t);
+                if (t.ID != 0)
+                    _surveyService.UpdateTranslation(t);
+                else
+                {
+                    _surveyService.InsertTranslation(t); 
+                }
             }
         }
 
