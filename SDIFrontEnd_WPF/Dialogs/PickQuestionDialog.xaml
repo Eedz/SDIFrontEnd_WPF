@@ -5,12 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SDIFrontEnd_WPF"
         xmlns:lib ="clr-namespace:ITCLib;assembly=ITCLib"
+        xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
         mc:Ignorable="d"
-        Title="Select Question" Height="300" Width="500"
+        Title="Select Question" Height="400" Width="850"
         WindowStartupLocation="CenterOwner">
-    <DockPanel Margin="10">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <StackPanel Margin="10" Width="Auto">
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MaxWidth="350">
+        <ScrollViewer DockPanel.Dock="Top" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Height="300" MinHeight="300" >
             <ListBox x:Name="questionList"
                      ItemsSource="{Binding Questions}"
                      SelectionMode="Single"
@@ -25,20 +31,12 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type lib:SurveyQuestion}">
-                        <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Margin="5" Padding="10" Width="250">
+                        <Border BorderThickness="1" BorderBrush="Gray" CornerRadius="8" Margin="5" Padding="10" Width="250" Height="280">
                             <StackPanel>
                                 <TextBlock Text="{Binding SurveyCode}" FontWeight="Bold"/>
                                 <TextBlock Text="{Binding VarName.VarName}" FontSize="14" FontWeight="SemiBold" Margin="0,5,0,0"/>
                                 <TextBlock Text="{Binding VarName.VarLabel}" TextWrapping="Wrap" FontStyle="Italic" Foreground="DarkSlateGray"/>
-
-                                <TextBlock Text="PreA:" FontWeight="Bold" Margin="0,8,0,0"/>
-                                <TextBlock Text="{Binding PreAW.WordingText}" TextWrapping="Wrap"/>
-
-                                <TextBlock Text="LitQ:" FontWeight="Bold" Margin="0,4,0,0"/>
-                                <TextBlock Text="{Binding LitQW.WordingText}" TextWrapping="Wrap"/>
-
-                                <TextBlock Text="Resp Options:" FontWeight="Bold" Margin="0,4,0,0"/>
-                                <TextBlock Text="{Binding RespOptionsS.RespList}" TextWrapping="Wrap"/>
+                                <FlowDocumentScrollViewer Document="{Binding CondensedHtmlWording, Converter={StaticResource HtmlToFlow}}" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -50,5 +48,5 @@
             <Button Content="OK" Width="80" Margin="0,0,10,0" IsDefault="True" Click="Ok_Click"/>
             <Button Content="Cancel" Width="80" IsCancel="True"/>
         </StackPanel>
-    </DockPanel>
+    </StackPanel>
 </Window>
