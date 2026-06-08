@@ -65,7 +65,8 @@ namespace SDIFrontEnd_WPF
 
         public string CurrentQuestionText => SelectedQuestion?.GetQuestionTextHTML() ?? string.Empty;
 
-        bool Editable => !(CurrentSurvey == null || CurrentSurvey.Locked);
+        //bool Editable => !(CurrentSurvey == null || CurrentSurvey.Locked);
+        bool Editable => !(CurrentSurvey == null);
         public bool Locked => !Editable;
         
 
@@ -187,14 +188,7 @@ namespace SDIFrontEnd_WPF
                 SelectedQuestionRecord = record;
         }
 
-        async Task UpdateRelatedQuestions(string refVarName)
-        {
-            var relatedQuestions = await _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
-            relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
 
-            RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
-            OnPropertyChanged(nameof(RelatedQsVM));
-        }
 
         partial void OnSelectedQuestionChanged(SurveyQuestion? value)
         {
@@ -504,9 +498,32 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand(CanExecute = nameof(Editable))]
-        private void SaveChanges()
+        private async Task SaveChanges()
         {
+            var relock = false;
 
+            // if the survey is locked, confirm with the user that they want to save changes, as this may overwrite fielded data.
+            // If they confirm, unlock the survey, save changes, then relock the survey. If unlocking fails, do not save changes.
+            if (CurrentSurvey.Locked)
+            {
+                if (!_dialogService.Confirm("You are saving changes to a locked survey. These changes may not represent what fielded. Are you sure you want to save these changes?"))
+                    return;
+
+                bool unlocked = await _surveyService.UnlockSurvey(CurrentSurvey.SID);
+                if (unlocked)
+                {
+                    CurrentSurvey.Locked = false;
+                    relock = true;
+                }
+                else
+                {
+                    _dialogService.ShowMessage("Failed to unlock survey. Changes have not been saved.");
+                    return;
+                }
+            }
+
+
+            // confirm deletions by making the user type DELETE
             if (this.Removed.Count > 0)
                 if (_dialogService.PromptForText("One or more questions are being deleted. Type 'DELETE' to confirm.", "Confirm Deletes") != "DELETE")
                 {
@@ -515,22 +532,57 @@ namespace SDIFrontEnd_WPF
                 }
                 else
                 {
-                    _ = ProcessDeletes();
+                    // document deletions
+                    await ProcessDeletes();
                 }
 
-            foreach (var r in RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord))
+            var modified = new List<SurveyQuestionRecord>(RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord));
+            foreach (var r in modified)
             {
-                if (r.NewRecord)
-                    _questionService.AddQuestion(r.Item);
+                if (r.NewRecord && r.Deleted)
+                {
+                    // if the record is new and deleted, just remove it from the list
+                    CurrentSurvey.RemoveQuestion(r.Item, true);
+                    RecordList.Remove(r);
+                    Removed.Remove(r.Item);
+                }
+                else if (r.NewRecord)
+                {
+                    var result = await _questionService.AddQuestion(r.Item);
+                    if (result>0)
+                    {
+                        r.NewRecord= false ;
+                        Added.Remove(r.Item);
+                    }
+                }
                 else if (r.ShouldSave)
-                    _questionService.UpdateQuestion(r.Item);
+                {
+
+                    var result = await _questionService.UpdateQuestion(r.Item);
+                    if (result > 0)
+                        r.Dirty = false;
+                }
                 else if (r.Deleted)
-                    _questionService.DeleteQuestion(r.Item);
+                {
+                    var deleted = await _questionService.DeleteQuestion(r.Item);
+                    if (deleted > 0)
+                    {
+                        CurrentSurvey.RemoveQuestion(r.Item, true);
+                        RecordList.Remove(RecordList.First(x => x.Item == r.Item));
+                        Removed.Remove(r.Item);
+                    }
+                }
                 else
                     continue;
             }
 
             OnPropertyChanged(nameof(RecordList));
+            OnPropertyChanged(nameof(StatusSummary));
+            OnPropertyChanged(nameof(Editable));
+            // check if we unlocked this survey for saving, if so, relock it
+            if (!relock) return;
+            bool locked = await _surveyService.LockSurvey(CurrentSurvey.SID);
+            if (locked) CurrentSurvey.Locked = true;
         }
 
         [RelayCommand]
