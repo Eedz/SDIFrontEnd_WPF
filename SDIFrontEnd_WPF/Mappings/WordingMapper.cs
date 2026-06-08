@@ -19,7 +19,7 @@ namespace SDIFrontEnd_WPF.Mappings
             {
                 WordID = dto.ID,
                 Type = (WordingType)dto.Type,
-                WordingText = dto.WordingText
+                WordingText = dto.WordingText,
             };
         }
 
@@ -29,7 +29,8 @@ namespace SDIFrontEnd_WPF.Mappings
             {
                 ID = entity.WordID,
                 Type = (int)entity.Type,
-                WordingText = entity.WordingText
+                WordingText = entity.WordingText,
+                FieldType = entity.FieldType
             };
         }
 
