@@ -960,18 +960,19 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        // ask user to document, backup comments, confirm delete by typing 'DELETE' then remove from list and add to removed collection
+        // ask user to document deletes with a comment, then save comments
         private async Task ProcessDeletes()
         {
             if (_dialogService.Confirm("Do you want to document these deletes?"))
             {
-
-
                 QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _referenceDataService);
 
                 bool? result = _dialogService.ShowDialog(vm);
-                if (result.Value)
-                {
+
+                if (!result.HasValue) return;
+
+                if (!result.Value) return;
+
                     foreach (SurveyQuestion q in Removed)
                     {
                         DeletedComment newComment = new DeletedComment(vm.NewComment)
@@ -981,32 +982,25 @@ namespace SDIFrontEnd_WPF
                             VarName = q.VarName.VarName,
                         };
 
-                        if (!await _commentService.InsertDeletedComment(newComment) )
+                    if (!await _commentService.InsertDeletedComment(newComment))
                         {
                             _dialogService.ShowError("Error saving comment.", "Comments Error");
-                            return;
                         }
                     }
                 }
             }
 
-            foreach (var question in Removed)
+        async Task UpdateRelatedQuestions(string refVarName)
             {
-                // transfer comments
-                await _commentService.BackupCommentsAsync(question.ID);
-                CurrentSurvey.RemoveQuestion(question, true);
+            var relatedQuestions = await _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
+            relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
 
-                RecordList.Remove(RecordList.First(x => x.Item == question));
+            RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
+            OnPropertyChanged(nameof(RelatedQsVM));
             }
-
-            Removed.Clear();
-        }
 
         private async Task OpenWordings(string type, int wordID)
         {
-            // TODO 
-            //bool? result = await _dialogService.ShowDialogAsync<WordingViewModel>(async x=> await x.Load());
-
             WordingViewModel wordingVM = new WordingViewModel(_wordingData, _wordingService, _dialogService, type, wordID);
             await wordingVM.Load();
             bool? result = _dialogService.ShowDialog(wordingVM);
