@@ -91,6 +91,12 @@ namespace SDIFrontEnd_WPF.ViewModels
         [RelayCommand]
         private async Task Save()
         {
+            if (Usages.Any(x => x.Locked))
+            {
+                _dialogService.ShowMessage("Cannot modify wordings used in locked surveys.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(ResponseSet.RespList))
             {
                 _dialogService.ShowError("Response text cannot be empty.");
