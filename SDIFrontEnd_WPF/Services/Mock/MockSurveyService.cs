@@ -300,6 +300,14 @@ public class MockSurveyService : IApiSurveyService
         throw new NotImplementedException();
     }
 
-    
+    public async Task<bool> UnlockSurvey(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<bool> LockSurvey(int id)
+    {
+        throw new NotImplementedException();
+    }
 }
 
