@@ -3,6 +3,7 @@ using ITCLib;
 using System.Net.Http;
 using System.Net.Http.Json;
 using SDIFrontEnd_WPF.Mappings;
+
 namespace SDIFrontEnd_WPF;
 public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 {
@@ -190,6 +191,20 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         response.EnsureSuccessStatusCode();
         return true;
     }
-    
+
+    public async Task<bool> UnlockSurvey(int surveyId)
+    {
+        HttpResponseMessage response = await _http.PatchAsync($"api/surveys/{surveyId}/unlock", null);
+
+        return response.IsSuccessStatusCode;
+    }
+
+
+    public async Task<bool> LockSurvey(int surveyId)
+    {
+        HttpResponseMessage response = await _http.PatchAsync($"api/surveys/{surveyId}/lock", null);
+
+        return response.IsSuccessStatusCode;
+    }
 }
 

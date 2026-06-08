@@ -28,5 +28,8 @@ namespace SDIFrontEnd_WPF
 
         Task<bool> UpdateTranslation(Translation translation);
         Task<bool> InsertTranslation(Translation translation);
+
+        Task<bool> UnlockSurvey(int id);
+        Task<bool> LockSurvey(int id);
     }
 }
