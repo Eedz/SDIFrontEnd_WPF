@@ -412,9 +412,16 @@ namespace SDIFrontEnd_WPF
             if (string.IsNullOrWhiteSpace(newVarName))
                 return;
 
+            var newVarNameCC = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
+            if (CurrentSurvey.Questions.Any(x => x.VarName.VarName == newVarNameCC))
+            {
+                _dialogService.ShowMessage("This varname already exists in this survey.");
+                return;
+            }
+
             var existingQuestions = await _surveyService.FindQuestionsByRefVarName(newVarName);
             SurveyQuestion selectedSource = null;
-            string newQnum = SelectedQuestion.Qnum;
+            string newQnum = SelectedQuestion.Qnum.Substring(0,3);
             int position = QuestionList.IndexOf(SelectedQuestion);
             if (existingQuestions.Count > 0)
             {
@@ -424,19 +431,19 @@ namespace SDIFrontEnd_WPF
 
                 if (selectedSource == null)
                 {
-                    newQuestion = new SurveyQuestion(newVarName);
-                    newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
+                    return;
                 }
                 else
                 {
                     newQuestion = new SurveyQuestion(selectedSource.VarName.VarName);
                     newQuestion.SurveyCode = CurrentSurvey.SurveyCode;
-                    newQuestion.VarName.VarName = Utilities.ChangeCC(newVarName, CurrentSurvey.CountryCode);
+                    newQuestion.VarName = selectedSource.VarName;
+                    newQuestion.VarName.VarName = newVarNameCC;
                 }
                 newQuestion.Qnum = newQnum;
                 CurrentSurvey.AddQuestion(newQuestion, position, true);
                 Added.Add(newQuestion);
-                RecordList.Insert(position, new SurveyQuestionRecord(newQuestion));
+                RecordList.Insert(position, new SurveyQuestionRecord(newQuestion) {  NewRecord = true });
             }
             else
             {
@@ -446,7 +453,7 @@ namespace SDIFrontEnd_WPF
                 newQuestion.Qnum = newQnum;
                 CurrentSurvey.AddQuestion(newQuestion, position, true);
                 Added.Add(newQuestion);
-                RecordList.Insert(position, new SurveyQuestionRecord(newQuestion));
+                RecordList.Insert(position, new SurveyQuestionRecord(newQuestion) {  NewRecord = true });
             }
             OnPropertyChanged(nameof(RecordList));
         }
