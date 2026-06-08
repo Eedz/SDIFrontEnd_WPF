@@ -334,6 +334,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             {
 
             }
+            OnPropertyChanged(nameof(CurrentQuestionText));
         }
 
         private void UpdateWording(Wording wording)
