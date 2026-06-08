@@ -24,11 +24,14 @@ namespace SDIFrontEnd_WPF
             e.Handled = true;
         }
 
+        
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             this.DispatcherUnhandledException += Application_DispatcherUnhandledException;
+            
             ServiceProvider serviceProvider;
 //#if DEBUG
 //            serviceProvider = AddMockServices();

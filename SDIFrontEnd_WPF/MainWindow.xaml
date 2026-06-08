@@ -79,8 +79,8 @@
                 <Button Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" Width="20" Height="20">
                     <Image Source="/Images/add.png"/>
                 </Button>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
         </StackPanel>
         <Border Grid.Row="2" Grid.ColumnSpan="2" BorderThickness="2" BorderBrush="AliceBlue">
             <StackPanel >
