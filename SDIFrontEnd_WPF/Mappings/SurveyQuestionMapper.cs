@@ -25,6 +25,7 @@ namespace SDIFrontEnd_WPF.Mappings
                 SurveyCode = dto.SurveyCode,
                 VarName = new VariableName(dto.VarName.VarName)
                 {
+                    ID = dto.VarName.ID,
                     VarLabel = dto.VarName.VarLabel,
                     Domain = new DomainLabel() { LabelText = dto.VarName.Domain.LabelText, ID = dto.VarName.Domain.ID },
                     Topic = new TopicLabel() { LabelText = dto.VarName.Topic.LabelText, ID = dto.VarName.Topic.ID },
@@ -63,6 +64,7 @@ namespace SDIFrontEnd_WPF.Mappings
                 SurveyCode = question.SurveyCode,
                 VarName = new VariableNameDto
                 {
+                    ID = question.VarName.ID,
                     VarName = question.VarName.VarName,
                     VarLabel = question.VarName.VarLabel,
                     Domain = new VarNameLabelDto { LabelText = question.VarName.DomainLabel.Label, ID = question.VarName.DomainLabel.ID },
