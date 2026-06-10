@@ -17,10 +17,10 @@ namespace SDIFrontEnd_WPF.Mappings
                 ID = entity.ID,
                 VarName = entity.VarName,
                 VarLabel = entity.VarLabel,
-                Domain = new VarNameLabelDto() { LabelText = entity.Domain.LabelText, ID = entity.Domain.ID },
-                Topic = new VarNameLabelDto() { LabelText = entity.Topic.LabelText, ID = entity.Topic.ID },
-                Content = new VarNameLabelDto() { LabelText = entity.Content.LabelText, ID = entity.Content.ID },
-                Product = new VarNameLabelDto() { LabelText = entity.Product.LabelText, ID = entity.Product.ID },
+                Domain = new VarNameLabelDto() { LabelText = entity.DomainLabel.Label, ID = entity.DomainLabel.ID },
+                Topic = new VarNameLabelDto() { LabelText = entity.TopicLabel.Label, ID = entity.TopicLabel.ID },
+                Content = new VarNameLabelDto() { LabelText = entity.ContentLabel.Label, ID = entity.ContentLabel.ID },
+                Product = new VarNameLabelDto() { LabelText = entity.ProductLabel.Label, ID = entity.ProductLabel.ID },
             };
         }
 
