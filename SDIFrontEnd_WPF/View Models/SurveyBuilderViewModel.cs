@@ -16,6 +16,7 @@ namespace SDIFrontEnd_WPF
         private readonly IApiWordingService _wordingService;
         private readonly IApiCommentService _commentService;
         private readonly IApiPeopleService _peopleService;
+        private readonly IApiVarNameService _varnameService;
         private readonly WordingData _wordingData;
 
         private readonly Survey CurrentSurvey;
@@ -68,13 +69,13 @@ namespace SDIFrontEnd_WPF
         //bool Editable => !(CurrentSurvey == null || CurrentSurvey.Locked);
         bool Editable => !(CurrentSurvey == null);
         public bool Locked => !Editable;
-        
+
 
         // other windows
         public TranslationViewModel? TranslationVM;
         public RelatedQuestionsViewModel? RelatedQsVM;
 
-        public string StatusSummary => $"Total Questions: {QuestionList.Count}, Added: {Added.Count}, Modified: {Modified.Count}, Removed: {Removed.Count}";
+        public string StatusSummary => $"Total Questions: {QuestionList.Count}, Added: {Added.Count}, Modified: {RecordList.Count(x=>x.Dirty || x.DirtyLabels || x.DirtyQnum)}, Removed: {Removed.Count}";
 
         public string SectionCount
         {
@@ -106,7 +107,7 @@ namespace SDIFrontEnd_WPF
         private string? nRName;
 
         public SurveyBuilderViewModel(IDialogService dialogService, IApiSurveyService surveyService, IApiQuestionService questionService, ReferenceDataStore referenceData, IApiWordingService wordingService,
-            IApiPeopleService peopleService, IApiCommentService commentService, WordingData wordingData, Survey survey)
+            IApiPeopleService peopleService, IApiCommentService commentService, IApiVarNameService varnameService, WordingData wordingData, Survey survey)
         {
             _dialogService = dialogService;
             _surveyService = surveyService ?? throw new ArgumentNullException(nameof(surveyService), "Survey service cannot be null.");
@@ -115,6 +116,7 @@ namespace SDIFrontEnd_WPF
             _wordingService = wordingService ?? throw new ArgumentNullException(nameof(wordingService), "Wording service cannot be null.");
             _peopleService = peopleService ?? throw new ArgumentNullException(nameof(peopleService), "People service cannot be null.");
             _commentService = commentService ?? throw new ArgumentNullException(nameof(commentService), "Comment service cannot be null.");
+            _varnameService = varnameService ?? throw new ArgumentNullException(nameof(varnameService), " VarName service cannot be null.");
             if (survey == null) throw new ArgumentNullException(nameof(survey), "Questions cannot be null");
 
             CurrentSurvey = survey;
@@ -188,7 +190,7 @@ namespace SDIFrontEnd_WPF
                 SelectedQuestionRecord = record;
         }
 
-
+        
 
         partial void OnSelectedQuestionChanged(SurveyQuestion? value)
         {
@@ -543,13 +545,36 @@ namespace SDIFrontEnd_WPF
                     await ProcessDeletes();
                 }
 
-            var modified = new List<SurveyQuestionRecord>(RecordList.Where(x => x.ShouldSave || x.Deleted || x.NewRecord));
+            var deleted = new List<SurveyQuestionRecord>(RecordList.Where(x => x.Deleted));
+            foreach (var r in deleted)
+            {
+                if (r.NewRecord)
+                {
+                    // if the record is new and deleted, just remove it from the list
+                    CurrentSurvey.RemoveQuestion(r.Item, true);
+                    RecordList.Remove(r);
+                    Removed.Remove(r.Item);
+                }else
+                {
+                    var result = await _questionService.DeleteQuestion(r.Item);
+                    if (result)
+                    {
+                        CurrentSurvey.RemoveQuestion(r.Item, true);
+                        RecordList.Remove(RecordList.First(x => x.Item == r.Item));
+                        Removed.Remove(r.Item);
+                    }
+                }
+            }
+
+            
+            var modified = new List<SurveyQuestionRecord>(RecordList.Where(x => x.ShouldSave || x.NewRecord));
+            List<SurveyQuestion> qnumUpdates = new List<SurveyQuestion>();
             foreach (var r in modified)
             {
                 if (r.NewRecord && r.Deleted)
                 {
                     // if the record is new and deleted, just remove it from the list
-                    CurrentSurvey.RemoveQuestion(r.Item, true);
+                    CurrentSurvey.RemoveQuestion(r.Item, false);
                     RecordList.Remove(r);
                     Removed.Remove(r.Item);
                 }
@@ -562,30 +587,38 @@ namespace SDIFrontEnd_WPF
                         Added.Remove(r.Item);
                     }
                 }
-                else if (r.ShouldSave)
+                else if (r.DirtyWordings)
                 {
 
                     var result = await _questionService.UpdateQuestion(r.Item);
-                    if (result > 0)
-                        r.Dirty = false;
+                    if (result > 0)  r.DirtyWordings = false;
                 }
-                else if (r.Deleted)
+                else if (r.DirtyLabels)
                 {
-                    var deleted = await _questionService.DeleteQuestion(r.Item);
-                    if (deleted > 0)
-                    {
-                        CurrentSurvey.RemoveQuestion(r.Item, true);
-                        RecordList.Remove(RecordList.First(x => x.Item == r.Item));
-                        Removed.Remove(r.Item);
-                    }
+                    var result = await _varnameService.UpdateVariable(r.Item.VarName);
+                    if (result) r.DirtyLabels = false;
+                }
+                else if (r.DirtyQnum)
+                {
+                    qnumUpdates.Add(r.Item);
                 }
                 else
                     continue;
             }
 
+            if (qnumUpdates.Count()>0)
+            {
+               var result =  await _questionService.UpdateQnums(qnumUpdates);
+                if (result)
+                {
+                    RecordList.Where(x => x.DirtyQnum).ToList().ForEach(x => x.DirtyQnum = false);
+                }
+            }
+
             OnPropertyChanged(nameof(RecordList));
             OnPropertyChanged(nameof(StatusSummary));
             OnPropertyChanged(nameof(Editable));
+            
             // check if we unlocked this survey for saving, if so, relock it
             if (!relock) return;
             bool locked = await _surveyService.LockSurvey(CurrentSurvey.SID);
@@ -903,7 +936,7 @@ namespace SDIFrontEnd_WPF
         /// Add an image to the selected question. Images must be already stored in the correct network location.
         /// </summary>
         [RelayCommand(CanExecute = nameof(Editable))]
-        
+
         private void AddImage()
         {
             if (SelectedQuestionRecord == null)
@@ -916,7 +949,7 @@ namespace SDIFrontEnd_WPF
             image.QID = SelectedQuestion.ID;
             image.Survey = CurrentSurvey.SurveyCode;
             image.VarName = SelectedQuestion.VarName.VarName;
-            
+
             image.ImageName = file.Substring(file.LastIndexOf(@"\") + 1);
             image.ImagePath = file;
 
@@ -925,10 +958,10 @@ namespace SDIFrontEnd_WPF
             CurrentImage = SelectedQuestion.Images.LastOrDefault();
             OnPropertyChanged(nameof(ImageIndex));
             OnPropertyChanged(nameof(SelectedQuestionRecord));
-            
+
         }
 
-        [RelayCommand(CanExecute = nameof(Editable))]   
+        [RelayCommand(CanExecute = nameof(Editable))]
         private void DeleteImage()
         {
             if (CurrentImage != null)
@@ -955,7 +988,7 @@ namespace SDIFrontEnd_WPF
             {
                 if (r.DirtyQnum)
                 {
-
+       
                 }
             }
         }
@@ -966,6 +999,7 @@ namespace SDIFrontEnd_WPF
             if (_dialogService.Confirm("Do you want to document these deletes?"))
             {
                 QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _referenceDataService);
+                await vm.LoadLists();
 
                 bool? result = _dialogService.ShowDialog(vm);
 
@@ -973,31 +1007,31 @@ namespace SDIFrontEnd_WPF
 
                 if (!result.Value) return;
 
-                    foreach (SurveyQuestion q in Removed)
+                foreach (SurveyQuestion q in Removed)
+                {
+                    DeletedComment newComment = new DeletedComment(vm.NewComment)
                     {
-                        DeletedComment newComment = new DeletedComment(vm.NewComment)
-                        {
-                            SurvID = CurrentSurvey.SID,
-                            Survey = q.SurveyCode,
-                            VarName = q.VarName.VarName,
-                        };
+                        SurvID = CurrentSurvey.SID,
+                        Survey = q.SurveyCode,
+                        VarName = q.VarName.VarName,
+                    };
 
                     if (!await _commentService.InsertDeletedComment(newComment))
-                        {
-                            _dialogService.ShowError("Error saving comment.", "Comments Error");
-                        }
+                    {
+                        _dialogService.ShowError("Error saving comment.", "Comments Error");
                     }
                 }
             }
+        }
 
         async Task UpdateRelatedQuestions(string refVarName)
-            {
+        {
             var relatedQuestions = await _surveyService.FindQuestionsByRefVarName(SelectedQuestion.VarName.RefVarName);
             relatedQuestions.RemoveAll(q => q.ID == SelectedQuestion.ID); // remove current question from list
 
             RelatedQsVM.UpdateQuestions(relatedQuestions, CurrentSurvey.SurveyCodePrefix);
             OnPropertyChanged(nameof(RelatedQsVM));
-            }
+        }
 
         private async Task OpenWordings(string type, int wordID)
         {
@@ -1026,11 +1060,11 @@ namespace SDIFrontEnd_WPF
             if (result.Value) // if closed with OK
             {
                 // apply wording to current question
-                //SetResponse(type, wordingVM.CurrentWording);
+                SetResponse(type, wordingVM.CurrentItem.ResponseSet);
             }
             else
             {
-                //UpdateResponse(type);
+                UpdateResponse(type);
             }
         }
 
@@ -1077,7 +1111,7 @@ namespace SDIFrontEnd_WPF
             switch (type)
             {
                 case "PreP":
-                    SelectedQuestion.PrePW = _wordingData.PreP.FirstOrDefault(x=>x.WordID == SelectedQuestion.PrePW.WordID);
+                    SelectedQuestion.PrePW = _wordingData.PreP.FirstOrDefault(x => x.WordID == SelectedQuestion.PrePW.WordID);
                     break;
                 case "PreI":
                     SelectedQuestion.PreIW = _wordingData.PreI.FirstOrDefault(x => x.WordID == SelectedQuestion.PreIW.WordID);
@@ -1099,5 +1133,45 @@ namespace SDIFrontEnd_WPF
             }
             OnPropertyChanged(nameof(CurrentQuestionText));
         }
+
+        private void SetResponse(string type, ResponseSet? responseSet)
+        {
+            if (responseSet == null || SelectedQuestion == null)
+                return;
+            switch (type)
+            {
+                case "RespOptions":
+                    SelectedQuestion.RespOptionsS = responseSet;
+                    RespName = responseSet.RespSetName;
+                    break;
+                case "NRCodes":
+                    SelectedQuestion.NRCodesS = responseSet;
+                    NRName = responseSet.RespSetName;
+                    break;
+                default:
+                    break;
+            }
+            OnPropertyChanged(nameof(CurrentQuestionText));
+        }
+
+        private void UpdateResponse(string type)
+        {
+            if (SelectedQuestion == null)
+                return;
+            switch (type)
+            {
+                case "RespOptions":
+                    SelectedQuestion.RespOptionsS = _wordingData.RO.FirstOrDefault(x => x.RespSetName == SelectedQuestion.RespOptionsS.RespSetName);
+                    break;
+                case "NRCodes":
+                    SelectedQuestion.NRCodesS = _wordingData.NR.FirstOrDefault(x => x.RespSetName == SelectedQuestion.NRCodesS.RespSetName);
+                    break;
+                default:
+                    break;
+            }
+            OnPropertyChanged(nameof(CurrentQuestionText));
+        }
+
+       
     }
 }
