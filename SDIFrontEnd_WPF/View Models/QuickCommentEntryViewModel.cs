@@ -5,6 +5,7 @@ using ITCLib;
 using MvvmLib.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,8 +16,8 @@ namespace SDIFrontEnd_WPF.ViewModels
     {
         private readonly IApiPeopleService _peopleService;
         private readonly ReferenceDataStore _commentData;
-        public List<Person> AllAuthors { get; set; }
-        public  List<CommentType> AllCommentTypes { get; set; }
+        public ObservableCollection<Person> AllAuthors { get; set; }
+        public ObservableCollection<CommentType> AllCommentTypes { get; set; }
         public string NoteText { get; set; } = string.Empty;
         public Person Author { get; set; } = new Person();
         public CommentType NoteType { get; set; } = new CommentType();
@@ -32,13 +33,12 @@ namespace SDIFrontEnd_WPF.ViewModels
             _commentData = commentService ?? throw new ArgumentNullException(nameof(commentService));
 
             base.DisplayName = "Comment Entry";
-            _ = LoadLists();
         }
 
-        private async Task LoadLists()
+        public async Task LoadLists()
         {
-            AllAuthors = await _peopleService.GetPeopleBasics();
-            AllCommentTypes = _commentData.CommentTypes.ToList();
+            AllAuthors = new ObservableCollection<Person>(await _peopleService.GetPeopleBasics());
+            AllCommentTypes = new ObservableCollection<CommentType>(_commentData.CommentTypes.ToList());
             OnPropertyChanged(nameof(AllAuthors));
             OnPropertyChanged(nameof(AllCommentTypes));
         }
@@ -67,7 +67,6 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         private bool CanSave()
         {
-            return true;
             return !string.IsNullOrWhiteSpace(NoteText);
         }
     }
