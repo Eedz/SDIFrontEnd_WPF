@@ -1090,7 +1090,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         async Task<int> ProcessDeletion(SurveyQuestion question)
         {
             // create deleted comments first
-            await _commentService.BackupCommentsAsync(question.ID);
+            //await _commentService.BackupCommentsAsync(question.ID);
 
             foreach (QuestionComment comment in question.Comments)
             {
@@ -1110,7 +1110,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             }
 
 
-            bool result = await _questionService.DeleteQuestion(question) !=1;
+            bool result = await _questionService.DeleteQuestion(question);
 
 
             if (result)

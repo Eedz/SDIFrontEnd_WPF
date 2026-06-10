@@ -97,7 +97,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                 {
                     // Load the issues for the selected survey
 
-                    LoadSurveyIssues(value.SID);
+                    _ = LoadSurveyIssues(value.SID);
                     _ = LoadLists();
                     LoadLanguages(value);
                     RefreshCurrentIssue();
@@ -271,9 +271,9 @@ namespace SDIFrontEnd_WPF.ViewModels
                 CurrentRecord.Dirty = false;
             }
 
-            SaveResponses();
+            await SaveResponses();
 
-            SaveImages();
+            await SaveImages();
 
             OnPropertyChanged(nameof(CurrentRecord));
             IssueVM.UpdateStatus();
@@ -670,14 +670,14 @@ namespace SDIFrontEnd_WPF.ViewModels
         }
 
         [RelayCommand (CanExecute ="CanRefresh")]
-        void Refresh()
+        async Task Refresh()
         {
             if (CurrentSurvey == null)
                 return;
 
-            SaveRecord();
+            await SaveRecord();
 
-            LoadSurveyIssues(CurrentSurvey.SID);
+            await LoadSurveyIssues(CurrentSurvey.SID);
 
             if (IsSearching)
             {
