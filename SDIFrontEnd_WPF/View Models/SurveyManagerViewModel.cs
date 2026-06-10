@@ -26,6 +26,7 @@ namespace SDIFrontEnd_WPF
         private readonly IApiPeopleService _peopleService; // Service for managing people data
         private readonly IApiCommentService _commentService; // Service for managing comments
         private readonly IWindowService _windowService; // Service for managing windows and dialogs
+        private readonly IApiVarNameService _varNameService;
 
         [ObservableProperty]
         private Survey? currentSurvey; // The currently selected survey
@@ -36,7 +37,7 @@ namespace SDIFrontEnd_WPF
         public SurveyBuilderViewModel? SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
         public SurveyManagerViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, IDialogService dialogService, ReferenceDataStore referenceDataService, WordingData wordingData,
-            IApiWordingService wordingService, IApiPeopleService peopleService, IApiCommentService commentService, IWindowService windowService)
+            IApiWordingService wordingService, IApiPeopleService peopleService, IApiCommentService commentService, IWindowService windowService, IApiVarNameService varnameService)
         {
             _surveyService = surveyService;
             _questionService = questionService;
@@ -48,7 +49,7 @@ namespace SDIFrontEnd_WPF
             _commentService = commentService;
             _windowService = windowService;
             _wordingData = wordingData;
-
+            _varNameService = varnameService;
         }
 
         public async void Load(Survey survey)
@@ -79,7 +80,7 @@ namespace SDIFrontEnd_WPF
             survey.AddQuestions(questions);
             await GetSurveyImageInfo(survey.Questions.SelectMany(q => q.Images).ToList(), survey);
             SurveyInfo = new SurveyViewModel(survey);
-            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, _wordingData, survey);
+            SurveyBuilder = new SurveyBuilderViewModel(_dialogService, _surveyService, _questionService, _referenceDataService, _wordingService, _peopleService, _commentService, _varNameService, _wordingData, survey);
 
             OnPropertyChanged(nameof(SurveyInfo));
             OnPropertyChanged(nameof(SurveyBuilder));
