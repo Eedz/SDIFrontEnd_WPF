@@ -91,11 +91,19 @@ namespace SDIFrontEnd_WPF
             return dto.ID;
         }
 
-        public async Task<int> DeleteQuestion(SurveyQuestion question)
+        public async Task<bool> UpdateQnums(IEnumerable<SurveyQuestion> questions)
+        {
+            var dtos = questions.Select(x=>_surveyQuestionMapper.MapToDto(x));
+            var response = await _http.PatchAsJsonAsync($"api/questions/question-order", dtos);
+            var result = response.EnsureSuccessStatusCode();
+            return result.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteQuestion(SurveyQuestion question)
         {
             var response = await _http.DeleteAsync($"api/questions/{question.ID}");
-            response.EnsureSuccessStatusCode();
-            return question.ID;
+            var result = response.EnsureSuccessStatusCode();
+            return result.IsSuccessStatusCode;
         }       
     }
 }

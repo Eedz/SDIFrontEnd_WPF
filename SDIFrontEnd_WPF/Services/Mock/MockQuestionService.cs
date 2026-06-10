@@ -53,7 +53,12 @@ namespace SDIFrontEnd_WPF
             throw new NotImplementedException();
         }
 
-        public async Task<int> DeleteQuestion(SurveyQuestion question)
+        public async Task<bool> DeleteQuestion(SurveyQuestion question)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> UpdateQnums(IEnumerable<SurveyQuestion> qnums)
         {
             throw new NotImplementedException();
         }

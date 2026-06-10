@@ -18,6 +18,7 @@ namespace SDIFrontEnd_WPF
 
         Task<int> AddQuestion(SurveyQuestion question);
         Task<int> UpdateQuestion(SurveyQuestion question);
-        Task<int> DeleteQuestion(SurveyQuestion question);
+        Task<bool> DeleteQuestion(SurveyQuestion question);
+        Task<bool> UpdateQnums(IEnumerable<SurveyQuestion> qnums);
     }
 }
