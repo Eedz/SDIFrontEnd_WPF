@@ -112,7 +112,10 @@ namespace SDIFrontEnd_WPF
             if (e.PropertyName == nameof(SurveyQuestion.VarName.Topic) ||
                 e.PropertyName == nameof(SurveyQuestion.VarName.Content) ||
                 e.PropertyName == nameof(SurveyQuestion.VarName.Product) ||
-                e.PropertyName == nameof(SurveyQuestion.VarName.VarLabel)
+                e.PropertyName == nameof(SurveyQuestion.VarName.VarLabel) || 
+                e.PropertyName == nameof(SurveyQuestion.VarName.TopicLabel) ||
+                e.PropertyName == nameof(SurveyQuestion.VarName.ContentLabel) ||
+                e.PropertyName == nameof(SurveyQuestion.VarName.ProductLabel) 
                 )
                 DirtyLabels = true;
 
