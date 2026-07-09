@@ -24,13 +24,13 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<string>> GetAuditSurveys()
         {
-            var dtos = await _http.GetFromJsonAsync<List<string>>($"api/history/surveys");
+            var dtos = await _http.GetFromJsonAsync<List<string>>($"{_baseApi}/history/surveys");
             return dtos;
         }
 
         public async Task<List<VariableName>> GetAuditVarNames(string survey)
         {
-            var dtos = await _http.GetFromJsonAsync<List<VariableNameDto>>($"api/history/varnames?survey={survey}");
+            var dtos = await _http.GetFromJsonAsync<List<VariableNameDto>>($"{_baseApi}/history/varnames?survey={survey}");
             if (dtos == null)
                 return new List<VariableName>();
 
@@ -39,14 +39,14 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<ChangedSurveyQuestion>> GetQuestionHistory(int qid)
         {
-            var dtos = await _http.GetFromJsonAsync<List<ChangedSurveyQuestionDto>>($"api/history/questions/{qid}");
+            var dtos = await _http.GetFromJsonAsync<List<ChangedSurveyQuestionDto>>($"{_baseApi}/history/questions/{qid}");
             var questions = dtos.Select(x => _mapper.MapToEntity(x)).ToList();
             return questions;
         }
 
         public async Task<List<AuditWording>> GetWordingHistory(string wordType, int wordID)
         {
-            var dtos = await _http.GetFromJsonAsync<List<AuditWordingDto>>($"api/history/wordings?type={wordType}&id={wordID}");
+            var dtos = await _http.GetFromJsonAsync<List<AuditWordingDto>>($"{_baseApi}/history/wordings?type={wordType}&id={wordID}");
             var questions = dtos.Select(x => _wordingMapper.MapToEntity(x)).ToList();
             return questions;
         }       
