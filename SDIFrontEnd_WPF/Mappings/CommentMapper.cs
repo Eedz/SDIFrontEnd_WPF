@@ -16,6 +16,8 @@ namespace SDIFrontEnd_WPF.Mappings
             {
                 ID = entity.ID,
                 QID = entity.QID,
+                VarName = entity.VarName,
+                Survey = entity.Survey,
                 NoteID = entity.Notes.ID,
                 NoteText = entity.Notes.NoteText,
                 NoteDate = entity.NoteDate,
@@ -32,6 +34,8 @@ namespace SDIFrontEnd_WPF.Mappings
             {
                 ID = dto.ID,
                 QID = dto.QID,
+                VarName = dto.VarName,
+                Survey = dto.Survey,
                 Notes = new Note(dto.NoteID, dto.NoteText),
                 NoteDate = dto.NoteDate,
                 Author = new Person(dto.Author.Name, dto.Author.ID),
