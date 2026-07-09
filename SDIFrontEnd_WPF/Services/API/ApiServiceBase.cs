@@ -6,6 +6,12 @@ public abstract class ApiServiceBase
 {
     protected readonly HttpClient _http;
 
+#if DEBUG
+    protected readonly string _baseApi = "/api-dev";
+#else 
+    protected readonly string _baseApi = "/api";
+#endif
+
     protected ApiServiceBase(HttpClient httpClient)
     {
         _http = httpClient;
@@ -18,7 +24,7 @@ public abstract class ApiServiceBase
     {
         try
         {
-            var response = await _http.GetAsync("api/health");
+            var response = await _http.GetAsync($"{_baseApi}/health");
             var status = response.StatusCode;
             return response.IsSuccessStatusCode;
         }
