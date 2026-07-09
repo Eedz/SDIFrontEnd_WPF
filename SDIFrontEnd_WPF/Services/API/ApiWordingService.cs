@@ -37,7 +37,7 @@ namespace SDIFrontEnd_WPF
                     throw new ArgumentException($"Invalid wording type: {type}");
             }
 
-            var response = await _http.GetFromJsonAsync<List<WordingDto>>($"api/wordings/{type}");
+            var response = await _http.GetFromJsonAsync<List<WordingDto>>($"{_baseApi}/wordings/{type}");
             return response.ToList();
         }
 
@@ -52,7 +52,7 @@ namespace SDIFrontEnd_WPF
                     throw new ArgumentException($"Invalid wording type: {type}");
             }
 
-            var response = await _http.GetFromJsonAsync<List<ResponseSetDto>>($"api/responses/{type}");
+            var response = await _http.GetFromJsonAsync<List<ResponseSetDto>>($"{_baseApi}/responses/{type}");
             return response.ToList();
         }
 
@@ -124,7 +124,7 @@ namespace SDIFrontEnd_WPF
         {
             string type = wording.FieldType.ToLower();
             var dto = wordingMapper.MapToDto(wording);
-            var response = await _http.PutAsJsonAsync<WordingDto>($"api/wordings/{type}/{wording.WordID}/", dto);
+            var response = await _http.PutAsJsonAsync<WordingDto>($"{_baseApi}/wordings/{type}/{wording.WordID}/", dto);
             response.EnsureSuccessStatusCode();
 
             var updatedDto = await response.Content.ReadFromJsonAsync<WordingDto>();
@@ -135,7 +135,7 @@ namespace SDIFrontEnd_WPF
         {
             string type = responseSet.FieldType.ToLower();
             var dto = responseMapper.MapToDto(responseSet);
-            var response = await _http.PutAsJsonAsync<ResponseSetDto>($"api/responses/{type}/{responseSet.RespSetName}/", dto);
+            var response = await _http.PutAsJsonAsync<ResponseSetDto>($"{_baseApi}/responses/{type}/{responseSet.RespSetName}/", dto);
             response.EnsureSuccessStatusCode();
             var updatedDto = await response.Content.ReadFromJsonAsync<ResponseSetDto>();
             return responseMapper.MapToEntity(updatedDto);
@@ -144,7 +144,7 @@ namespace SDIFrontEnd_WPF
         public async Task<List<WordingUsage>> GetWordingUsages(Wording wording)
         {
             string type = wording.FieldType.ToLower();
-            var response = await _http.GetFromJsonAsync<List<WordingUsageDto>>($"api/wordings/{type}/{wording.WordID}/usages");
+            var response = await _http.GetFromJsonAsync<List<WordingUsageDto>>($"{_baseApi}/wordings/{type}/{wording.WordID}/usages");
             var wordings = response.Select(dto => new WordingUsage()
             {
                 VarName = dto.VarName,
@@ -161,7 +161,7 @@ namespace SDIFrontEnd_WPF
         public async Task<List<ResponseUsage>> GetResponseUsages(ResponseSet responseset)
         {
             string type = responseset.FieldType.ToLower();
-            var response = await _http.GetFromJsonAsync<List<ResponseUsageDto>>($"api/responses/{type}/{responseset.RespSetName}/usages");
+            var response = await _http.GetFromJsonAsync<List<ResponseUsageDto>>($"{_baseApi}/responses/{type}/{responseset.RespSetName}/usages");
             var wordings = response.Select(dto => new ResponseUsage()
             {
                 VarName = dto.VarName,
@@ -179,7 +179,7 @@ namespace SDIFrontEnd_WPF
         {
             string type = wording.FieldType.ToLower();
             var dto = wordingMapper.MapToDto(wording);
-            var response = await _http.PostAsJsonAsync($"api/wordings/{wording.FieldType}", dto);
+            var response = await _http.PostAsJsonAsync($"{_baseApi}/wordings/{wording.FieldType}", dto);
             if (response.IsSuccessStatusCode)
             {
                 var createdDto = await response.Content.ReadFromJsonAsync<WordingDto>();
@@ -195,7 +195,7 @@ namespace SDIFrontEnd_WPF
         {
             string type = responseSet.FieldType.ToLower();
             var dto = responseMapper.MapToDto(responseSet);
-            var response = await _http.PostAsJsonAsync($"api/responses/{responseSet.FieldType}", dto);
+            var response = await _http.PostAsJsonAsync($"{_baseApi}/responses/{responseSet.FieldType}", dto);
             if (response.IsSuccessStatusCode)
             {
                 var createdDto = await response.Content.ReadFromJsonAsync<ResponseSetDto>();
@@ -210,7 +210,7 @@ namespace SDIFrontEnd_WPF
         public async Task<bool> DeleteWording(Wording wording)
         {
             string type = wording.FieldType.ToLower();
-            var response = await _http.DeleteAsync($"api/wordings/{type}/{wording.WordID}/");
+            var response = await _http.DeleteAsync($"{_baseApi}/wordings/{type}/{wording.WordID}/");
             response.EnsureSuccessStatusCode();
             return true;
         }
@@ -218,7 +218,7 @@ namespace SDIFrontEnd_WPF
         public async Task<bool> DeleteResponseSet(ResponseSet set)
         {
             string type = set.FieldType.ToLower();
-            var response = await _http.DeleteAsync($"api/responses/{type}/{set.RespSetName}/");
+            var response = await _http.DeleteAsync($"{_baseApi}/responses/{type}/{set.RespSetName}/");
             response.EnsureSuccessStatusCode();
             return true;
         }
