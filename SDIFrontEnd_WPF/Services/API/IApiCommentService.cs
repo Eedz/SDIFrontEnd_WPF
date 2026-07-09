@@ -13,5 +13,6 @@ namespace SDIFrontEnd_WPF
         Task<int> AddCommentAsync(QuestionComment comment);
         Task BackupCommentsAsync(int qid);
         Task<bool> InsertDeletedComment(DeletedComment comment);
+        Task<List<CommentType>> GetCommentTypesAsync();
     }
 }
