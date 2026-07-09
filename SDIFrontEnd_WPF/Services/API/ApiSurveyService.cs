@@ -19,7 +19,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<Survey>> GetAllAsync()
     {
-        var dtos = await _http.GetFromJsonAsync<List<SurveyDto>>("api/surveys");
+        var dtos = await _http.GetFromJsonAsync<List<SurveyDto>>($"{_baseApi}/surveys");
 
         var surveys = dtos.Select(dtos => surveyMapper.MapToEntity(dtos)).ToList();
         
@@ -28,7 +28,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<Survey?> GetSurveyByIdAsync(int id)
     {
-        var dto =  await _http.GetFromJsonAsync<SurveyDto>($"api/surveys/{id}");
+        var dto =  await _http.GetFromJsonAsync<SurveyDto>($"{_baseApi}/surveys/{id}");
 
         var survey = surveyMapper.MapToEntity(dto);
         return survey;
@@ -36,20 +36,20 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<StudyWave>> GetAllWavesAsync()
     {
-        var waves = await _http.GetFromJsonAsync<List<StudyWave>>("api/waves");
+        var waves = await _http.GetFromJsonAsync<List<StudyWave>>($"{_baseApi}/waves");
 
         return waves ?? new List<StudyWave>();
     }
 
     public async Task<List<Study>> GetAllStudiesAsync()
     {
-        var waves = await _http.GetFromJsonAsync<List<Study>>("api/studies");
+        var waves = await _http.GetFromJsonAsync<List<Study>>($"{_baseApi}/studies");
         return waves ?? new List<Study>();
     }
 
     public async Task<List<SurveyQuestion>> FindQuestionsByRefVarName(string refvarname)
     {
-        var dto = await _http.GetFromJsonAsync<List<SurveyQuestionDto>>($"api/questions/by-ref/{refvarname}");
+        var dto = await _http.GetFromJsonAsync<List<SurveyQuestionDto>>($"{_baseApi}/questions/by-ref/{refvarname}");
         if (dto == null) return new List<SurveyQuestion>();
         var questions = dto.Select(x => questionMapper.MapToEntity(x));
         return questions.ToList();
@@ -57,7 +57,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<SurveyQuestion>> GetSurveyQuestions(int id)
     {
-        var dto = await _http.GetFromJsonAsync<SurveyDto>($"api/surveys/{id}/questions");
+        var dto = await _http.GetFromJsonAsync<SurveyDto>($"{_baseApi}/surveys/{id}/questions");
         if (dto == null) return new List<SurveyQuestion>();
         var questions = dto.Questions.Select(x => questionMapper.MapToEntity(x));
         return questions.ToList() ?? new List<SurveyQuestion>();
@@ -65,7 +65,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<DeletedQuestion>> GetDeletedQuestions(int id)
     {
-        var dto = await _http.GetFromJsonAsync<List<DeletedQuestionDto>>($"api/surveys/{id}/deleted");
+        var dto = await _http.GetFromJsonAsync<List<DeletedQuestionDto>>($"{_baseApi}/surveys/{id}/deleted");
         if (dto == null) return new List<DeletedQuestion>();
         var deletedQuestions = dto.Select(x=> new DeletedQuestion()
         {
@@ -85,8 +85,8 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
                 VarName = y.VarName,
                 SurvID = y.SurvID,
                 Survey = y.Survey,
-                Author = new Person() { Name = y.Author.Name },
-                Authority = new Person() { Name = y.Author.Name },
+                Author = new Person() { ID = y.Author.ID, Name = y.Author.Name },
+                Authority = new Person() { ID = y.Author.ID, Name = y.Authority.Name },
                 Notes = new Note() { NoteText = y.NoteText },
                 NoteDate = y.NoteDate,
                 Source = y.Source,
@@ -101,7 +101,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
     public async Task<List<Survey>> GetChangedSurveys(DateTime date)
     {
         string formattedDate = date.ToString("yyyy-MM-dd");
-        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/surveys/changed?date={formattedDate}");
+        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"{_baseApi}/surveys/changed?date={formattedDate}");
         var surveys = dto.Select(dtos => new Survey
         {
             SID = dtos.SID,
@@ -113,7 +113,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<Survey>> GetSurveysByVar(string varname)
     {
-        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/surveys/by-var/{varname}");
+        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"{_baseApi}/surveys/by-var/{varname}");
         var surveys = dto.Select(dtos => new Survey
         {
             SID = dtos.SID,
@@ -125,7 +125,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<List<Survey>> GetSurveysByRefVar(string varname)
     {
-        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/surveys/by-ref/{varname}");
+        var dto = await _http.GetFromJsonAsync<List<SurveyDto>>($"{_baseApi}/surveys/by-ref/{varname}");
         var surveys = dto.Select(dtos => new Survey
         {
             SID = dtos.SID,
@@ -137,7 +137,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<int> CreateAsync(Survey survey)
     {
-        var response = await _http.PostAsJsonAsync("api/surveys", survey);
+        var response = await _http.PostAsJsonAsync($"{_baseApi}/surveys", survey);
         response.EnsureSuccessStatusCode();
 
         var created = await response.Content.ReadFromJsonAsync<Survey>();
@@ -148,14 +148,14 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
     {
         var dto = surveyMapper.MapToDto(survey);
 
-        var response = await _http.PutAsJsonAsync($"api/surveys/{dto.SID}", dto);
+        var response = await _http.PutAsJsonAsync($"{_baseApi}/surveys/{dto.SID}", dto);
         response.EnsureSuccessStatusCode();
         return survey;
     }
 
     public async Task DeleteAsync(int id)
     {
-        var response = await _http.DeleteAsync($"api/surveys/{id}");
+        var response = await _http.DeleteAsync($"{_baseApi}/surveys/{id}");
         response.EnsureSuccessStatusCode();
     }
 
@@ -171,7 +171,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
         };
 
-        var response = await _http.PostAsJsonAsync($"api/questions/{dto.QID}/translations/{dto.ID}", dto);
+        var response = await _http.PostAsJsonAsync($"{_baseApi}/questions/{dto.QID}/translations/{dto.ID}", dto);
         response.EnsureSuccessStatusCode();
         return true;
     }
@@ -187,14 +187,14 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
             
         };
 
-        var response = await _http.PutAsJsonAsync($"api/questions/{dto.QID}/translations/{dto.ID}", dto);
+        var response = await _http.PutAsJsonAsync($"{_baseApi}/questions/{dto.QID}/translations/{dto.ID}", dto);
         response.EnsureSuccessStatusCode();
         return true;
     }
 
     public async Task<bool> UnlockSurvey(int surveyId)
     {
-        HttpResponseMessage response = await _http.PatchAsync($"api/surveys/{surveyId}/unlock", null);
+        HttpResponseMessage response = await _http.PatchAsync($"{_baseApi}/surveys/{surveyId}/unlock", null);
 
         return response.IsSuccessStatusCode;
     }
@@ -202,7 +202,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
     public async Task<bool> LockSurvey(int surveyId)
     {
-        HttpResponseMessage response = await _http.PatchAsync($"api/surveys/{surveyId}/lock", null);
+        HttpResponseMessage response = await _http.PatchAsync($"{_baseApi}/surveys/{surveyId}/lock", null);
 
         return response.IsSuccessStatusCode;
     }
