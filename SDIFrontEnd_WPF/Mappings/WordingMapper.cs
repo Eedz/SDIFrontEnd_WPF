@@ -56,6 +56,7 @@ namespace SDIFrontEnd_WPF.Mappings
             return new ResponseSetDto
             {
                 RespSetName = entity.RespSetName,
+                FieldType = entity.FieldType,
                 Type = (int)entity.Type,
                 RespList = entity.RespList
             };
