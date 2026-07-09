@@ -1,6 +1,7 @@
 ﻿
 using ITC_Contracts;
 using ITCLib;
+using SDIFrontEnd_WPF.Mappings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace SDIFrontEnd_WPF
 {
@@ -59,6 +61,15 @@ namespace SDIFrontEnd_WPF
         }
 
         public async Task<bool> UpdateQnums(IEnumerable<SurveyQuestion> qnums)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<bool> CreateTranslation(Translation translation)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> UpdateTranslation(Translation translation)
         {
             throw new NotImplementedException();
         }

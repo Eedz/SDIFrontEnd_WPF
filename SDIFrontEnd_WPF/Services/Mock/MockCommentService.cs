@@ -47,5 +47,10 @@ namespace SDIFrontEnd_WPF
         {
             return true;
         }
+
+        public Task<List<CommentType>> GetCommentTypesAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
