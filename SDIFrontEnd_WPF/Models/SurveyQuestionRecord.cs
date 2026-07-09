@@ -40,7 +40,7 @@ namespace SDIFrontEnd_WPF
         public ObservableCollection<QuestionTimeFrame> DeleteTimeFrames;
 
         public ObservableCollection<SurveyImage> AddedImages;
-        public ObservableCollection<SurveyImage> DeletedImages;
+        public ObservableCollection<SurveyImage> DeletedImages;       
 
         public SurveyQuestion Item { get; set; }
 
@@ -127,12 +127,13 @@ namespace SDIFrontEnd_WPF
 
         private void WatchCollection(INotifyCollectionChanged collection)
         {
-            // collection.CollectionChanged += (sender, e) => OnCollectionChanged(e); // OnPropertyChanged(nameof(ShouldSave));
+            collection.CollectionChanged += (sender, e) => OnCollectionChanged(e);
         }
 
         private void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(ShouldSave));
+            OnPropertyChanged(nameof(QuestionStatus));
         }
 
         public void Dispose()
