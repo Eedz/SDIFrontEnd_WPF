@@ -23,7 +23,7 @@ namespace SDIFrontEnd_WPF
         public string ResponseText => inputBox.Text;
 
         public string Message { get; set; }
-        public string TitleText { get; set; }
+        public string TitleText { get; set; } = "Prompt";
 
         public PromptDialog(string message, string title)
         {
