@@ -22,7 +22,6 @@ namespace SDIFrontEnd_WPF.Mappings
                 ID = dto.ID,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                Name = dto.Name,
                 Email = dto.Email,
                 Username = dto.Username,
                 OfficeNo = dto.OfficeNo,
