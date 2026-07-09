@@ -21,7 +21,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariableName>> GetVarNamesByLabel(string type, VarNameLabel label)
         {
-            var dtos = await _http.GetFromJsonAsync<List<VariableNameDto>>($"api/labels/{type}/{label.ID}/varnames");
+            var dtos = await _http.GetFromJsonAsync<List<VariableNameDto>>($"{_baseApi}/labels/{type}/{label.ID}/varnames");
 
             return dtos.Select(dto => new VariableName()
             {
