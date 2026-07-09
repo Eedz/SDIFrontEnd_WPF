@@ -21,7 +21,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<ReferenceDataStore> GetReferenceData()
         {
-            var dto = await _http.GetFromJsonAsync<ReferenceDataDto>("api/reference-data");
+            var dto = await _http.GetFromJsonAsync<ReferenceDataDto>($"{_baseApi}/reference-data");
             if (dto == null) return new ReferenceDataStore();
             var referenceData = new ReferenceDataStore()
             {
