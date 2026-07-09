@@ -12,7 +12,6 @@ namespace SDIFrontEnd_WPF
         Task<List<SurveyQuestion>> GetQuestionsByVarNameAsync(string varName);
         Task<List<SurveyQuestion>> GetQuestionsByRefVarNameAsync(string refVarName);
 
-        Task<SurveyQuestionRecord> SaveQuestion(SurveyQuestionRecord question);
 
         Task<List<SurveyQuestion>> SearchQuestions(string searchTerm);
 
@@ -20,5 +19,8 @@ namespace SDIFrontEnd_WPF
         Task<int> UpdateQuestion(SurveyQuestion question);
         Task<bool> DeleteQuestion(SurveyQuestion question);
         Task<bool> UpdateQnums(IEnumerable<SurveyQuestion> qnums);
+
+        Task<bool> UpdateTranslation(Translation translation);
+        Task<bool> CreateTranslation(Translation translation);
     }
 }
