@@ -11,13 +11,15 @@ namespace SDIFrontEnd_WPF
     public class ReferenceDataService
     {
         private readonly IApiReferenceDataService _api;
+        private readonly IApiCommentService _apiComments;
         private readonly ReferenceDataStore _store;
 
         public ReferenceDataService(
-            IApiReferenceDataService api,
+            IApiReferenceDataService api, IApiCommentService commentService,
             ReferenceDataStore store)
         {
             _api = api;
+            _apiComments = commentService;
             _store = store;
         }
 
@@ -29,7 +31,9 @@ namespace SDIFrontEnd_WPF
             Replace(_store.TopicLabels, data.TopicLabels);
             Replace(_store.ContentLabels, data.ContentLabels);
             Replace(_store.ProductLabels, data.ProductLabels);
-
+            
+            var commentData = await _apiComments.GetCommentTypesAsync();
+            Replace(_store.CommentTypes, commentData);
 
         }
 
