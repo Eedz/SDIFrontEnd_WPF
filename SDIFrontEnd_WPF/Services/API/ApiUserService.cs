@@ -19,7 +19,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var response = await this._http.GetFromJsonAsync<UserPrefsDto>($"api/users?username={username}");
+                var response = await this._http.GetFromJsonAsync<UserPrefsDto>($"{_baseApi}/users?username={username}");
                 if (response == null)
                     return new UserPrefs();
 
