@@ -39,4 +39,25 @@ namespace SDIFrontEnd_WPF
 
 
     }
+
+    public class PraccingIssueParser : IDataRowParser<PraccingIssue>
+    {
+        public PraccingIssue Parse(IDictionary<string, string> row)
+        {
+
+            var issue = new PraccingIssue
+            {
+                IssueNo = Convert.ToInt32(row["IssueNo"]),
+                VarNames = (string)row["VarNames"],
+                IssueDate = DateTime.TryParse(row["Date"], out var date) ? date : DateTime.Today,
+                PinNo = (string)row["Pin"],                
+                Description = (string)row["Issue Description"]
+            };
+
+            issue.IssueFrom = new Person { Name = row["IssueFrom"] };
+            issue.IssueTo = new Person { Name = row["IssueTo"] };
+
+            return issue;
+        }
+    }
 }
