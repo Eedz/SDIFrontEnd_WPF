@@ -38,6 +38,8 @@ namespace SDIFrontEnd_WPF.Mappings
                 },
                 Qnum = dto.Qnum,
                 AltQnum = dto.AltQnum,
+                AltQnum2 = dto.AltQnum2,
+                AltQnum3 = dto.AltQnum3,
                 PrePW = dto.PrePW == null ? null : new Wording() { WordID = dto.PrePW.ID, WordingText = dto.PrePW.WordingText },
                 PreIW = dto.PreIW == null ? null : new Wording() { WordID = dto.PreIW.ID, WordingText = dto.PreIW.WordingText },
                 PreAW = dto.PreAW == null ? null : new Wording() { WordID = dto.PreAW.ID, WordingText = dto.PreAW.WordingText },
@@ -47,10 +49,10 @@ namespace SDIFrontEnd_WPF.Mappings
                 RespOptionsS = dto.RespOptionsS == null ? null : new ResponseSet() { RespSetName = dto.RespOptionsS.RespSetName, RespList = dto.RespOptionsS.RespList },
                 NRCodesS = dto.NRCodesS == null ? null : new ResponseSet() { RespSetName = dto.NRCodesS.RespSetName, RespList = dto.NRCodesS.RespList },
 
-                Comments = dto.Comments.Select(x=> _commentMapper.MapToEntity(x)).ToList(),
+                Comments = dto.Comments.Select(x => _commentMapper.MapToEntity(x)).ToList(),
                 Translations = dto.Translations.Select(x => new Translation() { ID = x.ID, QID = x.QID, Bilingual = x.Bilingual, LanguageName = new Language() { LanguageName = x.LanguageName }, TranslationText = x.TranslationText }).ToList(),
                 TimeFrames = dto.TimeFrames.Select(x => new QuestionTimeFrame() { ID = x.ID, QID = x.QID, TimeFrame = x.TimeFrame }).ToList(),
-                Images = dto.Images.Select(x=>new SurveyImage() { ID = x.ID, QID = x.QID, FilePath = x.FilePath, ImagePath = x.FilePath, ImageName = x.ImageName }).ToList()
+                Images = dto.Images.Select(x => new SurveyImage() { ID = x.ID, QID = x.QID, FilePath = x.FilePath, ImagePath = x.FilePath, ImageName = x.ImageName }).ToList()
             };
         }
 
@@ -74,6 +76,8 @@ namespace SDIFrontEnd_WPF.Mappings
                 },
                 Qnum = question.Qnum,
                 AltQnum = question.AltQnum,
+                AltQnum2 = question.AltQnum2,
+                AltQnum3 = question.AltQnum3, 
                 PrePW = question.PrePW == null ? null : new WordingDto { ID = question.PrePW.WordID, WordingText = question.PrePW.WordingText },
                 PreIW = question.PreIW == null ? null : new WordingDto { ID = question.PreIW.WordID, WordingText = question.PreIW.WordingText },
                 PreAW = question.PreAW == null ? null : new WordingDto { ID = question.PreAW.WordID, WordingText = question.PreAW.WordingText },
@@ -82,6 +86,11 @@ namespace SDIFrontEnd_WPF.Mappings
                 PstPW = question.PstPW == null ? null : new WordingDto { ID = question.PstPW.WordID, WordingText = question.PstPW.WordingText },
                 RespOptionsS = question.RespOptionsS == null ? null : new ResponseSetDto { RespSetName = question.RespOptionsS.RespSetName, RespList = question.RespOptionsS.RespList },
                 NRCodesS = question.NRCodesS == null ? null : new ResponseSetDto { RespSetName = question.NRCodesS.RespSetName, RespList = question.NRCodesS.RespList },
+
+                Comments = question.Comments.Select(x => _commentMapper.MapToDto(x)).ToList(),
+                Translations = question.Translations.Select(x => new TranslationDto() { ID = x.ID, QID = x.QID, Bilingual = x.Bilingual, LanguageID = x.LanguageName.ID, LanguageName = x.LanguageName.LanguageName, TranslationText = x.TranslationText }).ToList(),
+                TimeFrames = question.TimeFrames.Select(x => new QuestionTimeFrameDto() { ID = x.ID, QID = x.QID, TimeFrame = x.TimeFrame }).ToList(),
+                Images = question.Images.Select(x => new SurveyImageDto() { ID = x.ID, QID = x.QID, FilePath = x.FilePath, Path = x.FilePath, ImageName = x.ImageName }).ToList()
             };
         }
     }
