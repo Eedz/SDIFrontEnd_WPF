@@ -24,7 +24,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<int> DeletePraccingIssue(int id)
         {
-            var result = await _http.DeleteAsync($"api/praccing/{id}");
+            var result = await _http.DeleteAsync($"{_baseApi}/praccing/{id}");
             result.EnsureSuccessStatusCode();
             return 0;
             
@@ -32,7 +32,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<PraccingCategory>> GetPraccingCategories()
         {
-            var result = await _http.GetFromJsonAsync<List<PraccingCategoryDto>>($"api/praccing/categories");
+            var result = await _http.GetFromJsonAsync<List<PraccingCategoryDto>>($"{_baseApi}/praccing/categories");
             
             if (result ==null)
                 return new List<PraccingCategory>();
@@ -47,7 +47,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<PraccingIssue>> GetPraccingIssues(int surveyid)
         {
-            var result = await _http.GetFromJsonAsync<List<PraccingIssueDto>>($"api/praccing?id={surveyid}");
+            var result = await _http.GetFromJsonAsync<List<PraccingIssueDto>>($"{_baseApi}/praccing?id={surveyid}");
 
             if (result == null)
                 return new List<PraccingIssue>();
@@ -58,7 +58,7 @@ namespace SDIFrontEnd_WPF
         public async Task<PraccingIssue> AddPraccingIssue(PraccingIssue issue)
         {
             var dto = _issueMapper.MapToDto(issue);
-            var response = await _http.PostAsJsonAsync("api/praccing", dto);
+            var response = await _http.PostAsJsonAsync($"{_baseApi}/praccing", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingIssueDto>();
@@ -71,7 +71,7 @@ namespace SDIFrontEnd_WPF
         public async Task<PraccingIssue> UpdatePraccingIssue(PraccingIssue issue)
         {
             var dto = _issueMapper.MapToDto(issue);
-            var response = await _http.PutAsJsonAsync("api/praccing", dto);
+            var response = await _http.PutAsJsonAsync($"{_baseApi}/praccing/{issue.ID}", dto);
 
             response.EnsureSuccessStatusCode();
 
@@ -85,7 +85,7 @@ namespace SDIFrontEnd_WPF
         public async Task<PraccingResponse> AddPraccingResponse(PraccingResponse issueresponse)
         {
             var dto = _responseMapper.MapToDto(issueresponse);
-            var response = await _http.PostAsJsonAsync("api/praccing/responses", dto);
+            var response = await _http.PostAsJsonAsync($"{_baseApi}/praccing/responses", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingResponseDto>();
@@ -97,7 +97,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<int> DeletePraccingResponse(int id)
         {
-            var response = await _http.DeleteAsync($"api/praccing/responses/{id}");
+            var response = await _http.DeleteAsync($"{_baseApi}/praccing/responses/{id}");
             response.EnsureSuccessStatusCode();
             return 0;
         }
@@ -105,7 +105,7 @@ namespace SDIFrontEnd_WPF
         public async Task<PraccingResponse> UpdatePraccingResponse(PraccingResponse issueresponse)
         {
             var dto = _responseMapper.MapToDto(issueresponse);
-            var response = await _http.PutAsJsonAsync("api/praccing", dto);
+            var response = await _http.PutAsJsonAsync($"{_baseApi}/praccing", dto);
 
             response.EnsureSuccessStatusCode();
 
@@ -124,7 +124,7 @@ namespace SDIFrontEnd_WPF
                 Path = image.Path,
                 FilePath = image.FilePath,
             };
-            var response = await _http.PostAsJsonAsync("api/praccing/images", dto);
+            var response = await _http.PostAsJsonAsync($"{_baseApi}/praccing/images", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingImageDto>();
@@ -142,7 +142,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<int> DeletePraccingImage(int id)
         {
-            var result = await _http.DeleteAsync($"api/praccing/images/{id}");
+            var result = await _http.DeleteAsync($"{_baseApi}/praccing/images/{id}");
             result.EnsureSuccessStatusCode();
             return 0;
         }
@@ -156,7 +156,7 @@ namespace SDIFrontEnd_WPF
                 Path = image.Path,
                 FilePath = image.FilePath,
             };
-            var response = await _http.PostAsJsonAsync("api/praccing/responses/images", dto);
+            var response = await _http.PostAsJsonAsync($"{_baseApi}/praccing/responses/images", dto);
             response.EnsureSuccessStatusCode();
 
             var created = await response.Content.ReadFromJsonAsync<PraccingImageDto>();
@@ -174,14 +174,14 @@ namespace SDIFrontEnd_WPF
 
         public async Task<int> DeletePraccingResponseImage(int id)
         {
-            var result = await _http.DeleteAsync($"api/praccing/responses/images/{id}");
+            var result = await _http.DeleteAsync($"{_baseApi}/praccing/responses/images/{id}");
             result.EnsureSuccessStatusCode();
             return 0;
         }
 
         public async Task<List<Survey>> GetPraccingSurveys()
         {
-            var result = await _http.GetFromJsonAsync<List<SurveyDto>>($"api/praccing/surveys");
+            var result = await _http.GetFromJsonAsync<List<SurveyDto>>($"{_baseApi}/praccing/surveys");
 
             if (result == null)
                 return new List<Survey>();
