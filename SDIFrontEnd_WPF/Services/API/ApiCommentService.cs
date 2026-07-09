@@ -25,7 +25,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var response = await _http.GetFromJsonAsync<List<QuestionCommentDto>>($"api/comments/question/{questionId}");
+                var response = await _http.GetFromJsonAsync<List<QuestionCommentDto>>($"{_baseApi}/comments/question/{questionId}");
 
                 var comments = response.Select(c => _questionCommentMapper.MapToEntity(c)).ToList();
                 return comments;
@@ -34,6 +34,21 @@ namespace SDIFrontEnd_WPF
             {
                 // Log the exception or handle it as needed
                 throw new ApplicationException($"Error fetching comments for question {questionId}: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<CommentType>> GetCommentTypesAsync()
+        {
+            try
+            {
+                var response = await _http.GetFromJsonAsync<List<CommentTypeDto>>($"{_baseApi}/comments/types");
+                var commentTypes = response.Select(ct => new CommentType() { ID = ct.ID, TypeName = ct.TypeName, ShortForm = ct.ShortForm }).ToList();
+                return commentTypes;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                throw new ApplicationException($"Error fetching comment types: {ex.Message}", ex);
             }
         }
 
@@ -58,7 +73,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var response = await _http.PostAsync($"api/comments/backup/{qid}", null);
+                var response = await _http.PostAsync($"{_baseApi}/comments/backup/{qid}", null);
                 response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
@@ -73,7 +88,7 @@ namespace SDIFrontEnd_WPF
             try
             {
                 var commentDto = _deletedCommentMapper.MapToDto(comment);
-                var response = await _http.PostAsJsonAsync("api/comments/deleted", commentDto);
+                var response = await _http.PostAsJsonAsync($"{_baseApi}/comments/deleted", commentDto);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
