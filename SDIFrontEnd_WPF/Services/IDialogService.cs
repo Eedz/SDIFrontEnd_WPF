@@ -212,8 +212,7 @@ namespace SDIFrontEnd_WPF
                 Content = new ContentControl { Content = viewModel },
                 DataContext = viewModel,
                 Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
             };
 
             // Keep a strong reference to the handler so we can unsubscribe
