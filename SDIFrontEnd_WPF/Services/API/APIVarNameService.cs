@@ -27,13 +27,13 @@ namespace SDIFrontEnd_WPF
         {
 
             var dto = _varnameMapper.MapToDto(variable);
-            var result = await _http.PostAsJsonAsync("api/varnames", dto);
+            var result = await _http.PostAsJsonAsync($"{_baseApi}/varnames", dto);
             return result.IsSuccessStatusCode ? 1 : 0;
         }
 
         public async Task<List<VariableName>> GetAllVarNames()
         {
-            var list = await _http.GetFromJsonAsync<List<VariableNameDto>>("api/varnames/all");
+            var list = await _http.GetFromJsonAsync<List<VariableNameDto>>($"{_baseApi}/varnames/all");
             return list.Select(_varnameMapper.MapToEntity).ToList();
         }
 
@@ -43,7 +43,7 @@ namespace SDIFrontEnd_WPF
 
             foreach (string varname in varlist)
             {
-                var varnames = await _http.GetFromJsonAsync<VariableNameDto>($"api/varnames/{varname}");
+                var varnames = await _http.GetFromJsonAsync<VariableNameDto>($"{_baseApi}/varnames/{varname}");
                 list.Add(_varnameMapper.MapToEntity(varnames));
             }
             return list;
@@ -51,7 +51,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<VariableName> GetVariableInfo(string varname)
         {
-            var dto = await _http.GetFromJsonAsync<VariableNameDto>($"api/varnames/{varname}");
+            var dto = await _http.GetFromJsonAsync<VariableNameDto>($"{_baseApi}/varnames/{varname}");
             return dto == null ? new VariableName() : _varnameMapper.MapToEntity(dto);
         }
 
@@ -62,20 +62,20 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariableName>> SearchVarNames(string search, int take = 50)
         {
-            var dto = await _http.GetFromJsonAsync<List<VariableNameDto>>($"api/varnames?search={Uri.EscapeDataString(search)}&take={take}");
+            var dto = await _http.GetFromJsonAsync<List<VariableNameDto>>($"{_baseApi}/varnames?search={Uri.EscapeDataString(search)}&take={take}");
             return dto == null ? new List<VariableName>() : dto.Select(_varnameMapper.MapToEntity).ToList();
         }
 
         public async Task<bool> UpdateVariable(VariableName variable)
         {
             var dto = _varnameMapper.MapToDto(variable);
-            var result = await _http.PutAsJsonAsync($"api/varnames/{variable.ID}", dto);
+            var result = await _http.PutAsJsonAsync($"{_baseApi}/varnames/{variable.ID}", dto);
             return result.IsSuccessStatusCode;
         }
 
         public async Task<bool> VarNameInUse(string varname)
         {
-            var result = await _http.GetAsync($"api/varnames/exists?varName={varname}");
+            var result = await _http.GetAsync($"{_baseApi}/varnames/exists?varName={varname}");
             if (result.IsSuccessStatusCode)
             {
                 var inUse = await result.Content.ReadFromJsonAsync<bool>();
@@ -91,19 +91,19 @@ namespace SDIFrontEnd_WPF
 
         public async Task<bool> DeleteVariable(string varname)
         {
-            var result = await _http.DeleteAsync($"api/varnames/{varname}");
+            var result = await _http.DeleteAsync($"{_baseApi}/varnames/{varname}");
             return result.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteVariable(int id)
         {
-            var dto = await _http.DeleteAsync($"api/varnames/{id}");
+            var dto = await _http.DeleteAsync($"{_baseApi}/varnames/{id}");
             return dto.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteVariablePrefix(int id)
         {
-            var response = await _http.DeleteAsync($"api/varnames/prefixes/{id}");
+            var response = await _http.DeleteAsync($"{_baseApi}/varnames/prefixes/{id}");
             return response.IsSuccessStatusCode;
         }
 
@@ -121,7 +121,7 @@ namespace SDIFrontEnd_WPF
                 Inactive = prefix.Inactive
             };
 
-            var response = await _http.PostAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes", dto);
+            var response = await _http.PostAsJsonAsync<VariablePrefixDto>($"{_baseApi}/varnames/prefixes", dto);
             response.EnsureSuccessStatusCode();
             var createdDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>();
             return 0;
@@ -129,7 +129,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariablePrefix>> GetVariablePrefixes()
         {
-            var response = await _http.GetFromJsonAsync<List<VariablePrefixDto>>($"api/varnames/prefixes");
+            var response = await _http.GetFromJsonAsync<List<VariablePrefixDto>>($"{_baseApi}/varnames/prefixes");
             var prefixes = response.Select(x => new VariablePrefix()
             {
                 ID = x.ID,
@@ -172,7 +172,7 @@ namespace SDIFrontEnd_WPF
                     Description = x.Description }).ToList()
             };
 
-            var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"api/varnames/prefixes/{prefix.ID}", dto);
+            var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"{_baseApi}/varnames/prefixes/{prefix.ID}", dto);
             response.EnsureSuccessStatusCode();
             var updatedDto = await response.Content.ReadFromJsonAsync<VariablePrefixDto>();
             return 0;
@@ -180,7 +180,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<VariableNameSurveys>> SearchVarNameUsage(string searchTerm, int take)
         {
-            var dto = await _http.GetFromJsonAsync<List<VarNameUsageDto>>($"api/varnames/usage?search={Uri.EscapeDataString(searchTerm)}&take={take}");
+            var dto = await _http.GetFromJsonAsync<List<VarNameUsageDto>>($"{_baseApi}/varnames/usage?search={Uri.EscapeDataString(searchTerm)}&take={take}");
             var usages = new List<VariableNameSurveys>();
             dto.ForEach(x => usages.Add(new VariableNameSurveys()
             {
@@ -203,7 +203,7 @@ namespace SDIFrontEnd_WPF
 
         public async Task<List<QuestionUsage>> GetVarNameQuestions(string varname)
         {
-            var dto = await _http.GetFromJsonAsync<List<QuestionUsageDto>>($"api/varnames/usage/{varname}");
+            var dto = await _http.GetFromJsonAsync<List<QuestionUsageDto>>($"{_baseApi}/varnames/usage/{varname}");
             var questions = dto.Select(x => new QuestionUsage
             {
                 ID = x.ID,
