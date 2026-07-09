@@ -26,7 +26,7 @@ namespace SDIFrontEnd_WPF
         {
             try
             {
-                var response = await this._http.GetFromJsonAsync<List<PersonDto>>($"api/people/basics");
+                var response = await this._http.GetFromJsonAsync<List<PersonDto>>($"{_baseApi}/people/basics");
                 if (response == null)
                     return new List<Person>();
 
