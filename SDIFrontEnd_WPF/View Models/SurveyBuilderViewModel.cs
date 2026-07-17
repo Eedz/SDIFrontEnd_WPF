@@ -394,7 +394,7 @@ namespace SDIFrontEnd_WPF
                 return;
             }
             // show translation window
-            TranslationVM = new TranslationViewModel(SelectedQuestion);
+            TranslationVM = new TranslationViewModel(_questionService, SelectedQuestion);
             _dialogService.ShowWindow(TranslationVM);
         }
 
@@ -406,8 +406,15 @@ namespace SDIFrontEnd_WPF
                 _dialogService.ShowError("No question selected.", "Translation Error");
                 return;
             }
+
+            if (SelectedQuestion.ID == 0)
+            {
+                _dialogService.ShowError("Please save the question before adding translations.", "Translation Error");
+                return;
+            }
+
             // show translation window
-            TranslationVM = new TranslationViewModel(SelectedQuestion);
+            TranslationVM = new TranslationViewModel(_questionService, SelectedQuestion);
             bool? result = _dialogService.ShowDialog(TranslationVM);
             if (result.Value) // if closed with OK
             {
