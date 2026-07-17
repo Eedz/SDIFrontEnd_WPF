@@ -86,6 +86,17 @@ namespace SDIFrontEnd_WPF
                     // A normal item selected -> deselect <All>
                     AllItem.IsSelected = false;
                 }
+                else if (!changed.IsAll && !changed.IsSelected)
+                {
+                    // A normal item was deselected
+                    // If no normal items are selected, reselect <All>
+                    bool anySelected = Items.Any(i => !i.IsAll && i.IsSelected);
+
+                    if (!anySelected)
+                    {
+                        AllItem.IsSelected = true;
+                    }
+                }
             }
 
             _suppress = false;
