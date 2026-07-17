@@ -12,7 +12,7 @@ using System.Collections.ObjectModel;
 
 namespace SDIFrontEnd_WPF
 {
-    public enum MenuCategory { Home, Surveys, VarNames, Search, Praccing, Reports, Timing }
+    public enum MenuCategory { Home, Surveys, VarNames, Search, Praccing, Reports } //, Timing }
     public partial class MainWindowViewModel : ViewModelBase
     {
         // this class controls which items are displayed in the left pane of the main window
@@ -178,8 +178,8 @@ namespace SDIFrontEnd_WPF
                     await ((PraccingReportViewModel)vm).LoadSurveysAsync();
                     return vm;
                 case "Import":
-                    vm = _services.GetRequiredService<PraccingImportViewModel>();
-                   // await ((PraccingImportViewModel)vm).Load();
+                    vm = _services.GetRequiredService<PraccingIssuesImporterViewModel>();
+                    await ((PraccingIssuesImporterViewModel)vm).LoadAsync();
                     return vm;
                 case "Sheet":
                     vm = _services.GetRequiredService<PraccingSheetViewModel>();
@@ -279,10 +279,10 @@ namespace SDIFrontEnd_WPF
             {
                 new SublinkItem("Variable Info", "varinfo", MenuCategory.VarNames),
                 new SublinkItem("Rename Vars", "rename_vars", MenuCategory.VarNames),
-                new SublinkItem("VarName Changes", "varchanges", MenuCategory.VarNames),
-                new SublinkItem("VarName Usage", "varusage", MenuCategory.VarNames),
+             //   new SublinkItem("VarName Changes", "varchanges", MenuCategory.VarNames),
+             //   new SublinkItem("VarName Usage", "varusage", MenuCategory.VarNames),
                 new SublinkItem("Prefix List", "prefixes", MenuCategory.VarNames),
-                new SublinkItem("VarName History", "history", MenuCategory.VarNames),
+             //   new SublinkItem("VarName History", "history", MenuCategory.VarNames),
                 new SublinkItem("Label Library", "labels", MenuCategory.VarNames),
             };
         }
@@ -292,8 +292,8 @@ namespace SDIFrontEnd_WPF
             return new ObservableCollection<SublinkItem>()
             {
                 new SublinkItem("Questions", "Questions", MenuCategory.Search),
-                new SublinkItem("Response Sets", "ResponseSets", MenuCategory.Search),
-                new SublinkItem("Comments", "Comments", MenuCategory.Search),
+              //  new SublinkItem("Response Sets", "ResponseSets", MenuCategory.Search),
+             //   new SublinkItem("Comments", "Comments", MenuCategory.Search),
             };
         }
 
@@ -313,13 +313,13 @@ namespace SDIFrontEnd_WPF
         {
             return new ObservableCollection<SublinkItem>()
             {
-                new SublinkItem("Single", "Single", MenuCategory.Reports),
-                new SublinkItem("Comparison", "Comparison", MenuCategory.Reports),
-                new SublinkItem("Translation", "Translation", MenuCategory.Reports),
-                new SublinkItem("Website", "Website", MenuCategory.Reports),
+               // new SublinkItem("Single", "Single", MenuCategory.Reports),
+                //new SublinkItem("Comparison", "Comparison", MenuCategory.Reports),
+                //new SublinkItem("Translation", "Translation", MenuCategory.Reports),
+                //new SublinkItem("Website", "Website", MenuCategory.Reports),
                 new SublinkItem("Variable List", "Variable List", MenuCategory.Reports),
                 new SublinkItem("Harmony", "Harmony", MenuCategory.Reports),
-                new SublinkItem("Parallel Vars", "Parallel Vars", MenuCategory.Reports),
+                //new SublinkItem("Parallel Vars", "Parallel Vars", MenuCategory.Reports),
                 new SublinkItem("Topic/Content", "tc", MenuCategory.Reports),
                 
             };
@@ -338,7 +338,7 @@ namespace SDIFrontEnd_WPF
                 MenuCategory.Search => GetSearchLinks(),
                 MenuCategory.Praccing => GetPraccingLinks(),
                 MenuCategory.Reports => GetReportLinks(),
-                MenuCategory.Timing => new ObservableCollection<SublinkItem>() { new SublinkItem("Timing", "Timing", MenuCategory.Timing)},
+               // MenuCategory.Timing => new ObservableCollection<SublinkItem>() { new SublinkItem("Timing", "Timing", MenuCategory.Timing)},
                 _ => Enumerable.Empty<SublinkItem>()
             };
 

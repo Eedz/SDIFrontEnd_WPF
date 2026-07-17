@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SDIFrontEnd_WPF"
         mc:Ignorable="d"
-        Title="Survey Development Index" Height="700" Width="1200" WindowState="Maximized">
+        Title="Survey Development Index" Height="700" Width="1400" WindowState="Maximized">
     <Window.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -47,7 +47,8 @@
         </StackPanel>
 
         <DockPanel Grid.Row="1" Grid.Column="1" Background="AliceBlue">
-            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Stretch">
+            <ContentControl Content="{Binding ActiveForm}" Margin="10" Background="White" BorderBrush="Gray" 
+                            BorderThickness="1" VerticalAlignment="Stretch" >
                 
             </ContentControl>
         </DockPanel>
