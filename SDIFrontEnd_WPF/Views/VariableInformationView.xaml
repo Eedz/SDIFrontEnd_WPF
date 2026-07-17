@@ -15,12 +15,18 @@
                 <Button Content="Save All" Command="{Binding SaveAllCommand}" Margin="900,3,3,3"/>
             </StackPanel>
             <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" Height="800">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel, UpdateSourceTrigger=PropertyChanged}"/>
-
-               
-
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Dirty}" Value="True">
+                                <Setter Property="Background" Value="Orange"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="VarName" Binding="{Binding VarName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="VarLabel" Binding="{Binding VarLabel, UpdateSourceTrigger=PropertyChanged}"/>
                     <DataGridTemplateColumn Header="Domain">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -30,10 +36,8 @@
 
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <ComboBox
-                        ItemsSource="{Binding DataContext.Domains, ElementName=Root}"
-                        SelectedItem="{Binding Domain, Mode=TwoWay}"
-                        DisplayMemberPath="Label"/>
+                                <ComboBox ItemsSource="{Binding DataContext.Domains, ElementName=Root}"
+                                    SelectedItem="{Binding Domain, Mode=TwoWay}" DisplayMemberPath="Label"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -48,10 +52,8 @@
 
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <ComboBox
-                        ItemsSource="{Binding DataContext.Topics, ElementName=Root}"
-                        SelectedItem="{Binding Topic, Mode=TwoWay}"
-                        DisplayMemberPath="Label"/>
+                                <ComboBox ItemsSource="{Binding DataContext.Topics, ElementName=Root}"
+                                    SelectedItem="{Binding Topic, Mode=TwoWay}" DisplayMemberPath="Label"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -66,10 +68,8 @@
 
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <ComboBox
-                        ItemsSource="{Binding DataContext.Contents, ElementName=Root}"
-                        SelectedItem="{Binding Content, Mode=TwoWay}"
-                        DisplayMemberPath="Label"/>
+                                <ComboBox ItemsSource="{Binding DataContext.Contents, ElementName=Root}"
+                                    SelectedItem="{Binding Content, Mode=TwoWay}" DisplayMemberPath="Label"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -84,10 +84,8 @@
 
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <ComboBox
-                        ItemsSource="{Binding DataContext.Products, ElementName=Root}"
-                        SelectedItem="{Binding Product, Mode=TwoWay}"
-                        DisplayMemberPath="Label"/>
+                                <ComboBox ItemsSource="{Binding DataContext.Products, ElementName=Root}"
+                                    SelectedItem="{Binding Product, Mode=TwoWay}" DisplayMemberPath="Label"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
