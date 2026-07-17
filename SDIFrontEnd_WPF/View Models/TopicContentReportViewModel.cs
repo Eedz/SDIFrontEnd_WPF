@@ -27,7 +27,7 @@ namespace SDIFrontEnd_WPF.ViewModels
 
 
         public SelectableList<VarNameLabel>? ProductList { get; set; }
-        public ObservableCollection<VarNameLabel> SelectedProductLabels { get; set; } = new ObservableCollection<VarNameLabel>();
+      
 
         public SelectableList<string>? FieldNames {  get; set; }
 
@@ -69,6 +69,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             rprt.ProductCrosstab = IncludeProduct;
             foreach (ReportSurvey s in ReportSurveys)
             {
+                s.Questions.Clear();
                 var rs = await PopulateSurvey(s);
                 rprt.AddSurvey(rs);
             }
