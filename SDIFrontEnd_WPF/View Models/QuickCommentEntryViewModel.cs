@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 using ITCLib;
 
@@ -18,7 +19,10 @@ namespace SDIFrontEnd_WPF.ViewModels
         private readonly ReferenceDataStore _commentData;
         public ObservableCollection<Person> AllAuthors { get; set; }
         public ObservableCollection<CommentType> AllCommentTypes { get; set; }
-        public string NoteText { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommentCommand))]
+        private string noteText = string.Empty;
         public Person Author { get; set; } = new Person();
         public CommentType NoteType { get; set; } = new CommentType();
         public DateTime NoteDate { get; set; } = DateTime.Now;
