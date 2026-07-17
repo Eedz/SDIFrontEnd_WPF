@@ -26,10 +26,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         private ObservableCollection<ResponseUsage> usages = new();
 
         [ObservableProperty]
-        private FlowDocument responseText = new();
+        private string wordingHtml = string.Empty;
 
-
-        
 
         /// <summary>
         /// Raised when this item has been successfully deleted, so the parent list can remove it.
@@ -64,7 +62,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             if (string.IsNullOrEmpty(ResponseSet.RespList))
                 return;
 
-            ResponseText = (FlowDocument)SimpleHtmlConverter.FromHtml(ResponseSet.RespList);
+            WordingHtml = ResponseSet.RespList;
         }
 
         public async Task LoadUsagesAsync()
@@ -73,9 +71,11 @@ namespace SDIFrontEnd_WPF.ViewModels
                 await _wordingService.GetResponseUsages(ResponseSet));
         }
 
-        partial void OnResponseTextChanged(FlowDocument value)
+        partial void OnWordingHtmlChanged(string value)
         {
-            ResponseSet.RespList = SimpleHtmlConverter.ToHtml(value);
+            ResponseSet.RespList = value == null
+                ? string.Empty
+                : value;
         }
 
         [RelayCommand]
