@@ -4,6 +4,7 @@ using ITCLib;
 using MvvmLib.ViewModels;
 using SDIFrontEnd_WPF.ViewModels;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace SDIFrontEnd_WPF
 {
@@ -18,6 +19,8 @@ namespace SDIFrontEnd_WPF
         private readonly IApiPeopleService _peopleService;
         private readonly IApiVarNameService _varnameService;
         private readonly WordingData _wordingData;
+
+        public QuestionRecordDropHandler DropHandler { get; }
 
         private readonly Survey CurrentSurvey;
         private readonly ObservableCollection<SurveyQuestionRecord> _recordList;
