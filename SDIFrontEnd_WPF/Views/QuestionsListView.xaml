@@ -34,10 +34,11 @@
             <TextBlock Text="|"/>
             <TextBlock Text="{Binding SelectedQuestion.VarName.VarLabel}" Margin="5,0" FontWeight="Bold"/>
         </StackPanel>
-        <Grid Grid.Row="2" Grid.Column="0" >
+        <Grid Grid.Row="2" Grid.Column="0" Margin="5,2,5,2" >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition MaxHeight="25"></RowDefinition>
@@ -51,33 +52,35 @@
                 <RowDefinition Height="*"></RowDefinition>
                 
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Grid.Row="0" >
-                <TextBox Text="{Binding SelectedQuestion.PrePW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="1" >
-                <TextBox Text="{Binding SelectedQuestion.PreIW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="2"  >
-                <TextBox Text="{Binding SelectedQuestion.PreAW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="3" >
-                <TextBox Text="{Binding  SelectedQuestion.LitQW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="4" >
-                <TextBox Text="{Binding SelectedQuestion.RespOptionsS.RespSetName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="5" >
-                <TextBox Text="{Binding SelectedQuestion.NRCodesS.RespSetName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="6" >
-                <TextBox Text="{Binding SelectedQuestion.PstIW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Grid.Row="7" >
-                <TextBox Text="{Binding SelectedQuestion.PstPW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
-            </StackPanel>
+            
+            <TextBlock Text="PreP" Grid.Row="0"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedQuestion.PrePW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
+            <TextBlock Text="PreI" Grid.Row="1"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedQuestion.PreIW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
+            <TextBlock Text="PreA" Grid.Row="2"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedQuestion.PreAW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
+            <TextBlock Text="LitQ" Grid.Row="3"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding  SelectedQuestion.LitQW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+
+            <TextBlock Text="ROs" Grid.Row="4"/>
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedQuestion.RespOptionsS.RespSetName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
+            
+            <TextBlock Text="NRs" Grid.Row="5"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SelectedQuestion.NRCodesS.RespSetName}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
+            <TextBlock Text="PstI" Grid.Row="6"/>
+            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding SelectedQuestion.PstIW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
+            <TextBlock Text="PstP" Grid.Row="7"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding SelectedQuestion.PstPW.WordID}" Width="70" Margin="5,0" VerticalContentAlignment="Center"/>
+            
            
             <!-- question text -->
-            <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+            <FlowDocumentScrollViewer Grid.Column="2" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
                 <FlowDocumentScrollViewer.Document>
                     <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
                 </FlowDocumentScrollViewer.Document>

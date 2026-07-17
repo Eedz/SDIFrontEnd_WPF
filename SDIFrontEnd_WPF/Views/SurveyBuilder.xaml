@@ -9,6 +9,7 @@
              xmlns:views="clr-namespace:SDIFrontEnd_WPF.Views"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:MvvmLib.Behaviors;assembly=MvvmLib"
+             xmlns:gong="urn:gong-wpf-dragdrop"
              mc:Ignorable="d" Height="Auto"
              d:DesignHeight="450" d:DesignWidth="1200">
     <UserControl.Resources>
@@ -25,7 +26,7 @@
             <Style x:Key="QuestionRowColor" TargetType="DataGridRow" BasedOn="{StaticResource QuestionRowStyle}">
                 <Setter Property="Background" Value="{Binding QuestionStatus, Converter={StaticResource QuestionStatusToBackgroundConverter}}"/>
             </Style>
-           
+            
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -85,6 +86,8 @@
             <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock FontWeight="Bold" FontSize="12" Text="AltQ#: " />
                 <TextBox Text="{Binding SelectedQuestion.AltQnum}" d:Text="AltQ#" Width="70" DockPanel.Dock="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+                <TextBox Text="{Binding SelectedQuestion.AltQnum2}" d:Text="AltQ#" Width="70" DockPanel.Dock="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+                <TextBox Text="{Binding SelectedQuestion.AltQnum3}" d:Text="AltQ#" Width="70" DockPanel.Dock="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
             </StackPanel>
             <TextBlock  HorizontalAlignment="Center" Text="{Binding SectionCount}" FontSize ="10" d:Text="Current Question's section count"/>
         </StackPanel>
@@ -94,29 +97,34 @@
                 <TextBlock Text="Go To" DockPanel.Dock="Top"/>
                 <ComboBox Margin="3,0" ItemsSource="{Binding QuestionList}" SelectedItem="{Binding GoToVar}" DisplayMemberPath="VarName" Width="90"/>
             </StackPanel>
+            <!--<DataGrid Height="Auto"
+                AllowDrop="True"
+                mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestionRecords}"
+            </DataGrid>-->
+
             <DataGrid Height="Auto"
                 ItemsSource="{Binding RecordList}"
                 SelectedItem="{Binding SelectedQuestionRecord}"
-                ScrollViewer.VerticalScrollBarVisibility="Visible" 
-                VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingPanel.VirtualizationMode="Recycling"
-                AutoGenerateColumns="False" 
+                AutoGenerateColumns="False"
                 HeadersVisibility="Column"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
-                AllowDrop="True"
                 IsReadOnly="True"
                 Margin="5"
                 GridLinesVisibility="None"
                 SelectionUnit="FullRow"
-                mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestionRecords}"
+                SelectionMode="Extended"
+                ScrollViewer.VerticalScrollBarVisibility="Visible"
+                VirtualizingStackPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
                 mvvmLib:DataGridHelper.ScrollOnSelected="True"
                 mvvmLib:DataGridHelper.Command="{Binding ToggleQuestionCommand}"
-                RowStyle="{StaticResource QuestionRowColor}">
+                RowStyle="{StaticResource QuestionRowColor}"
 
-                <i:Interaction.Behaviors>
-                    <behaviors:DataGridReorderBehavior MoveCommand="{Binding ReorderCommand}" />
-                </i:Interaction.Behaviors>
+                gong:DragDrop.IsDragSource="True"
+                gong:DragDrop.IsDropTarget="True"
+                gong:DragDrop.UseDefaultDragAdorner="True"
+                gong:DragDrop.DropHandler="{Binding DropHandler}">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Qnum" Binding="{Binding Item.Qnum}" Width="60"/>
@@ -124,7 +132,6 @@
                     <DataGridTextColumn Header="VarLabel" Binding="{Binding Item.VarName.VarLabel}" Width="300"/>
                     <DataGridTextColumn Header="RespName" Binding="{Binding Item.RespOptionsS.RespSetName}" Width="Auto"/>
                 </DataGrid.Columns>
-
 
             </DataGrid>
         </DockPanel>
@@ -233,8 +240,8 @@
                             <Run  d:Text="0" Text="{Binding SelectedQuestion.Translations.Count, Mode=OneWay}" />
                             <Run  Text=" translations."/>
                         </TextBlock>
-                        <TextBlock Text="Time Frames" FontWeight="Bold" />
-                        <ListBox Height="80" ItemsSource="{Binding SelectedQuestion.TimeFrames}"></ListBox>
+                        <!--<TextBlock Text="Time Frames" FontWeight="Bold" />
+                        <ListBox Height="80" ItemsSource="{Binding SelectedQuestion.TimeFrames}"></ListBox>-->
                     </StackPanel>
                     
                     <!-- question text -->
