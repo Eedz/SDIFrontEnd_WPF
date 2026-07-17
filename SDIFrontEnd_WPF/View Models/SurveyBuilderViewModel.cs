@@ -985,7 +985,7 @@ namespace SDIFrontEnd_WPF
         {
             if (CurrentImage != null)
             {
-                if (_dialogService.Confirm("Are you sure you want to delete this image?", "Confirm"))
+                if (!_dialogService.Confirm("Are you sure you want to delete this image?", "Confirm"))
                     return;
 
                 SelectedQuestion.Images.Remove(CurrentImage);
