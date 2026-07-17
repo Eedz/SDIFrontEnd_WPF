@@ -47,8 +47,9 @@
                 
                 <RichTextBox Margin="0" FontWeight="Bold"
                     VerticalScrollBarVisibility="Visible" IsDocumentEnabled="True"
-                    mvvm:RichTextBoxHelper.Document="{Binding EnglishPreP, Mode=TwoWay}" IsReadOnly="True">
-
+                    mvvm:RichTextBoxHelper.Html="{Binding EnglishPreP, Mode=OneWay}"
+                    IsReadOnly="True">
+                    
                 </RichTextBox>
             </DockPanel>
         </Border>
@@ -57,7 +58,7 @@
             
             <RichTextBox Margin="0" 
                 VerticalScrollBarVisibility="Visible" AcceptsTab="True" IsDocumentEnabled="True"
-                mvvm:RichTextBoxHelper.Document="{Binding CurrentTranslationText, Mode=TwoWay}" >
+                mvvm:RichTextBoxHelper.Html="{Binding TranslationText, Mode=TwoWay}" >
                 <xctk:RichTextBoxFormatBarManager.FormatBar>
                     <xctk:RichTextBoxFormatBar/>
                 </xctk:RichTextBoxFormatBarManager.FormatBar>
@@ -67,7 +68,7 @@
         <DockPanel Margin="5" Grid.Row="3" HorizontalAlignment="Stretch" Background="White" Effect="{StaticResource SunkenEffect}">
             <RichTextBox Margin="0" FontWeight="Bold"
                 VerticalScrollBarVisibility="Visible" IsDocumentEnabled="True"
-                mvvm:RichTextBoxHelper.Document="{Binding EnglishPstP, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True">
+                mvvm:RichTextBoxHelper.Html="{Binding EnglishPstP, Mode=OneWay}" IsReadOnly="True">
                 
             </RichTextBox>
         </DockPanel>

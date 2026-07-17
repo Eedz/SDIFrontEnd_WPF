@@ -3,19 +3,23 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:behaviors="clr-namespace:SDIFrontEnd_WPF.Behaviors"
              xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
              xmlns:mvvm="clr-namespace:MvvmLib;assembly=MvvmLib"
              xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" >
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
     <Grid Background="LightBlue">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition Height="5"></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -23,20 +27,23 @@
         <!-- Commands -->
         <DockPanel Grid.ColumnSpan="2">
        
-            <Button Command="{Binding SaveAsyncCommand}" Content="Save" Margin="3" Height="20" Width="35"/>
-            <Button Command="{Binding ToggleEditAsyncCommand}" Content="Edit" Margin="3" Height="20" Width="35"/>
-            
-            <Button Command="{Binding DeleteAsyncCommand}" Content="Delete" HorizontalAlignment="Right" Margin="3" Height="20" Width="45"/>
+            <Button Command="{Binding SaveCommand}" Content="Save" Margin="3" Height="20" Width="35"/>
+            <Button Command="{Binding ToggleEditCommand}" Content="Edit" Margin="3" Height="20" Width="35"/>
+            <TextBlock Text="Editing..." Visibility="{Binding LockedForEditing, Converter={StaticResource BoolToVis}}" Margin="3" VerticalAlignment="Center"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete" HorizontalAlignment="Right" Margin="3" Height="20" Width="45"/>
            
         </DockPanel>
         <!-- Wording Text -->
-        <RichTextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,0,0,0" 
+        <xctk:RichTextBox x:Name="MyRichTextBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,0,0,0" 
                     VerticalScrollBarVisibility="Visible" AcceptsTab="True" IsDocumentEnabled="True"
-                    mvvm:RichTextBoxHelper.Document="{Binding WordingText, Mode=TwoWay}" IsReadOnly="{Binding LockedForEditing}">
+                    mvvm:RichTextBoxHelper.Html="{Binding WordingHtml, Mode=TwoWay}" IsReadOnly="{Binding LockedForEditing}"
+                    behaviors:RichTextBoxSoftReturnBehavior.EnableSoftReturn="True">
+
+            
             <xctk:RichTextBoxFormatBarManager.FormatBar>
                 <xctk:RichTextBoxFormatBar/>
             </xctk:RichTextBoxFormatBarManager.FormatBar>
-        </RichTextBox>
+        </xctk:RichTextBox>
 
         <!-- Splitter -->
         <GridSplitter Grid.Row="2" Grid.ColumnSpan="2"
