@@ -86,24 +86,22 @@ namespace SDIFrontEnd_WPF.ViewModels
         private string dbImageRepo = ConfigurationManager.AppSettings["PraccingImagesPath"] ?? string.Empty;
 
 
+        [ObservableProperty]
         private Survey? currentSurvey;
-        public Survey? CurrentSurvey
-        {
-            get => currentSurvey;
-            set
-            {
-                SetProperty(ref currentSurvey, value);
-                if (value != null)
-                {
-                    // Load the issues for the selected survey
 
-                    _ = LoadSurveyIssues(value.SID);
-                    _ = LoadLists();
-                    LoadLanguages(value);
-                    RefreshCurrentIssue();
-                }
-                NotifyAllCommandCanExecuteChanged();
+       
+
+        partial void OnCurrentSurveyChanged(Survey? oldValue, Survey? newValue)
+        {
+            if (newValue != null)
+            {
+                // Load the issues for the selected survey
+                _ = LoadSurveyIssues(newValue.SID);
+                _ = LoadLists();
+                LoadLanguages(newValue);
+                RefreshCurrentIssue();
             }
+            NotifyAllCommandCanExecuteChanged();
         }
 
         /// <summary>

@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.PraccingIssuesImporterView"
+             x:Name="Root"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:main="clr-namespace:SDIFrontEnd_WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="860" d:DesignWidth="1450" >
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+    <Grid Width="1260" HorizontalAlignment="Left">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Praccing Issues Importer" FontSize="22" FontWeight="Bold" Margin="10"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
+            <TextBlock Text="Survey:" VerticalAlignment="Center"/>
+            <ComboBox ItemsSource="{Binding SurveyList}" SelectedItem="{Binding SelectedSurvey}" Width="100" Height="25" Margin="32,0"/>
+            <TextBlock Text="Select File:" VerticalAlignment="Center" Margin="5,0"/>
+            <TextBox x:Name="FilePathTextBox" Text="{Binding FilePath}" Width="300" Height="50" TextWrapping="Wrap" Margin="5,0"/>
+            <Button Content="Browse..." Command="{Binding BrowseFilesCommand}" Width="80" Margin="3"/>
+            <Button Content="Load" Command="{Binding LoadFileCommand}" Width="80" Margin="3"/>
+            <Button Content="Import" Command="{Binding ImportIssuesCommand}" Width="80" Margin="3"/>
+        </StackPanel >
+
+        <DockPanel Grid.Row="4" Width="1580" HorizontalAlignment="Left" Visibility="{Binding Loaded, Converter={StaticResource BoolToVis}}" >
+            <local:PraccingImportItemView DataContext="{Binding CurrentItem}" Margin="10"
+                                          CategoryList="{Binding DataContext.CategoryList, ElementName=Root}"
+                                          PeopleList ="{Binding DataContext.PeopleList, ElementName=Root}"/>
+        </DockPanel>
+
+
+        <main:NavigationBar Grid.Row="5" Visibility="{Binding Loaded, Converter={StaticResource BoolToVis}}"
+                            FirstItemCommand="{Binding FirstIssueCommand}"
+                            PreviousItemCommand="{Binding PreviousIssueCommand}"
+                            ItemPosition="{Binding ItemPosition}"
+                            NextItemCommand="{Binding NextIssueCommand}"
+                            LastItemCommand="{Binding LastIssueCommand}" />
+        
+    </Grid>
+</UserControl>

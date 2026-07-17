@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
-             xmlns:behaviors="clr-namespace:MvvmLib.Behaviors;assembly=MvvmLib"
+             
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="650" Background="#ECDE74">
     <Grid>
@@ -31,24 +31,51 @@
             <TextBlock Text="Filters" FontWeight="Bold" Margin="4,0,0,0"/>
             <StackPanel Orientation="Horizontal"  Margin="0,4,0,0" Height="150">
                 <TextBlock Text="Date"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding DateList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedDates}"/>
-                    <TextBlock Text="From"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox Width="130" ItemsSource="{Binding FromList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedFrom}"/>
+                
+                <ListBox MinHeight="100" Width="100" ItemsSource="{Binding DateList.Items}" SelectionMode="Multiple">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+                
+                <TextBlock Text="From"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <ListBox Width="130" ItemsSource="{Binding FromList.Items}" SelectionMode="Multiple" >
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Height="150">
-                    <TextBlock Text="To"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding ToList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedTo}"/>
-                    <TextBlock Text="Category"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox Width="130" ItemsSource="{Binding CategoryList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedCategory}"/>
+                <TextBlock Text="To"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <ListBox MinHeight="100" Width="100" ItemsSource="{Binding ToList.Items}" SelectionMode="Multiple" >
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+                <TextBlock Text="Category"  Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <ListBox Width="130" ItemsSource="{Binding CategoryList.Items}" SelectionMode="Multiple" >
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
             </StackPanel>
+            
             <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <TextBlock Text="Status" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+                <TextBlock Text="Status" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
                 <ComboBox ItemsSource="{Binding StatusList}" SelectedItem="{Binding SelectedStatus}" Width="100"/>
             </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <TextBlock Text="Language" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                <TextBlock Text="Language" Width="60" TextAlignment="Right" Margin="0,0,4,0"/>
                 <ComboBox ItemsSource="{Binding LanguageList}" SelectedItem="{Binding SelectedLanguage}" Width="100"/>
             </StackPanel>
         </StackPanel>
@@ -61,8 +88,8 @@
             </StackPanel>
             <CheckBox Content="Include Pracc Instructions" IsChecked="{Binding IncludeInstructions}"/>
             <CheckBox Content="Include Empty Row" IsChecked="{Binding IncludeEmptyRow}"/>
-            <CheckBox Content="Include Qnums" IsChecked="{Binding IncludeQnum}"/>
-            <CheckBox Content="Include Prev. Names" IsChecked="{Binding IncludePrevNames}"/>
+            <CheckBox Content="Include Qnums" IsChecked="{Binding IncludeQnums}"/>
+            <!--<CheckBox Content="Include Prev. Names" IsChecked="{Binding IncludePrevNames}"/>-->
         </StackPanel>
 
         <Border Grid.Row="2" Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="1">
@@ -70,14 +97,33 @@
                 <TextBlock Text="Last Update Filters" FontWeight="Bold" Margin="4,0,0,0"/>
                 <StackPanel Orientation="Horizontal"  Margin="0,4,0,0" Height="150">
                     <TextBlock Text="Date"  Width="30" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding LastUpdateDateList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedLUDates}"/>
+                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding LastUpdateDateList.Items}" SelectionMode="Multiple" >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
                     <TextBlock Text="From"  Width="30" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox Width="100" ItemsSource="{Binding LastUpdateFromList}" SelectionMode="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedLUFrom}"/>
+                    <ListBox Width="100" ItemsSource="{Binding LastUpdateFromList.Items}" SelectionMode="Multiple">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Height="150">
                     <TextBlock Text="To"  Width="30" TextAlignment="Right" Margin="0,0,4,0"/>
-                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding LastUpdateToList}" SelectionMode ="Multiple" behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedLUTo}"/>
+                    <ListBox MinHeight="100" Width="100" ItemsSource="{Binding LastUpdateToList.Items}" SelectionMode ="Multiple" >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
 
                 </StackPanel>
             </StackPanel>

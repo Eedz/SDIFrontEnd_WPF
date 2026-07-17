@@ -19,16 +19,8 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public PraccingImagesViewModel ImagesVM { get; }
 
-        private FlowDocument responseFlow;
-        public FlowDocument ResponseFlow
-        {
-            get => responseFlow;
-            set
-            {
-                SetProperty(ref responseFlow, value);
-                _response.Response = HtmlUtils.ConvertFlowDocumentToHtml(responseFlow);
-            }
-        }
+        [ObservableProperty]
+        private string responseText = string.Empty;
 
         public int ImageCount => ImagesVM.Images?.Count ?? 0;
 
@@ -37,7 +29,15 @@ namespace SDIFrontEnd_WPF.ViewModels
             _response = response;
 
             ImagesVM = new PraccingImagesViewModel(new ObservableCollection<PraccingImage>(response.Images));
-            responseFlow = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(_response.Response, true));
+           
+            ResponseText = response.Response;
+        }
+
+        partial void OnResponseTextChanged(string value)
+        {
+            _response.Response = value == null
+                ? string.Empty
+                : value;
         }
 
         public void SetResponse(PraccingResponse response)
@@ -45,7 +45,8 @@ namespace SDIFrontEnd_WPF.ViewModels
             if (response == null) return;   
             _response.Response = response.Response;
             ImagesVM.SetImages(new ObservableCollection<PraccingImage>(response.Images));
-            responseFlow = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(_response.Response, true));
+            
+            ResponseText = response.Response;
             OnPropertyChanged(nameof(Response));
         }
     }

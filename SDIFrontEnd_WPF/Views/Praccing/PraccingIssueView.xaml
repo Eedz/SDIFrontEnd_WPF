@@ -114,7 +114,7 @@
                         VerticalScrollBarVisibility="Visible"
                         AcceptsTab="True"
                         IsDocumentEnabled="True"
-                        local:RichTextBoxHelper.Document="{Binding DescriptionFlow, Mode=TwoWay}">          
+                        lib:RichTextBoxHelper.Html="{Binding DescriptionHtml, Mode=TwoWay}">          
                     <xctk:RichTextBoxFormatBarManager.FormatBar>
                         <xctk:RichTextBoxFormatBar/>
                     </xctk:RichTextBoxFormatBarManager.FormatBar>

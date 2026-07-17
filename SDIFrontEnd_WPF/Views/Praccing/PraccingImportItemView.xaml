@@ -1,0 +1,113 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.PraccingImportItemView"
+             x:Name="Root"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
+             xmlns:behaviors="clr-namespace:SDIFrontEnd_WPF.Behaviors"
+             xmlns:mvvm="clr-namespace:MvvmLib;assembly=MvvmLib"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="1400">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+            <converters:IntToNewConverter x:Key="IntToNew"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" MinHeight="500"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="70"/>
+            <ColumnDefinition Width="110"/>
+            <ColumnDefinition Width="425"/>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="650"/>
+        </Grid.ColumnDefinitions>
+
+        
+        
+        <TextBlock Text="Issue No."></TextBlock>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding IssueNo, Converter={StaticResource IntToNew}}"></TextBox>
+        <TextBlock Grid.Row="1" Text="VarNames"></TextBlock>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding VarNames}"></TextBox>
+
+        <TextBlock Grid.Row="2" Text="From"></TextBlock>
+        <ComboBox Grid.Row="2" Grid.Column="1" SelectedItem="{Binding From}" ItemsSource="{Binding PeopleList, ElementName=Root}"></ComboBox>
+
+        <TextBlock Grid.Row="3" Text="To"></TextBlock>
+        <ComboBox Grid.Row="3" Grid.Column="1" SelectedItem="{Binding To}" ItemsSource="{Binding PeopleList , ElementName=Root}"></ComboBox>
+
+        <TextBlock Grid.Row="4" Text="Category"></TextBlock>
+        <ComboBox Grid.Row="4" Grid.Column="1" SelectedItem="{Binding Category}" 
+                  ItemsSource="{Binding CategoryList, ElementName=Root}"/>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal">
+            <DatePicker   SelectedDate="{Binding Date}" Margin="3,0"></DatePicker>
+            <TextBlock Text="PIN" Margin="20,3,3,3"></TextBlock>
+            <TextBox Text="{Binding Pin}" Width="80"></TextBox>
+            <TextBlock Margin="20,3,30,3" Text="Images found for this issue." Visibility="{Binding HasImages, Converter={StaticResource BoolToVis}}"/>
+            <TextBlock Text="{Binding Status}" Margin="30,3,3,3" Width="Auto" d:Text="Status"/>
+        </StackPanel>
+        
+        <!-- description text -->
+        <xctk:RichTextBox Grid.Row="1" Grid.Column="2" Grid.RowSpan ="4" Margin="3,0,0,0" 
+        VerticalScrollBarVisibility="Visible" AcceptsTab="True" IsDocumentEnabled="True"
+        mvvm:RichTextBoxHelper.Html="{Binding Description}" IsReadOnly="True"
+        >
+            
+        </xctk:RichTextBox>
+       
+
+        <ToggleButton Grid.Column="3" Grid.Row="0" Content="Keep?" IsChecked="{Binding KeepIssue}" Margin="3,0"/>
+        <!--<ToggleButton Grid.Column="3" Grid.Row="1" Content="Move" IsChecked="{Binding Moving}" Margin="3,0"/>-->
+        <CheckBox Grid.Column="3" Grid.Row="2" Content="Resolved" IsChecked="{Binding Resolved}" Margin="3,0" VerticalAlignment="Center"/>
+        <DatePicker Grid.Column="3" Grid.Row="3" SelectedDate="{Binding ResolvedDate}" Margin="3,0"/>
+        <ComboBox Grid.Column="3" Grid.Row="4" SelectedItem="{Binding ResolvedBy}" ItemsSource="{Binding PeopleList, ElementName=Root}" Margin="3,0"/>
+
+        <DockPanel Height="500" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10" 
+                   Visibility="{Binding HasOldResponses, Converter={StaticResource BoolToVis}}" >
+            <TextBlock FontSize="14" FontWeight="SemiBold" DockPanel.Dock="Top">
+                <Run Text="Existing Responses: "/>
+                <Run Text="{Binding ExistingResponses.Count, Mode=OneWay}"/>
+            </TextBlock> 
+            <ListBox   Margin="10" ItemsSource="{Binding ExistingResponses}" ScrollViewer.HorizontalScrollBarVisibility="Hidden" >
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <local:PraccingImportResponseItemView NewResponse="False"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+
+
+        <DockPanel Height="500" Grid.Row="5" Grid.Column="3" Grid.ColumnSpan="2"
+                    Visibility="{Binding HasNewResponses, Converter={StaticResource BoolToVis}}" >
+            <TextBlock FontSize="14" FontWeight="SemiBold" DockPanel.Dock="Top">
+                <Run Text="New Responses: "/>
+                <Run Text="{Binding NewResponses.Count, Mode=OneWay}"/>
+            </TextBlock>
+            <ListBox  Margin="10" ItemsSource="{Binding NewResponses}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <local:PraccingImportResponseItemView NewResponse="True"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+        
+    </Grid>
+</UserControl>

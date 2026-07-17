@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 using System.Windows.Documents;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
@@ -22,17 +23,10 @@ namespace SDIFrontEnd_WPF.ViewModels
 
         public bool Dirty => _issueRecord.ShouldSave;
 
-        private FlowDocument _descriptionFlow;
-        public FlowDocument DescriptionFlow
-        {
-            get => _descriptionFlow;
-            set
-            {
-                SetProperty(ref _descriptionFlow, value);
-               
-                Issue.Description = HtmlUtils.ConvertFlowDocumentToHtml(DescriptionFlow);                
-            }
-        }
+       
+
+        [ObservableProperty]
+        public string descriptionHtml;
 
         public PraccingResponse CurrentResponse { get; set; }
 
@@ -42,6 +36,12 @@ namespace SDIFrontEnd_WPF.ViewModels
             ImagesVM = new PraccingImagesViewModel();
 
             SetIssue(issueRecord);
+        }
+
+        partial void OnDescriptionHtmlChanged(string? oldValue, string newValue)
+        {
+            Issue.Description = newValue;
+            
         }
 
         public void SetIssue(PraccingIssueRecord issueRecord)
@@ -59,7 +59,7 @@ namespace SDIFrontEnd_WPF.ViewModels
                 ResponsesVM.Add(new PraccingResponseViewModel(response));
             }
             ImagesVM.SetImages(new ObservableCollection<PraccingImage>(issueRecord.Item.Images));
-            DescriptionFlow = (FlowDocument)XamlReader.Parse(HtmlToXaml.HtmlToXamlConverter.ConvertHtmlToXaml(Issue.Description, true));
+            DescriptionHtml = Issue.Description;
         }
 
         public void OnRecordChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
