@@ -60,6 +60,7 @@ namespace SDIFrontEnd_WPF
             SearchResults.Clear();
             SearchResults = new ObservableCollection<SurveyQuestion>( await _questionService.SearchQuestions(SearchTerm));
             FilteredResults = new ObservableCollection<SurveyQuestion>(UpdateFilter());
+            OnPropertyChanged(nameof(FilteredResults));
         }
 
        
