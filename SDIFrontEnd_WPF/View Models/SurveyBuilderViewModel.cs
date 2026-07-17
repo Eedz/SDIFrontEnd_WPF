@@ -531,7 +531,9 @@ namespace SDIFrontEnd_WPF
         [RelayCommand(CanExecute = nameof(Editable))]
         private async Task SaveChanges()
         {
-            var relock = false;
+
+            // TODO replace with SurveyManagerService.
+            bool relock = false;
 
             // if the survey is locked, confirm with the user that they want to save changes, as this may overwrite fielded data.
             // If they confirm, unlock the survey, save changes, then relock the survey. If unlocking fails, do not save changes.
@@ -593,14 +595,8 @@ namespace SDIFrontEnd_WPF
             List<SurveyQuestion> qnumUpdates = new List<SurveyQuestion>();
             foreach (var r in modified)
             {
-                if (r.NewRecord && r.Deleted)
-                {
-                    // if the record is new and deleted, just remove it from the list
-                    CurrentSurvey.RemoveQuestion(r.Item, false);
-                    RecordList.Remove(r);
-                    Removed.Remove(r.Item);
-                }
-                else if (r.NewRecord)
+                
+                if (r.NewRecord)
                 {
                     var result = await _questionService.AddQuestion(r.Item);
                     if (result>0)
@@ -609,23 +605,25 @@ namespace SDIFrontEnd_WPF
                         Added.Remove(r.Item);
                     }
                 }
-                else if (r.DirtyWordings)
+                
+                if (r.DirtyWordings)
                 {
 
                     var result = await _questionService.UpdateQuestion(r.Item);
                     if (result > 0)  r.DirtyWordings = false;
                 }
-                else if (r.DirtyLabels)
+                
+                if (r.DirtyLabels)
                 {
                     var result = await _varnameService.UpdateVariable(r.Item.VarName);
                     if (result) r.DirtyLabels = false;
                 }
-                else if (r.DirtyQnum)
+                
+                if (r.DirtyQnum)
                 {
                     qnumUpdates.Add(r.Item);
                 }
-                else
-                    continue;
+               
             }
 
             if (qnumUpdates.Count()>0)
@@ -643,8 +641,7 @@ namespace SDIFrontEnd_WPF
             
             // check if we unlocked this survey for saving, if so, relock it
             if (!relock) return;
-            bool locked = await _surveyService.LockSurvey(CurrentSurvey.SID);
-            if (locked) CurrentSurvey.Locked = true;
+            CurrentSurvey.Locked = await _surveyService.LockSurvey(CurrentSurvey.SID);
         }
 
         [RelayCommand]
