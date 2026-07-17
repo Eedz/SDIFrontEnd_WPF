@@ -105,12 +105,17 @@ namespace SDIFrontEnd_WPF.ViewModels
         private void Cancel()
         {
             Model.VarLabel = _original.VarLabel;
-            Model.Domain = _original.Domain;
-            Model.Topic = _original.Topic;
-            Model.Content = _original.Content;
-            Model.Product = _original.Product;
-
-            OnPropertyChanged(string.Empty); // refresh all bindings
+            Model.DomainLabel = _original.DomainLabel;
+            Model.TopicLabel = _original.TopicLabel;
+            Model.ContentLabel = _original.ContentLabel;
+            Model.ProductLabel = _original.ProductLabel;
+            Dirty = false;
+            
+            OnPropertyChanged(nameof(Domain)); // refresh all bindings
+            OnPropertyChanged(nameof(Topic));
+            OnPropertyChanged(nameof(Content));
+            OnPropertyChanged(nameof(Product));
+            OnPropertyChanged(nameof(VarLabel));
         }
 
         [RelayCommand]
