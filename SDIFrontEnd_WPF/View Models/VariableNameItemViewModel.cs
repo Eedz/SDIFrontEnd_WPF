@@ -30,7 +30,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         public string VarName => Model.VarName;
         public string RefVarName => Model.RefVarName;
 
-        public bool Dirty = false;
+        [ObservableProperty]
+        private bool dirty = false;
 
         public string VarLabel
         {
@@ -92,7 +93,10 @@ namespace SDIFrontEnd_WPF.ViewModels
 
             bool success = await _service.UpdateVariable(Model);
             if (success)
+            {
+                Dirty = false;
                 _original = new VariableName(Model);
+            }
              
 
         }
