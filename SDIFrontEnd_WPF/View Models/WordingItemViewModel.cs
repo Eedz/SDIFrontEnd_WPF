@@ -27,7 +27,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         private ObservableCollection<WordingUsage> usages = new();
 
         [ObservableProperty]
-        private FlowDocument wordingText = new();
+        private string wordingHtml = string.Empty;
 
 
         
@@ -65,7 +65,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             if (string.IsNullOrEmpty(Wording.WordingText))
                 return;
 
-            WordingText = (FlowDocument)SimpleHtmlConverter.FromHtml(Wording.WordingText);
+            WordingHtml = Wording.WordingText;
         }
 
         public async Task LoadUsagesAsync()
@@ -74,9 +74,11 @@ namespace SDIFrontEnd_WPF.ViewModels
                 await _wordingService.GetWordingUsages(Wording));
         }
 
-        partial void OnWordingTextChanged(FlowDocument value)
+        partial void OnWordingHtmlChanged(string value)
         {
-            Wording.WordingText = SimpleHtmlConverter.ToHtml(value);
+            Wording.WordingText = value == null
+                ? string.Empty
+                : value;
         }
 
         [RelayCommand]
@@ -106,7 +108,10 @@ namespace SDIFrontEnd_WPF.ViewModels
             try
             {
                 if (IsNew)
-                    await _wordingService.CreateWording(Wording);
+                {
+                    var created = await _wordingService.CreateWording(Wording);
+                    Wording.WordID = created.WordID;
+                }
                 else
                     await _wordingService.UpdateWording(Wording);
 
