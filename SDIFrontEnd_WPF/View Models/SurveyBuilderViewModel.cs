@@ -131,6 +131,13 @@ namespace SDIFrontEnd_WPF
             SelectedQuestionRecord = _recordList.FirstOrDefault() ?? new SurveyQuestionRecord(new SurveyQuestion("Default", "0000"));
             SelectedQuestionRecords = new ObservableCollection<SurveyQuestionRecord>();
             SelectedQuestions = new ObservableCollection<SurveyQuestion>();
+
+            DropHandler = new QuestionRecordDropHandler(OnItemsReordered);
+        }
+
+        private void OnItemsReordered()
+        {
+            ReorderCommand.Execute(null);
         }
 
         void ModifyPreP(Wording prep, SurveyQuestion question)
@@ -185,6 +192,10 @@ namespace SDIFrontEnd_WPF
         {
             if (value == null)
                 return;
+
+            if (SelectedQuestionRecord == null)
+                return;
+
             var record = _recordList.FirstOrDefault(r => r.Item == value);
             if (record != null && record.Item.ID != SelectedQuestionRecord.Item.ID)
                 SelectedQuestionRecord = record;
@@ -343,7 +354,7 @@ namespace SDIFrontEnd_WPF
             }
 
             QuickCommentEntryViewModel vm = new QuickCommentEntryViewModel(_peopleService, _referenceDataService);
-
+            await vm.LoadLists();
             bool? result = _dialogService.ShowDialog(vm);
             if (result.Value)
             {
@@ -353,14 +364,18 @@ namespace SDIFrontEnd_WPF
                     VarName = SelectedQuestion.VarName.VarName,
                 };
 
+                if (!SelectedQuestionRecord.NewRecord)
+                {
                 if (await _commentService.AddCommentAsync(newComment) == 0)
                 {
                     _dialogService.ShowError("Error saving comment.", "Comments Error");
                     return;
                 }
+                }
 
                 SelectedQuestion.Comments.Add(newComment);
                 OnPropertyChanged(nameof(Comments));
+                OnPropertyChanged(nameof(StatusSummary));
             }
         }
 
