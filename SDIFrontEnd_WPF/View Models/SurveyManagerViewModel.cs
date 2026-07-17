@@ -66,6 +66,13 @@ namespace SDIFrontEnd_WPF
 
         partial void OnCurrentSurveyChanged(Survey value)
         {
+            
+            if (SurveyBuilder != null && SurveyBuilder.RecordList.Any(x=>x.ShouldSave))
+            {
+                if (!_dialogService.Confirm($"There are unsaved changes to {CurrentSurvey}. Discard changes?."))
+                    return;
+            }
+
             if (value == null)
                 throw new ArgumentNullException(nameof(value), "Current survey cannot be null");
 
