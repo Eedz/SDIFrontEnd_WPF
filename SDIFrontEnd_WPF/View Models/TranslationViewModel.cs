@@ -17,69 +17,63 @@ namespace SDIFrontEnd_WPF
     // TODO colors
     public partial class TranslationViewModel : WorkspaceViewModel
     {
-
+        private readonly IApiQuestionService _questionService;
         public ObservableCollection<Translation> Translations { get; set; }
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(CurrentTranslationText))]
+        [NotifyPropertyChangedFor(nameof(TranslationText))]
         [NotifyPropertyChangedFor(nameof(ItemPosition))]
         private Translation? currentTranslation;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(EnglishPreP))]
         [NotifyPropertyChangedFor(nameof(EnglishPstP))]
-        [NotifyPropertyChangedFor(nameof(CurrentTranslationText))]
+        [NotifyPropertyChangedFor(nameof(TranslationText))]
         private SurveyQuestion question;
 
 
-        private FlowDocument? currentTranslationText;
-        public FlowDocument? CurrentTranslationText
-        {
-            get => currentTranslationText;
-            set
-            {
-                SetProperty(ref currentTranslationText, value);
-                if (CurrentTranslation != null)
-                    CurrentTranslation.TranslationText = SimpleHtmlConverter.ToHtml(value);
-            }
-        }
+        [ObservableProperty]
+        private string translationText;
 
         public string ItemPosition => $"{(Translations.IndexOf(CurrentTranslation) + 1)} of {Translations.Count}";
 
-        public FlowDocument? EnglishPreP { get;  set; }         
-        public FlowDocument? EnglishPstP { get;  set; }
+        public string? EnglishPreP { get;  set; }         
+        public string? EnglishPstP { get;  set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="question"></param>
-        public TranslationViewModel(SurveyQuestion question)
+        public TranslationViewModel(IApiQuestionService service, SurveyQuestion question)
         {
             base.DisplayName = "Translations";
+            _questionService = service;
             Question = question;           
         }
 
         partial void OnQuestionChanged(SurveyQuestion value)
         {
-            EnglishPreP = SimpleHtmlConverter.FromHtml(value?.PrePW?.WordingText) ?? new FlowDocument();
-            EnglishPstP = SimpleHtmlConverter.FromHtml(value?.PstPW?.WordingText) ?? new FlowDocument();
+            EnglishPreP = value?.PrePW?.WordingText;
+            EnglishPstP = value?.PstPW?.WordingText;
 
             Translations = new ObservableCollection<Translation>(value.Translations);
             CurrentTranslation = Translations.FirstOrDefault();
             if (CurrentTranslation != null)
-                CurrentTranslationText = (FlowDocument)SimpleHtmlConverter.FromHtml(CurrentTranslation.TranslationText);
+                //CurrentTranslationText = (FlowDocument)SimpleHtmlConverter.FromHtml(CurrentTranslation.TranslationText);
+                TranslationText = CurrentTranslation.TranslationText;
             else
-                CurrentTranslationText = new FlowDocument();
-            OnPropertyChanged(nameof(CurrentTranslationText));
+                //CurrentTranslationText = new FlowDocument();
+                TranslationText = string.Empty;
+            OnPropertyChanged(nameof(TranslationText));
         }
 
         partial void OnCurrentTranslationChanged(Translation? oldValue, Translation? newValue)
         {
             if (CurrentTranslation != null)
-                CurrentTranslationText = (FlowDocument)SimpleHtmlConverter.FromHtml(CurrentTranslation.TranslationText);
+                TranslationText = CurrentTranslation.TranslationText;
             else
-                CurrentTranslationText = new FlowDocument();
-            OnPropertyChanged(nameof(CurrentTranslationText));
+                TranslationText = string.Empty;
+            OnPropertyChanged(nameof(TranslationText));
         }
 
         [RelayCommand]
@@ -143,9 +137,14 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void Save()
+        private async Task Save()
         {
+            if (CurrentTranslation == null) return;
+            if (CurrentTranslation.ID == 0)
 
+                await _questionService.CreateTranslation(CurrentTranslation);
+            else 
+                await _questionService.UpdateTranslation(CurrentTranslation);
         }
 
         public void UpdateTranslations(SurveyQuestion question)
