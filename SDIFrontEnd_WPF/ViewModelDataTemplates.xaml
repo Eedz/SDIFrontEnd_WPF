@@ -137,4 +137,16 @@
     <DataTemplate DataType="{x:Type viewmodels:TopicContentReportViewModel}">
         <views:TopicContentReportView/>
     </DataTemplate>
+    
+    <DataTemplate DataType="{x:Type viewmodels:PraccingIssuesImporterViewModel}">
+        <views:PraccingIssuesImporterView/>
+    </DataTemplate>
+    
+    <DataTemplate DataType="{x:Type viewmodels:PraccingImportItemViewModel}">
+        <views:PraccingImportItemView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodels:PraccingImportResponseItemViewModel}">
+        <views:PraccingImportResponseItemView/>
+    </DataTemplate>
 </ResourceDictionary>
