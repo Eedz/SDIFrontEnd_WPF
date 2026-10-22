@@ -67,10 +67,10 @@
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Survey.WebName}" Margin="5"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Type:" Margin="0,5" VerticalAlignment="Center"/>
-            <ComboBox Grid.Row="3" Grid.Column="1" SelectedItem ="{Binding Survey.Cohort}" ItemsSource="{Binding Cohorts}" Margin="5"/>
+            <ComboBox Grid.Row="3" Grid.Column="1" SelectedItem ="{Binding Survey.Cohort}" ItemsSource="{Binding Cohorts}" DisplayMemberPath="Cohort" Margin="5"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Mode:" Margin="0,5" VerticalAlignment="Center"/>
-            <ComboBox Grid.Row="4" Grid.Column="1" SelectedItem ="{Binding Survey.Mode}" ItemsSource="{Binding Modes}" Margin="5"/>
+            <ComboBox Grid.Row="4" Grid.Column="1" SelectedItem ="{Binding Survey.Mode}" ItemsSource="{Binding Modes}" DisplayMemberPath="Mode" Margin="5"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Creation Date:" Margin="0,5" VerticalAlignment="Center"/>
             <DatePicker Grid.Row="5" Grid.Column="1" SelectedDate="{Binding Survey.CreationDate, StringFormat=d}" Margin="5"/>
