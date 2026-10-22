@@ -26,24 +26,24 @@
         <Border Grid.Row="2" HorizontalAlignment="Left" Margin="5">
             <StackPanel Orientation="Horizontal" DataContext="{Binding SelectedQuestion}" >
                 <StackPanel>
-                    <TextBlock d:Text="VarName" Text="{Binding VarName}"/>
+                    <TextBlock d:Text="VarName" Text="{Binding VarName}" FontSize="22"/>
                     
-                    <TextBlock d:Text="01/01/2001" Text="{Binding DeleteDate}"/>
-                    <TextBlock d:Text="Deleted By Eddie B" Text="{Binding DeletedBy, StringFormat={}Deleted by {0}}"/> 
+                    <TextBlock d:Text="Deleted on 01/01/2001" Text="{Binding DeleteDate, StringFormat={}Deleted on {0}}"/>
+                    <TextBlock d:Text="by Eddie B" Text="{Binding DeletedBy, StringFormat={}by {0}}"/> 
                 </StackPanel>
                 <StackPanel Margin="10,0">
                     <TextBlock d:Text="VarLabel" Text="{Binding VarLabel}" Width="200"/>
-                    <TextBlock d:Text="ContentLabel" Text="{Binding ContentLabel, StringFormat={}Content:  {0}}"/>
-                    <TextBlock d:Text="TopicLabel" Text="{Binding TopicLabel, StringFormat={}Topic:      {0}}"/>
-                    <TextBlock d:Text="Domain Label" Text="{Binding DomainLabel, StringFormat={}Domain:  {0}}"/>
+                    <TextBlock d:Text="Content:  ContentLabel" Text="{Binding ContentLabel, StringFormat={}Content:  {0}}"/>
+                    <TextBlock d:Text="Topic:      TopicLabel" Text="{Binding TopicLabel, StringFormat={}Topic:      {0}}"/>
+                    <TextBlock d:Text="Domain:  DomainLabel" Text="{Binding DomainLabel, StringFormat={}Domain:  {0}}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
         <!-- Comments -->
 
-        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Effect="{StaticResource SunkenEffect}" Grid.Row="3" Margin="5">
-            <TextBlock DockPanel.Dock="Top" Text="Comments:"/>
-            <Border >
+        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Margin="5">
+            <TextBlock DockPanel.Dock="Top" Text="Comments"/>
+			<Border Effect="{StaticResource SunkenEffect}">
                 <local:CommentsListView Comments="{Binding SelectedQuestion.DeleteNotes}" />
             </Border>
         </DockPanel>
