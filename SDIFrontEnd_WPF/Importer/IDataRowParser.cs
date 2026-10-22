@@ -10,21 +10,29 @@ namespace SDIFrontEnd_WPF
     public interface IDataRowParser<T>
     {
         T Parse(IDictionary<string, string> row);
-    }
+		T Parse(IDictionary<string, string> row, string column);
+	}
 
     public class TranslationParser : IDataRowParser<Translation>
     {
-        public Translation Parse(IDictionary<string, string> row)
+        public Translation Parse(IDictionary<string, string> row, string column)
         {
             return new Translation
             {
                 VarName = row["VarName"],
-                TranslationText = row["French"]
+                TranslationText = row[column]
             };
         }
+		public Translation Parse(IDictionary<string, string> row)
+		{
+			return new Translation
+			{
+				VarName = row["VarName"],
+				TranslationText = row["Translation"]
+			};
+		}
 
-       
-    }
+	}
 
     public class RenameParser : IDataRowParser<VarNameChange>
     {
@@ -37,8 +45,15 @@ namespace SDIFrontEnd_WPF
             };
         }
 
-
-    }
+		public VarNameChange Parse(IDictionary<string, string> row, string column)
+		{
+			return new VarNameChange
+			{
+				OldName = row["Old"],
+				NewName = row["New"]
+			};
+		}
+	}
 
     public class PraccingIssueParser : IDataRowParser<PraccingIssue>
     {
@@ -59,5 +74,17 @@ namespace SDIFrontEnd_WPF
 
             return issue;
         }
-    }
+
+		public PraccingIssue Parse(IDictionary<string, string> row, string column)
+		{
+			return new PraccingIssue
+			{
+				IssueNo = Convert.ToInt32(row["IssueNo"]),
+				VarNames = (string)row["VarNames"],
+				IssueDate = DateTime.TryParse(row["Date"], out var date) ? date : DateTime.Today,
+				PinNo = (string)row["Pin"],
+				Description = (string)row["Issue Description"]
+			};
+		}
+	}
 }
