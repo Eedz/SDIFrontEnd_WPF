@@ -19,6 +19,7 @@ namespace SDIFrontEnd_WPF
         Task<List<VariableNameSurveys>> SearchVarNameUsage(string searchTerm, int take);
         Task<bool> UpdateVariable(VariableName variableName);
         Task<bool> VarNameInUse(string varname);
+        Task<bool> RenameVariable(string oldVarName, string newVarName, string survey);
 
         Task<bool> DeleteVariable(string varname);
         Task<bool> DeleteVariable(int id);
@@ -30,6 +31,8 @@ namespace SDIFrontEnd_WPF
 
         Task<List<VariablePrefix>> GetVariablePrefixes();
         Task<List<QuestionUsage>> GetVarNameQuestions(string varname);
+
+        Task<VarNameChange> CreateVarNameChange(VarNameChange change);
 
     }
 }
