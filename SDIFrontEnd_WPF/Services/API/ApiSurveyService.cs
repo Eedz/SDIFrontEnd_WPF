@@ -149,8 +149,19 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         var dto = surveyMapper.MapToDto(survey);
 
         var response = await _http.PutAsJsonAsync($"{_baseApi}/surveys/{dto.SID}", dto);
+        
         response.EnsureSuccessStatusCode();
-        return survey;
+
+		var updatedDto = await response.Content.ReadFromJsonAsync<SurveyDto>();
+
+        if (updatedDto == null)
+		{
+			throw new Exception("Failed to deserialize the updated survey from the response.");
+		}
+
+		var updatedSurvey = surveyMapper.MapToEntity(updatedDto);
+
+		return updatedSurvey;
     }
 
     public async Task DeleteAsync(int id)
