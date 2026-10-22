@@ -31,8 +31,12 @@ namespace SDIFrontEnd_WPF
             Replace(_store.TopicLabels, data.TopicLabels);
             Replace(_store.ContentLabels, data.ContentLabels);
             Replace(_store.ProductLabels, data.ProductLabels);
-            
-            var commentData = await _apiComments.GetCommentTypesAsync();
+            Replace(_store.Cohorts, data.Cohorts);
+            Replace(_store.Modes, data.Modes);
+            Replace(_store.Languages, data.Languages);
+            Replace(_store.UserStates, data.UserStates);
+            Replace(_store.ScreenedProducts, data.ScreenedProducts);
+			var commentData = await _apiComments.GetCommentTypesAsync();
             Replace(_store.CommentTypes, commentData);
 
         }
