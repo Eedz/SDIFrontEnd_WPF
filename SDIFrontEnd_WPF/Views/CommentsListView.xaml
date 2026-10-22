@@ -11,12 +11,15 @@
         <ListBox.ItemTemplate>
             <DataTemplate>
                 <Border BorderBrush="Gray" BorderThickness="1">
-                    <DockPanel LastChildFill="False" Margin="4">
-                        <TextBlock Text="{Binding Author.Name}" DockPanel.Dock="Right" Margin="8,0" Width="60"/>
-                        <TextBlock Text="{Binding NoteType.TypeName}" DockPanel.Dock="Right" Margin="8,0" Width="100"/>
-                        <TextBlock Text="{Binding NoteDate, StringFormat={}{0:yyyy-MM-dd}}" DockPanel.Dock="Right" Margin="8,0" Width="75"/>
-                        <TextBlock Text="{Binding Notes.NoteText}" TextWrapping="Wrap" Margin="0,0" MaxWidth="250"/>
-                    </DockPanel>
+					<StackPanel>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock FontWeight="Bold" Text="{Binding Author.Name}" Margin="8,0" Width="60"/>
+							<TextBlock FontWeight="Bold" Text="{Binding NoteType.TypeName}" Margin="8,0" Width="120"/>
+							<TextBlock FontWeight="Bold" Text="{Binding NoteDate, StringFormat={}{0:yyyy-MM-dd}}" Margin="8,0" Width="75"/>
+						</StackPanel>
+						<TextBlock Text="{Binding Notes.NoteText}" TextAlignment="Left" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="5,5" MaxWidth="550"/>
+					</StackPanel>
+                    
                 </Border>
             </DataTemplate>
         </ListBox.ItemTemplate>
