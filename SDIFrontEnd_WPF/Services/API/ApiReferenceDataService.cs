@@ -28,9 +28,16 @@ namespace SDIFrontEnd_WPF
                 DomainLabels = new ObservableCollection<VarNameLabel>(dto.DomainLabels.Select(x => new VarNameLabel() { ID = x.ID, Label = x.LabelText })),
                 ContentLabels = new ObservableCollection<VarNameLabel>(dto.ContentLabels.Select(x => new VarNameLabel() { ID = x.ID, Label = x.LabelText })),
                 TopicLabels = new ObservableCollection<VarNameLabel>(dto.TopicLabels.Select(x => new VarNameLabel() { ID = x.ID, Label = x.LabelText })),
-                ProductLabels = new ObservableCollection<VarNameLabel>(dto.ProductLabels.Select(x => new VarNameLabel() { ID = x.ID, Label = x.LabelText }))
+                ProductLabels = new ObservableCollection<VarNameLabel>(dto.ProductLabels.Select(x => new VarNameLabel() { ID = x.ID, Label = x.LabelText })),
+                Cohorts = new ObservableCollection<SurveyCohort>(dto.SurveyCohorts.Select(x=> new SurveyCohort() { ID = x.ID, Cohort = x.Cohort })),
+                Modes = new ObservableCollection<SurveyMode>(dto.SurveyModes.Select(x=> new SurveyMode() { ID = x.ID, Mode = x.Mode })),
+                Languages = new ObservableCollection<Language>(dto.Languages.Select(x=> new Language() { 
+                    ID = x.ID, LanguageName = x.LanguageName, Abbrev = x.Abbrev, ISOAbbrev = x.ISOAbbrev, 
+                    NonLatin = x.NonLatin, PreferredFont = x.PreferredFont, RTL = x.RTL })),
+                UserStates = new ObservableCollection<UserState>(dto.UserStates.Select(x => new UserState() { ID = x.ID, UserStateName = x.UserStateName })),
+                ScreenedProducts = new ObservableCollection<ScreenedProduct>(dto.ScreenedProducts.Select(x => new ScreenedProduct() { ID = x.ID, ProductName = x.ProductName })),
 
-            };
+			};
                 
             
             return referenceData;
