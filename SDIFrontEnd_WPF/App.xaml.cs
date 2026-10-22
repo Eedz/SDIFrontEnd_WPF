@@ -294,6 +294,7 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<PrefixListViewModel>();
             services.AddTransient<LabelLibraryViewModel>();
             services.AddTransient<TopicContentReportViewModel>();
+            services.AddTransient<PraccingIssuesImporterViewModel>();
         }
     }
 
