@@ -84,6 +84,7 @@ namespace SDIFrontEnd_WPF
         {
             DisplayName = "Survey Manager - " + survey.SurveyCode;
             var questions = await _surveyService.GetSurveyQuestions(survey.SID);
+            survey.RemoveAllQuestions();
             survey.AddQuestions(questions);
             await GetSurveyImageInfo(survey.Questions.SelectMany(q => q.Images).ToList(), survey);
             SurveyInfo = new SurveyViewModel(survey);
@@ -145,13 +146,15 @@ namespace SDIFrontEnd_WPF
         }
 
         [RelayCommand]
-        private void ImportTranslations() 
+        private async Task ImportTranslations() 
         {
             TranslationImporterViewModel vm = new TranslationImporterViewModel(_surveyService, _questionService, _referenceDataService, _dialogService);
-            Task.Run(()=>vm.LoadAsync());
+            await vm.LoadAsync();
             vm.SelectedSurvey = CurrentSurvey;
             vm.SelectedLanguage = CurrentSurvey.LanguageList.FirstOrDefault()?.SurvLanguage;
             _dialogService.ShowWindow(vm);
+
+            // TODO refresh translations
         }
 
         [RelayCommand]
