@@ -74,7 +74,19 @@ namespace SDIFrontEnd_WPF
             throw new NotImplementedException();
         }
 
-        private SurveyQuestion MapToEntity(SurveyQuestionDto dto)
+		public async Task<bool> InsertQuestionImage(SurveyImage image)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<bool> DeleteQuestionImage(int qid, int imageId)
+		{
+			throw new NotImplementedException();
+		}
+
+
+
+		private SurveyQuestion MapToEntity(SurveyQuestionDto dto)
         {
             return new SurveyQuestion
             {

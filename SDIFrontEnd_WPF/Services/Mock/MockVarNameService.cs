@@ -134,5 +134,15 @@ namespace SDIFrontEnd_WPF
         {
             throw new NotImplementedException();
         }
+
+        public Task<bool> RenameVariable(string oldName, string newName, string surve)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<VarNameChange> CreateVarNameChange(VarNameChange change)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
