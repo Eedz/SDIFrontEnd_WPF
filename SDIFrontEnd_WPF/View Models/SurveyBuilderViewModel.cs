@@ -69,7 +69,6 @@ namespace SDIFrontEnd_WPF
 
         public string CurrentQuestionText => SelectedQuestion?.GetQuestionTextHTML() ?? string.Empty;
 
-        //bool Editable => !(CurrentSurvey == null || CurrentSurvey.Locked);
         bool Editable => !(CurrentSurvey == null);
         public bool Locked => !Editable;
 
@@ -261,7 +260,7 @@ namespace SDIFrontEnd_WPF
             else
                 PreAID = oldValue;
             OnPropertyChanged(nameof(CurrentQuestionText));
-        }
+		}
 
         partial void OnLitQIDChanged(int oldValue, int newValue)
         {
@@ -369,16 +368,15 @@ namespace SDIFrontEnd_WPF
 
                 if (!SelectedQuestionRecord.NewRecord)
                 {
-                if (await _commentService.AddCommentAsync(newComment) == 0)
-                {
-                    _dialogService.ShowError("Error saving comment.", "Comments Error");
-                    return;
-                }
+                    if (await _commentService.AddCommentAsync(newComment) == 0)
+                    {
+                        _dialogService.ShowError("Error saving comment.", "Comments Error");
+                        return;
+                    }   
                 }
 
                 SelectedQuestion.Comments.Add(newComment);
                 OnPropertyChanged(nameof(Comments));
-                OnPropertyChanged(nameof(StatusSummary));
             }
         }
 
@@ -508,10 +506,11 @@ namespace SDIFrontEnd_WPF
                 {
                     q.SurveyCode = CurrentSurvey.SurveyCode;
                     q.Qnum = $"{newQnum}{q.QnumSuffix}";
+                    q.VarName.VarName = Utilities.ChangeCC(q.VarName.VarName, CurrentSurvey.CountryCode);
 
                     CurrentSurvey.AddQuestion(q, position, true);
                     Added.Add(q);
-                    RecordList.Insert(position, new SurveyQuestionRecord(q));
+                    RecordList.Insert(position, new SurveyQuestionRecord(q) { NewRecord = true });
                     position++;
                 }
 
@@ -523,12 +522,14 @@ namespace SDIFrontEnd_WPF
         [RelayCommand(CanExecute = nameof(Editable))]
         private void RemoveSurveyQuestion()
         {
-            if (SelectedQuestionRecords == null) return;
+            if (QuestionList == null) return;
+
             foreach (SurveyQuestionRecord q in SelectedQuestionRecords)
             {
                 Removed.Add(q.Item);
                 q.Deleted = true;
             }
+
         }
 
         [RelayCommand(CanExecute = nameof(Editable))]
@@ -626,8 +627,27 @@ namespace SDIFrontEnd_WPF
                 {
                     qnumUpdates.Add(r.Item);
                 }
-               
-            }
+
+				foreach (var image in r.AddedImages.ToList())
+				{
+					var result = await _questionService.InsertQuestionImage(image);
+
+					if (result)
+					{
+						r.AddedImages.Remove(image);
+					}
+				}
+
+				foreach (var image in r.DeletedImages.ToList())
+				{
+					var result = await _questionService.DeleteQuestionImage(r.Item.ID, image.ID);
+
+					if (result)
+					{
+						r.DeletedImages.Remove(image);
+					}
+				}
+			}
 
             if (qnumUpdates.Count()>0)
             {
@@ -682,7 +702,7 @@ namespace SDIFrontEnd_WPF
             if (SelectedQuestion == null) return;
 
             // get previous question in survey
-            var previousQuestion = QuestionList.Where(x => x.GetQnumValue() < SelectedQuestion.GetQnumValue()).LastOrDefault();
+            var previousQuestion = QuestionList.LastOrDefault(x => x.Qnum != SelectedQuestion.Qnum && x.GetQnumValue() <= SelectedQuestion.GetQnumValue());
 
             if (previousQuestion == null)
             {
@@ -980,8 +1000,9 @@ namespace SDIFrontEnd_WPF
             CurrentImage = SelectedQuestion.Images.LastOrDefault();
             OnPropertyChanged(nameof(ImageIndex));
             OnPropertyChanged(nameof(SelectedQuestionRecord));
+			if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
 
-        }
+		}
 
         [RelayCommand(CanExecute = nameof(Editable))]
         private void DeleteImage()
@@ -995,7 +1016,8 @@ namespace SDIFrontEnd_WPF
                 SelectedQuestionRecord.DeletedImages.Add(CurrentImage);
                 CurrentImage = SelectedQuestion.Images.FirstOrDefault();
                 OnPropertyChanged(nameof(ImageIndex));
-            }
+				if (!Modified.Contains(SelectedQuestion)) Modified.Add(SelectedQuestion);
+			}
         }
 
         [RelayCommand]
@@ -1006,13 +1028,7 @@ namespace SDIFrontEnd_WPF
             Survey temp = new Survey();
             temp.Questions.AddRange(RecordList.Select(x => x.Item));
             temp.Renumber(start);
-            foreach (var r in RecordList)
-            {
-                if (r.DirtyQnum)
-                {
-       
-                }
-            }
+            
         }
 
         // ask user to document deletes with a comment, then save comments
