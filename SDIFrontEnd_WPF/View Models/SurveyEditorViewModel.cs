@@ -48,7 +48,7 @@ namespace SDIFrontEnd_WPF
         private void DeleteProduct(ScreenedProduct product)
         {
             if (product == null) return;
-            _survey.ScreenedProducts.RemoveAll(x => x.Product.ProductName.Equals(product));
+            _survey.ScreenedProducts.RemoveAll(x => x.Product.Equals(product));
             OnPropertyChanged(nameof(ScreenedProductsList));
         }
 
