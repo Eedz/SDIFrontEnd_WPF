@@ -51,8 +51,17 @@ namespace SDIFrontEnd_WPF
 
         public async Task<VariableName> GetVariableInfo(string varname)
         {
-            var dto = await _http.GetFromJsonAsync<VariableNameDto>($"{_baseApi}/varnames/{varname}");
-            return dto == null ? new VariableName() : _varnameMapper.MapToEntity(dto);
+            if (varname == null)
+                return null;
+            try
+            {
+                var dto = await _http.GetFromJsonAsync<VariableNameDto>($"{_baseApi}/varnames/{varname}");
+
+                return dto == null ? new VariableName() : _varnameMapper.MapToEntity(dto);
+            }catch (Exception )
+            {
+                return null;
+            }
         }
 
         public async Task<List<VariableName>> GetVariableInfoByRef(string refvarname)
@@ -164,12 +173,13 @@ namespace SDIFrontEnd_WPF
                 Description = prefix.Description,
                 Comments = prefix.Comments,
                 Inactive = prefix.Inactive,
-                Ranges = prefix.Ranges.Select(x=>new VariableRangeDto() 
-                { 
-                    PrefixID = x.ID, 
-                    Lower = x.Lower, 
-                    Upper = x.Upper, 
-                    Description = x.Description }).ToList()
+                Ranges = prefix.Ranges.Select(x => new VariableRangeDto()
+                {
+                    PrefixID = x.ID,
+                    Lower = x.Lower,
+                    Upper = x.Upper,
+                    Description = x.Description
+                }).ToList()
             };
 
             var response = await _http.PutAsJsonAsync<VariablePrefixDto>($"{_baseApi}/varnames/prefixes/{prefix.ID}", dto);
@@ -235,8 +245,47 @@ namespace SDIFrontEnd_WPF
 
             return questions;
         }
-    }
 
-       
+        public async Task<bool> RenameVariable(string oldVarName, string newVarName, string survey)
+        {
+            var result = await _http.PostAsync($"{_baseApi}/varnames/rename?oldVarName={Uri.EscapeDataString(oldVarName)}&newVarName={Uri.EscapeDataString(newVarName)}&survey={Uri.EscapeDataString(survey)}", null);
+            return result.IsSuccessStatusCode;
+        }
+
+        public async Task<VarNameChange> CreateVarNameChange(VarNameChange change)
+        {
+            var dto = new VarNameChangeDto()
+            {
+                OldName = change.OldName,
+                NewName = change.NewName,
+                ChangeDate = change.ChangeDate,
+                ChangedBy = change.ChangedBy.ID,
+                Authorization = change.Authorization,
+                Rationale = change.Rationale,
+                Source = change.Source,
+                Hiddenchange = change.HiddenChange,
+                PreFWChange = change.PreFWChange,
+                SurveysAffected = change.SurveysAffected.Select(s => s.SurveyCode.SurveyCode ).ToList()
+            };
+            var response = await _http.PostAsJsonAsync<VarNameChangeDto>($"{_baseApi}/varnames/changes", dto);
+            response.EnsureSuccessStatusCode();
+            var createdDto = await response.Content.ReadFromJsonAsync<VarNameChangeDto>();
+            return new VarNameChange()
+            {
+                ID = createdDto.ID,
+                OldName = createdDto.OldName,
+                NewName = createdDto.NewName,
+                ChangeDate = createdDto.ChangeDate,
+                ChangedBy = new Person() { ID = createdDto.ChangedBy },
+                Authorization = createdDto.Authorization,
+                Rationale= createdDto.Rationale,
+                Source= createdDto.Source,
+                HiddenChange = createdDto.Hiddenchange,
+                PreFWChange = createdDto.PreFWChange,
+                SurveysAffected = createdDto.SurveysAffected.Select(s => new VarNameChangeSurvey() { SurveyCode = new Survey(s) }).ToList()
+            };
+        }
+
+    }
     
 }
