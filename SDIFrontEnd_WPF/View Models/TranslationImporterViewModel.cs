@@ -103,7 +103,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             {
                 t.Survey = SelectedSurvey.SurveyCode;
                 t.LanguageName = SelectedLanguage;
-
+                
                 SurveyQuestion match = questions.FirstOrDefault(q => q.VarName.VarName.Equals(t.VarName, StringComparison.OrdinalIgnoreCase));
                 if (match == null)
                 {
@@ -130,6 +130,7 @@ namespace SDIFrontEnd_WPF.ViewModels
             OnPropertyChanged(nameof(CurrentImportedText));
             OnPropertyChanged(nameof(CurrentMissingText));
             OnPropertyChanged(nameof(CurrentDuplicateText));
+            OnPropertyChanged(nameof(ImportedCurrent));
         }
 
         /// <summary>
@@ -154,7 +155,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         /// </summary>
         [RelayCommand]
         
-        private async void CheckVarName(Translation translation)
+        private async Task CheckVarName(Translation translation)
         {
             var questions = await _questionService.GetQuestionsByVarNameAsync(translation.VarName);
 
