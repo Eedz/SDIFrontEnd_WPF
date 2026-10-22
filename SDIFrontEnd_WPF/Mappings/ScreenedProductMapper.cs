@@ -10,7 +10,7 @@ namespace SDIFrontEnd_WPF.Mappings
             return new SurveyScreenedProduct
             {
                 SurveyScreenedProductID = dto.SurveyScreenedProductID,
-                ID = dto.ScreenedProductID,
+                ID = dto.SurveyScreenedProductID,
                 Product = new ScreenedProduct() { ID = dto.ScreenedProductID, ProductName = dto.ScreenedProductName ?? string.Empty }
             };
         }
@@ -19,8 +19,8 @@ namespace SDIFrontEnd_WPF.Mappings
         {
             return new SurveyScreenedProductDto
             {
-                SurveyScreenedProductID = entity.SurveyScreenedProductID,
-                ScreenedProductID = entity.ID,
+                SurveyScreenedProductID = entity.ID,
+                ScreenedProductID = entity.Product.ID,
                 ScreenedProductName = entity.Product.ProductName
             };
         }

@@ -9,8 +9,8 @@ namespace SDIFrontEnd_WPF.Mappings
         {
             return new SurveyLanguageDto
             {
-                SurveyLanguageID = entity.SurveyLanguageID,
-                LanguageID = entity.ID,
+                SurveyLanguageID = entity.ID,
+                LanguageID = entity.SurvLanguage.ID,
                 LanguageName = entity.SurvLanguage.LanguageName
             };
         }
@@ -21,10 +21,12 @@ namespace SDIFrontEnd_WPF.Mappings
         {
             return new SurveyLanguage
             {
-                SurveyLanguageID = dto.SurveyLanguageID,
-                ID = dto.LanguageID,
-
-                SurvLanguage = new Language() { ID = dto.LanguageID, LanguageName = dto.LanguageName ?? string.Empty }
+				SurveyLanguageID = dto.SurveyLanguageID,
+                SurvLanguage = new Language() 
+                { 
+                    ID = dto.LanguageID, 
+                    LanguageName = dto.LanguageName ?? string.Empty 
+                }
             };
         }
     }

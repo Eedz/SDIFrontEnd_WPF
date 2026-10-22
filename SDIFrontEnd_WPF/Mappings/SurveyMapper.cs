@@ -1,11 +1,10 @@
-﻿using System;
+﻿using ITC_Contracts;
+using ITCLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ITCLib;
-using ITC_Contracts;
-using System.Printing;
 namespace SDIFrontEnd_WPF.Mappings
 {
     public class SurveyMapper : IMapper<Survey, SurveyDto>
@@ -41,6 +40,7 @@ namespace SDIFrontEnd_WPF.Mappings
                 ReRun = survey.ReRun,
                 HideSurvey = survey.HideSurvey,
                 NCT = survey.NCT,
+                ITCSurvey = survey.ITCSurvey,
                 Wave = survey.Wave,
                 CreationDate = survey.CreationDate,
                 Cohort = cohortMapper.MapToDto(survey.Cohort),
@@ -67,7 +67,8 @@ namespace SDIFrontEnd_WPF.Mappings
                 ReRun = dto.ReRun,
                 HideSurvey = dto.HideSurvey,
                 NCT = dto.NCT,
-                Wave = dto.Wave,
+				ITCSurvey = dto.ITCSurvey,
+				Wave = dto.Wave,
                 CreationDate = dto.CreationDate,
                 Cohort = dto.Cohort == null ? new SurveyCohort() : cohortMapper.MapToEntity(dto.Cohort),
                 Mode = dto.Mode == null ? new SurveyMode() : modeMapper.MapToEntity(dto.Mode),

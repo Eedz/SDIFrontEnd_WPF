@@ -10,7 +10,7 @@ namespace SDIFrontEnd_WPF.Mappings
             return new SurveyUserState
             {
                 SurveyUserStateID = dto.SurveyUserStateID,
-                ID = dto.UserStateID,
+                ID = dto.SurveyUserStateID,
                 UserStateID = dto.UserStateID,
                 State = new UserState(dto.UserStateID, dto.UserStateName)
             };
@@ -20,8 +20,8 @@ namespace SDIFrontEnd_WPF.Mappings
         {
             return new SurveyUserStateDto
             {
-                SurveyUserStateID = entity.SurveyUserStateID,
-                UserStateID = entity.UserStateID,
+                SurveyUserStateID = entity.ID,
+                UserStateID = entity.State.ID,
                 UserStateName = entity.State.UserStateName
             };
         }
