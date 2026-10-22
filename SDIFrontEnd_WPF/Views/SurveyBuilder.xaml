@@ -26,7 +26,10 @@
             <Style x:Key="QuestionRowColor" TargetType="DataGridRow" BasedOn="{StaticResource QuestionRowStyle}">
                 <Setter Property="Background" Value="{Binding QuestionStatus, Converter={StaticResource QuestionStatusToBackgroundConverter}}"/>
             </Style>
-            
+
+			<Style x:Key="ToolbarButton" TargetType="Button">
+				<Setter Property="Height" Value="40"/>
+			</Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -105,6 +108,7 @@
             <DataGrid Height="Auto"
                 ItemsSource="{Binding RecordList}"
                 SelectedItem="{Binding SelectedQuestionRecord}"
+					  mvvmLib:DataGridHelper.BindableSelectedItems="{Binding SelectedQuestionRecords}"
                 AutoGenerateColumns="False"
                 HeadersVisibility="Column"
                 CanUserAddRows="False"
@@ -137,8 +141,13 @@
         </DockPanel>
         
         <!-- Question View -->
-        <DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="5" LastChildFill="True" HorizontalAlignment="Stretch">
-            <local:NavigationBar DockPanel.Dock="Bottom" 
+		<Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2">
+			<!-- Background with shadow-->
+			<Border Background="LightSkyBlue" Effect="{StaticResource SunkenEffect}" Margin="5"/>
+			<!-- Question Content -->
+			<DockPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Margin="5" LastChildFill="True" HorizontalAlignment="Stretch">
+				
+                <local:NavigationBar DockPanel.Dock="Bottom" 
                                  FirstItemCommand="{Binding FirstItemCommand}"
                                  PreviousItemCommand="{Binding PreviousItemCommand}"
                                  ItemPosition="{Binding ItemPosition}"
@@ -146,118 +155,117 @@
                                  LastItemCommand="{Binding LastItemCommand}"/>
             
           
-            <!-- Labels -->
-            <Border Margin="0,0,0,5" DockPanel.Dock="Bottom" Background="LightSkyBlue"
-                Effect="{StaticResource SunkenEffect}">
-                <Grid Margin="5" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="65"></ColumnDefinition>
-                        <ColumnDefinition Width="275"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition ></RowDefinition>
-                        <RowDefinition ></RowDefinition>
-                        <RowDefinition ></RowDefinition>
-                        <RowDefinition ></RowDefinition>
-                        <RowDefinition ></RowDefinition>
-                    </Grid.RowDefinitions>
+                <!-- Labels -->
+                <Border Margin="0,0,0,5" DockPanel.Dock="Bottom" Background="LightSkyBlue">
+					<Grid Margin="5" >
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="65"></ColumnDefinition>
+							<ColumnDefinition Width="275"></ColumnDefinition>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition ></RowDefinition>
+							<RowDefinition ></RowDefinition>
+							<RowDefinition ></RowDefinition>
+							<RowDefinition ></RowDefinition>
+							<RowDefinition ></RowDefinition>
+						</Grid.RowDefinitions>
 
-                    <TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="12" />
-                    <TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding SelectedQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
+						<TextBlock Text="VarLabel:" FontWeight="Bold" Grid.Column="0" Grid.Row="0" Margin="0,0,0,10" FontSize="12" />
+						<TextBox Grid.Column="1" Grid.Row="0" Width="275" MaxHeight="25" Text="{Binding SelectedQuestion.VarName.VarLabel}" VerticalContentAlignment="Top" Padding="3,0,0,0"/>
 
-                    <TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.TopicLabel}" DisplayMemberPath="Label"/>
+						<TextBlock Text="Topic:" Grid.Column="0" Grid.Row="1" Margin="0,0,0,10" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+						<ComboBox Grid.Column="1" Grid.Row="1" Width="275" MaxHeight="25" ItemsSource="{Binding TopicLabels}" SelectedItem="{Binding SelectedQuestion.VarName.TopicLabel}" DisplayMemberPath="Label"/>
 
-                    <TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-                    <ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.ContentLabel}" DisplayMemberPath="Label"/>
+						<TextBlock Text="Content:" Grid.Column="0" Grid.Row="2" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+						<ComboBox Grid.Column="1" Grid.Row="2" Width="275" MaxHeight="25" ItemsSource="{Binding ContentLabels}" SelectedItem="{Binding SelectedQuestion.VarName.ContentLabel}" DisplayMemberPath="Label"/>
 
-                    <TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-                    <ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.DomainLabel}" DisplayMemberPath="Label"/>
+						<TextBlock Text="Domain:" Grid.Column="0" Grid.Row="3" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+						<ComboBox Grid.Column="1" Grid.Row="3" MaxHeight="25" ItemsSource="{Binding DomainLabels}" SelectedItem="{Binding SelectedQuestion.VarName.DomainLabel}" DisplayMemberPath="Label"/>
 
-                    <TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
-                    <ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.ProductLabel}" DisplayMemberPath="Label"/>
+						<TextBlock Text="Product:" Grid.Column="0" Grid.Row="4" Margin="0,0,0,10" FontSize="12" FontWeight="Bold"/>
+						<ComboBox Grid.Column="1" Grid.Row="4" MaxHeight="25" ItemsSource="{Binding ProductLabels}" SelectedItem="{Binding SelectedQuestion.VarName.ProductLabel}" DisplayMemberPath="Label"/>
 
-                </Grid>
-            </Border>
-            <!-- Question Details -->
-            <Border Background="LightSkyBlue" Effect="{StaticResource SunkenEffect}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition MaxHeight="25"></RowDefinition>
-                        <RowDefinition Height="*"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" Grid.Row="0" >
-                        <Button Content="PreP" Command="{Binding OpenPrePCommand}" CommandParameter="{Binding PrePID}" Width="50"/>
-                        <TextBox Text="{Binding PrePID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/> 
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="1" >
-                        <Button Content="PreI" Command="{Binding OpenPreICommand}" CommandParameter="{Binding PreIID}" Width="50"/>
-                        <TextBox Text="{Binding PreIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="2"  >
-                        <Button Content="PreA" Width="50" Command="{Binding OpenPreACommand}" CommandParameter="{Binding PreAID}"/>
-                        <TextBox Text="{Binding PreAID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="3" >
-                        <Button Content="LitQ" Width="50" Command="{Binding OpenLitQCommand}" CommandParameter="{Binding LitQID}"/>
-                        <TextBox Text="{Binding LitQID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="4" >
-                        <Button Content="ROs" Width="50" Command="{Binding OpenRespOptionsCommand}" CommandParameter="{Binding RespName}"/>
-                        <TextBox Text="{Binding RespName}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="5" >
-                        <Button Content="NRs" Width="50" Command="{Binding OpenNRCodesCommand}" CommandParameter="{Binding NRName}"/>
-                        <TextBox Text="{Binding NRName}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="6" >
-                        <Button Content="PstI" Width="50" Command="{Binding OpenPstICommand}" CommandParameter="{Binding PstIID}"/>
-                        <TextBox Text="{Binding PstIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="7" >
-                        <Button Content="PstP" Width="50" Command="{Binding OpenPstPCommand}" CommandParameter="{Binding PstPID}"/>
-                        <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
-                    </StackPanel>
+					</Grid>
+				</Border>
+                <!-- Question Details -->
+                <Border Background="LightSkyBlue" >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition MaxHeight="25"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                            <Button Content="PreP" Command="{Binding OpenPrePCommand}" CommandParameter="{Binding PrePID}" Width="50"/>
+                            <TextBox Text="{Binding PrePID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/> 
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" >
+                            <Button Content="PreI" Command="{Binding OpenPreICommand}" CommandParameter="{Binding PreIID}" Width="50"/>
+                            <TextBox Text="{Binding PreIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="2"  >
+                            <Button Content="PreA" Width="50" Command="{Binding OpenPreACommand}" CommandParameter="{Binding PreAID}"/>
+                            <TextBox Text="{Binding PreAID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="3" >
+                            <Button Content="LitQ" Width="50" Command="{Binding OpenLitQCommand}" CommandParameter="{Binding LitQID}"/>
+                            <TextBox Text="{Binding LitQID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="4" >
+                            <Button Content="ROs" Width="50" Command="{Binding OpenRespOptionsCommand}" CommandParameter="{Binding RespName}"/>
+                            <TextBox Text="{Binding RespName}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="5" >
+                            <Button Content="NRs" Width="50" Command="{Binding OpenNRCodesCommand}" CommandParameter="{Binding NRName}"/>
+                            <TextBox Text="{Binding NRName}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="6" >
+                            <Button Content="PstI" Width="50" Command="{Binding OpenPstICommand}" CommandParameter="{Binding PstIID}"/>
+                            <TextBox Text="{Binding PstIID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Row="7" >
+                            <Button Content="PstP" Width="50" Command="{Binding OpenPstPCommand}" CommandParameter="{Binding PstPID}"/>
+                            <TextBox Text="{Binding PstPID}" Width="70" Margin="5,0" VerticalContentAlignment="Center" IsReadOnly="{Binding Locked}"/>
+                        </StackPanel>
                     
-                    <!-- # comments, translations, Time Frames -->
-                    <StackPanel Grid.Row="8" Margin="3">
-                        <TextBlock>
-                            <Run  d:Text="0" Text="{Binding SelectedQuestion.Comments.Count, Mode=OneWay}" />
-                            <Run  Text=" comments."/>
-                        </TextBlock>
-                        <TextBlock>
-                            <Run  d:Text="0" Text="{Binding SelectedQuestion.Translations.Count, Mode=OneWay}" />
-                            <Run  Text=" translations."/>
-                        </TextBlock>
-                        <!--<TextBlock Text="Time Frames" FontWeight="Bold" />
-                        <ListBox Height="80" ItemsSource="{Binding SelectedQuestion.TimeFrames}"></ListBox>-->
-                    </StackPanel>
+                        <!-- # comments, translations, Time Frames -->
+                        <StackPanel Grid.Row="8" Margin="3">
+                            <TextBlock>
+                                <Run  d:Text="0" Text="{Binding SelectedQuestion.Comments.Count, Mode=OneWay}" />
+                                <Run  Text=" comments."/>
+                            </TextBlock>
+                            <TextBlock>
+                                <Run  d:Text="0" Text="{Binding SelectedQuestion.Translations.Count, Mode=OneWay}" />
+                                <Run  Text=" translations."/>
+                            </TextBlock>
+                            <!--<TextBlock Text="Time Frames" FontWeight="Bold" />
+                            <ListBox Height="80" ItemsSource="{Binding SelectedQuestion.TimeFrames}"></ListBox>-->
+                        </StackPanel>
                     
-                    <!-- question text -->
-                    <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
-                        <FlowDocumentScrollViewer.Document>
-                            <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
-                        </FlowDocumentScrollViewer.Document>
-                    </FlowDocumentScrollViewer>
+                        <!-- question text -->
+                        <FlowDocumentScrollViewer Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
+                            <FlowDocumentScrollViewer.Document>
+                                <Binding Path="CurrentQuestionText" Converter="{StaticResource HtmlToFlow}" />
+                            </FlowDocumentScrollViewer.Document>
+                        </FlowDocumentScrollViewer>
                     
-                </Grid>
+                    </Grid>
                 
-            </Border>
+                </Border>
             
         </DockPanel>
-        
-        <!-- Images -->
+		</Grid>
+		<!-- Images -->
         <StackPanel Grid.Row="0" Grid.Column="2">
             <local:NavigationBar  Height="30"
                     FirstItemCommand="{Binding FirstImageCommand}"
@@ -282,14 +290,19 @@
         </DockPanel>
         
         <!-- Comments -->
-        <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" Effect="{StaticResource SunkenEffect}">
+        <DockPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" >
             <TextBlock DockPanel.Dock="Top" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,5">
                 <Run Text="Comments"/>
                 <Button Command="{Binding AddCommentCommand}" Margin="10,0" VerticalAlignment="Center">
                     <Image Source="/Images/add.png" Width="15" Height="10"></Image>
                 </Button>
             </TextBlock>
-            <views:CommentsListView Comments="{Binding Comments}"/>
+			<Grid>
+				<!-- Background with shadow-->
+				<Border Background="LightBlue" Effect="{StaticResource SunkenEffect}" />
+				<views:CommentsListView Comments="{Binding Comments}"/>
+			</Grid>
+            
             
         </DockPanel>
     </Grid>
