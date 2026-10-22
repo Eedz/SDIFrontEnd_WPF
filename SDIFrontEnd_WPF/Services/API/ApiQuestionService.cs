@@ -77,10 +77,24 @@ namespace SDIFrontEnd_WPF
             response.EnsureSuccessStatusCode();
             return response.IsSuccessStatusCode;
         }
-        #endregion
 
-        #region PUT Methods
-        public async Task<int> UpdateQuestion(SurveyQuestion question)
+		public async Task<bool> InsertQuestionImage(SurveyImage image)
+		{
+            var dto = new SurveyImageDto()
+            {
+				QID = image.QID,
+				Path = image.ImagePath,
+				FilePath = image.ImagePath,
+				ImageName = image.ImageName
+			};
+			var response = await _http.PostAsJsonAsync($"{_baseApi}/questions/{image.QID}/images", dto);
+			response.EnsureSuccessStatusCode();
+			return response.IsSuccessStatusCode;
+		}
+		#endregion
+
+		#region PUT Methods
+		public async Task<int> UpdateQuestion(SurveyQuestion question)
         {
             var dto = _surveyQuestionMapper.MapToDto(question);
             var response = await _http.PutAsJsonAsync($"{_baseApi}/questions/{dto.ID}", dto);
@@ -95,6 +109,7 @@ namespace SDIFrontEnd_WPF
             return response.IsSuccessStatusCode;
         }
 
+        
         #endregion
 
         #region PATCH
@@ -116,8 +131,15 @@ namespace SDIFrontEnd_WPF
             var result = response.EnsureSuccessStatusCode();
             return result.IsSuccessStatusCode;
         }
-        #endregion 
-      
-        
-    }
+
+        public async Task<bool> DeleteQuestionImage(int qid, int imageId)
+		{
+			var response = await _http.DeleteAsync($"{_baseApi}/questions/{qid}/images/{imageId}");
+			var result = response.EnsureSuccessStatusCode();
+			return result.IsSuccessStatusCode;
+		}
+		#endregion
+
+
+	}
 }
