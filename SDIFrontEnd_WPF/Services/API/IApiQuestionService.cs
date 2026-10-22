@@ -22,5 +22,7 @@ namespace SDIFrontEnd_WPF
 
         Task<bool> UpdateTranslation(Translation translation);
         Task<bool> CreateTranslation(Translation translation);
+        Task<bool> InsertQuestionImage(SurveyImage image);
+        Task<bool> DeleteQuestionImage(int qid, int imageId);
     }
 }
