@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
              xmlns:converters="clr-namespace:MvvmLib.Converters;assembly=MvvmLib"
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="400" Height="550">
+             d:DesignHeight="550" d:DesignWidth="400" Height="600">
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:HtmlToFlowDocumentConverter x:Key="HtmlToFlow" />
@@ -26,7 +26,7 @@
         </Grid.ColumnDefinitions>
         
         <TextBlock Text="Translation Importer" FontSize="24" HorizontalAlignment="Center" Margin="10" Grid.ColumnSpan="2"/>
-        <Border Grid.Row="1" Effect="{StaticResource SunkenEffect}">
+        <Border Grid.Row="1" >
             <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" >
 
             <StackPanel  Width="125">
@@ -39,7 +39,7 @@
             </StackPanel>
         </StackPanel>
         </Border>
-        <Border Grid.Row="2" Effect="{StaticResource SunkenEffect}">
+        <Border Grid.Row="2" >
             <StackPanel Margin="5" Orientation="Horizontal"  VerticalAlignment="Top">
             <TextBlock Text="Source File" VerticalAlignment="Center"/>
             <TextBox Text="{Binding SourceFile}" Margin="5" Width="180" Height="55" TextWrapping="Wrap"></TextBox>
@@ -53,24 +53,20 @@
         </StackPanel>
         </Border>
 
-        <Border Grid.Row="3" Effect="{StaticResource SunkenEffect}">
-            <TabControl  Height="350" Margin="5">
+		<Border Grid.Row="3" Effect="{StaticResource SunkenEffect}">
+			<TabControl  Height="350" Margin="5" >
                 <TabItem Header="Imported">
                     <StackPanel>
-                        <TextBlock Text="{Binding ImportedCurrent.VarName}" />
-                        <FlowDocumentScrollViewer Height="250" FontSize="10" Grid.Column="1" Grid.RowSpan="9" IsToolBarVisible="False" BorderBrush="LightGray" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" >
-                            <FlowDocumentScrollViewer.Document>
-                                <Binding Path="CurrentImportedText" Converter="{StaticResource HtmlToFlow}" />
+                        <TextBlock Text="{Binding ImportedCurrent.VarName}" FontSize="18" FontWeight="Bold" Margin="10,0"/>
+                        <FlowDocumentScrollViewer Height="250"  IsToolBarVisible="False" BorderBrush="LightGray" 
+												  VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" Zoom="90" >
+							<FlowDocumentScrollViewer.Document>
+								<Binding Path="CurrentImportedText" Converter="{StaticResource HtmlToFlow}" />
                             </FlowDocumentScrollViewer.Document>
                         </FlowDocumentScrollViewer>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                            <Button Content="⟵ Previous"
-                Command="{Binding ImportedPrevCommand}"
-                Margin="5" />
-
-                            <Button Content="Next ⟶"
-                Command="{Binding ImportedNextCommand}"
-                Margin="5" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,0">
+                            <Button Content="⟵ Previous" Command="{Binding ImportedPrevCommand}" Margin="5" />
+                            <Button Content="Next ⟶" Command="{Binding ImportedNextCommand}" Margin="5" />
                         </StackPanel>
                     </StackPanel>
                 </TabItem>
