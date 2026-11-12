@@ -19,5 +19,10 @@ namespace SDIFrontEnd_WPF
         {
             throw new NotImplementedException();
         }
-    }
+
+        public async Task UpdateSurveyHistory(FormState formState)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

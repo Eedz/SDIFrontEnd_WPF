@@ -54,5 +54,29 @@ namespace SDIFrontEnd_WPF
                 throw new ApplicationException("Error fetching user preferences", ex);
             }
         }
-    }
+
+        public async Task UpdateSurveyHistory(FormState state)
+		{
+			try
+			{
+                var dto = new FormStateDto
+				{
+					ID = state.ID,
+					Filter = state.Filter,
+					FilterID = state.FilterID,
+					PersonnelID = state.PersonnelID,
+					FormName = state.FormName,
+					FormNum = state.FormNum,
+					RecordPosition = state.RecordPosition
+				};
+				var response = await this._http.PutAsJsonAsync($"{_baseApi}/users/{state.PersonnelID}/formstate", dto);
+				response.EnsureSuccessStatusCode();
+			}
+			catch (Exception ex)
+			{
+				// Log the exception or handle it as needed
+				throw new ApplicationException("Error updating survey history", ex);
+			}
+		}
+	}
 }

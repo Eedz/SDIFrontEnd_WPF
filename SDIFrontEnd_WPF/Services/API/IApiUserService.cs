@@ -10,5 +10,7 @@ namespace SDIFrontEnd_WPF
     public interface IApiUserService
     {
         Task<UserPrefs> GetUser(string username);
+
+        Task UpdateSurveyHistory(FormState formState);
     }
 }
