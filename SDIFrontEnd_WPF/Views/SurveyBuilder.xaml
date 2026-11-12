@@ -66,17 +66,10 @@
 
             </StackPanel>
             <StackPanel>
-                <TextBlock>
-                    <Run Text="Added: "/>
-                    <Run d:Text="Added: 0" Text="{Binding Added.Count, Mode=OneWay}"/>
-                    <LineBreak/>
-                    <Run Text="Modified: "/>
-                    <Run d:Text="Modified: 0" Text="{Binding Modified.Count, Mode=OneWay}"/>
-                    <LineBreak/>
-                    <Run Text="Deleted: "/>
-                    <Run d:Text="Deleted: 0" Text="{Binding Removed.Count, Mode=OneWay}"/>
-                </TextBlock>
-            </StackPanel>
+                <TextBlock Text="{Binding Added.Count, StringFormat='Added: {0}', Mode=OneWay}" />
+                <TextBlock Text="{Binding Modified.Count, StringFormat='Modified: {0}', Mode=OneWay}" />
+				<TextBlock Text="{Binding Removed.Count, StringFormat='Deleted: {0}', Mode=OneWay}" />
+			</StackPanel>
         </StackPanel>
 
         <!-- VarName/Qnum -->
