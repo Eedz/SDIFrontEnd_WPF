@@ -24,10 +24,10 @@
         <!-- Commands -->
         <DockPanel Grid.ColumnSpan="2">
 
-            <Button Command="{Binding SaveCommand}" Content="Save" Margin="3" Height="20" Width="35"/>
-            <Button Command="{Binding ToggleEditCommand}" Content="Edit" Margin="3" Height="20" Width="35"/>
+            <Button Command="{Binding SaveCommand}" Content="Save" Margin="3" Height="25" Width="40"/>
+            <Button Command="{Binding ToggleEditCommand}" Content="Edit" Margin="3" Height="25" Width="40"/>
 
-            <Button Command="{Binding DeleteCommand}" Content="Delete" HorizontalAlignment="Right" Margin="3" Height="20" Width="45"/>
+            <Button Command="{Binding DeleteCommand}" Content="Delete" HorizontalAlignment="Right" Margin="3" Height="25" Width="50"/>
 
         </DockPanel>
         <!-- Wording Text -->
