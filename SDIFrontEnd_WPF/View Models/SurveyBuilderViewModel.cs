@@ -364,6 +364,7 @@ namespace SDIFrontEnd_WPF
                 {
                     Survey = SelectedQuestion.SurveyCode,
                     VarName = SelectedQuestion.VarName.VarName,
+                    QID = SelectedQuestion.ID
                 };
 
                 if (!SelectedQuestionRecord.NewRecord)
@@ -972,7 +973,11 @@ namespace SDIFrontEnd_WPF
             // renumber the rest of the questions
             CurrentSurvey.Renumber(0);
 
-        }
+			foreach (SurveyQuestionRecord r in RecordList)
+				if (r.DirtyQnum && (!Modified.Contains(r.Item)))
+					Modified.Add(r.Item);
+
+		}
 
         /// <summary>
         /// Add an image to the selected question. Images must be already stored in the correct network location.
@@ -1023,12 +1028,14 @@ namespace SDIFrontEnd_WPF
         [RelayCommand]
         private void Reorder()
         {
-            var list = RecordList;
-            int start = CurrentSurvey.Questions[0].GetQnumValue() -1;
             Survey temp = new Survey();
             temp.Questions.AddRange(RecordList.Select(x => x.Item));
-            temp.Renumber(start);
+            temp.Renumber(0);
             
+            foreach(SurveyQuestionRecord r in RecordList)
+                if (r.DirtyQnum && (!Modified.Contains(r.Item)))
+                    Modified.Add(r.Item);
+
         }
 
         // ask user to document deletes with a comment, then save comments
