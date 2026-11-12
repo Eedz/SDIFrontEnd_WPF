@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Markup;
+
 namespace SDIFrontEnd_WPF
 {
     public static class HtmlUtils
@@ -17,13 +19,20 @@ namespace SDIFrontEnd_WPF
                 return string.Empty;
 
             // convert FlowDocument to XAML
-            string? content = RichTextBoxHelper.ConvertFlowDocumentToXaml(flowDocument);
+            string? content = ConvertFlowDocumentToXaml(flowDocument);
             // convert XAML to HTML
             string html = MarkupConverter.Core.HtmlFromXamlConverter.ConvertXamlToHtml(content, false);
             // convert HTML tags to lowercase
             html = ConvertHtmlTagsToLowerCase(html);
 
             return html;
+        }
+
+        public static string ConvertFlowDocumentToXaml(FlowDocument doc)
+        {
+            if (doc == null) return string.Empty;
+
+            return XamlWriter.Save(doc);
         }
 
         public static string ConvertHtmlTagsToLowerCase(string html)
