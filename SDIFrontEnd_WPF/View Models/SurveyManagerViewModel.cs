@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using ITCLib;
 using ITCReportLib;
 using MvvmLib.ViewModels;
+using SDIFrontEnd_WPF.Models;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,9 @@ namespace SDIFrontEnd_WPF
         private readonly IApiCommentService _commentService; // Service for managing comments
         private readonly IWindowService _windowService; // Service for managing windows and dialogs
         private readonly IApiVarNameService _varNameService;
+        private readonly ICurrentUserService _userService; // Service for managing user preferences and history
 
-        [ObservableProperty]
+		[ObservableProperty]
         private Survey? currentSurvey; // The currently selected survey
 
         public List<Survey>? AllSurveys { get; private set; } // List of all surveys
@@ -37,7 +39,7 @@ namespace SDIFrontEnd_WPF
         public SurveyBuilderViewModel? SurveyBuilder { get; set; } // ViewModel for managing survey questions and their properties
 
         public SurveyManagerViewModel(IApiSurveyService surveyService, IApiQuestionService questionService, IDialogService dialogService, ReferenceDataStore referenceDataService, WordingData wordingData,
-            IApiWordingService wordingService, IApiPeopleService peopleService, IApiCommentService commentService, IWindowService windowService, IApiVarNameService varnameService)
+            IApiWordingService wordingService, IApiPeopleService peopleService, IApiCommentService commentService, IWindowService windowService, IApiVarNameService varnameService, ICurrentUserService userService)
         {
             _surveyService = surveyService;
             _questionService = questionService;
@@ -50,7 +52,8 @@ namespace SDIFrontEnd_WPF
             _windowService = windowService;
             _wordingData = wordingData;
             _varNameService = varnameService;
-        }
+			_userService = userService;
+		}
 
         public async void Load(Survey survey)
         {
@@ -64,20 +67,31 @@ namespace SDIFrontEnd_WPF
             await LoadSurvey(survey);
         }
 
-        partial void OnCurrentSurveyChanged(Survey value)
+        partial void OnCurrentSurveyChanged(Survey? oldValue, Survey? newValue)
         {
             
             if (SurveyBuilder != null && SurveyBuilder.RecordList.Any(x=>x.ShouldSave))
             {
-                if (!_dialogService.Confirm($"There are unsaved changes to {CurrentSurvey}. Discard changes?."))
+                if (!_dialogService.Confirm($"There are unsaved changes to {oldValue}. Discard changes?"))
                     return;
             }
 
-            if (value == null)
-                throw new ArgumentNullException(nameof(value), "Current survey cannot be null");
+            if (newValue == null)
+                throw new ArgumentNullException(nameof(newValue), "Current survey cannot be null");
 
-            _ = LoadSurvey(value);
-        }
+            _ = LoadSurvey(newValue);
+
+            var newFormState = new FormState
+            {
+                PersonnelID = _userService.CurrentUser.userid, // Replace with actual username retrieval logic
+                FormName = "frmSurveyEntry",
+                FormNum = 1,
+                FilterID = newValue.SID,
+                RecordPosition = 0 // Assuming starting position is 0; adjust as necessary
+            };
+
+			_userService.UpdateFormState(newFormState);			
+		}
 
         [RelayCommand]
         private async Task LoadSurvey(Survey survey)
