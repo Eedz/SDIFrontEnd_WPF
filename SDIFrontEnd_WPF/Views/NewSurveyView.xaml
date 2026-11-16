@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="SDIFrontEnd_WPF.Views.NewSurveyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SDIFrontEnd_WPF.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="700">
+    <Grid HorizontalAlignment="Center">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="40" >	</RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="40"></RowDefinition>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="100"/>
+			<ColumnDefinition Width="200"/>
+			<ColumnDefinition Width="100"/>
+			<ColumnDefinition Width="200"/>
+		</Grid.ColumnDefinitions>
+		
+		<TextBlock Text="Create New Survey" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center" FontWeight="Bold" FontSize="30"/>
+			
+		<TextBlock Text="Wave:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+		<ComboBox Grid.Row="1" Grid.Column="1" x:Name="Wave" ItemsSource="{Binding StudyWaves}" DisplayMemberPath="WaveCode" SelectedValue="{Binding NewSurvey.WaveID}" SelectedValuePath="ID"/>
+		<TextBlock Text="Survey Code:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="2" Grid.Column="1" x:Name="SurveyName" Text="{Binding NewSurvey.SurveyCode}"/>
+		<TextBlock Text="Survey Type:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
+		<ComboBox Grid.Row="3" Grid.Column="1" x:Name="SurveyType" ItemsSource="{Binding SurveyCohorts}" DisplayMemberPath="Cohort" SelectedItem="{Binding NewSurvey.Cohort}"/>
+		<TextBlock Text="Survey Mode:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
+		<ComboBox Grid.Row="4" Grid.Column="1" x:Name="SurveyMode" ItemsSource="{Binding SurveyModes}" DisplayMemberPath="Mode" SelectedItem="{Binding NewSurvey.Mode}"/>
+		<TextBlock Text="Creation Date:" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
+		<DatePicker Grid.Row="5" Grid.Column="1" x:Name="Created" SelectedDate="{Binding NewSurvey.CreationDate}"/>
+
+		<TextBlock Grid.Row="1" Grid.Column="2" Text="Copy From:"  VerticalAlignment="Center"/>
+		<ComboBox Grid.Row="1" Grid.Column="3" x:Name="CopyFrom" ItemsSource="{Binding Surveys}" DisplayMemberPath="SurveyCode" SelectedItem="{Binding CopyFrom}"/>
+		<TextBlock Grid.Row="2" Grid.Column="2" Text="Title:"  VerticalAlignment="Center"/>
+		<TextBox Grid.Row="2" Grid.Column="3" Text="{Binding NewSurvey.Title}" />
+		<TextBlock Grid.Row="3" Grid.Column="2" Text="Web Name:"  VerticalAlignment="Center"/>
+		<TextBox Grid.Row="3" Grid.Column="3" Text="{Binding NewSurvey.WebName}"></TextBox>
+		<TextBlock Grid.Row="4" Grid.Column="2" Text="NCT:"  VerticalAlignment="Center"/>
+		<CheckBox Grid.Row="4" Grid.Column="3" IsChecked="{Binding NewSurvey.NCT}"></CheckBox>
+		<TextBlock Grid.Row="5" Grid.Column="2" Text="ITC Survey:"  VerticalAlignment="Center"/>
+		<CheckBox Grid.Row="5" Grid.Column="3" IsChecked="{Binding NewSurvey.ITCSurvey}"></CheckBox>
+			
+		
+
+		<StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="3" HorizontalAlignment="Right">
+			<Button Width="80" Content="OK" Command="{Binding CreateSurveyCommand}" Margin="3,3,30,3"/>
+			<Button Width="80" Content="Cancel" Command="{Binding CancelCommand}"/>
+		</StackPanel>
+    </Grid>
+</UserControl>
