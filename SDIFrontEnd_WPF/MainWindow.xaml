@@ -81,6 +81,7 @@
                     <Image Source="/Images/add.png"/>
                 </Button>
                 </StackPanel>
+				<Button Content="New Survey" Command="{Binding NewSurveyCommand}" Margin="8"/>
             </StackPanel>
         </StackPanel>
         <Border Grid.Row="2" Grid.ColumnSpan="2" BorderThickness="2" BorderBrush="AliceBlue">
