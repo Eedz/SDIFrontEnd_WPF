@@ -3,6 +3,7 @@ using ITCLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SDIFrontEnd_WPF.Mappings;
+using SDIFrontEnd_WPF.Models;
 using SDIFrontEnd_WPF.Services;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
@@ -172,6 +173,7 @@ namespace SDIFrontEnd_WPF
             // client services
             services.AddTransient<QuestionImporterService>();
             services.AddSingleton<IMatrixService, MatrixService>();
+            services.AddSingleton<ICurrentUserService, CurrentUserService>();
 
             AddVMServices(services);
 
@@ -200,6 +202,7 @@ namespace SDIFrontEnd_WPF
                     ?? throw new InvalidOperationException("ApiBaseUrl is not configured in App.config");
             #else
             var baseUrl = "https://localhost:7137/";
+            baseUrl = "http://itcweb.private.uwaterloo.ca/";
 #endif
 
             services.AddHttpClient<IApiSurveyService, ApiSurveyService>(client =>
@@ -295,6 +298,7 @@ namespace SDIFrontEnd_WPF
             services.AddTransient<LabelLibraryViewModel>();
             services.AddTransient<TopicContentReportViewModel>();
             services.AddTransient<PraccingIssuesImporterViewModel>();
+            services.AddTransient<NewSurveyViewModel>();
         }
     }
 
