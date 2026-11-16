@@ -5,6 +5,7 @@ using ITCLib;
 using ITCReportLib;
 using Microsoft.Extensions.DependencyInjection;
 using MvvmLib.ViewModels;
+using SDIFrontEnd_WPF.Models;
 using SDIFrontEnd_WPF.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -19,14 +20,17 @@ namespace SDIFrontEnd_WPF
         // when an item is selected, the corresponding user control is displayed in the right pane
 
         private readonly IServiceProvider _services; 
-        private readonly IApiUserService _userService;
+        private readonly ICurrentUserService _userService;
         private readonly IApiSurveyService apiSurveyService; // Service for managing surveys via API calls
+        private readonly IDialogService _dialogService;
 
         private UserPrefs? CurrentUser;
 
         public IEnumerable<MenuCategory> MenuCategories => Enum.GetValues(typeof(MenuCategory)).Cast<MenuCategory>();
 
         public List<Survey> AvailableSurveysToAdd { get; } = new List<Survey>();
+
+        public ObservableCollection<SublinkItem> SurveySublinks = new ObservableCollection<SublinkItem>();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CurrentSublinks))]
@@ -35,6 +39,8 @@ namespace SDIFrontEnd_WPF
         [ObservableProperty]
         private ObservableCollection<SublinkItem> currentSublinks;
            
+        
+
         [ObservableProperty]
         private SublinkItem? selectedSublink;
         [ObservableProperty]
@@ -50,19 +56,23 @@ namespace SDIFrontEnd_WPF
             DisplayName = "Main Window ViewModel";
             ActiveForm = services.GetRequiredService<HomeViewModel>(); // Set the initial active form to HomeViewModel
             _services = services;
-            _userService = _services.GetService(typeof(IApiUserService)) as IApiUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
-            
+            _userService = _services.GetService(typeof(ICurrentUserService)) as ICurrentUserService ?? throw new ArgumentNullException(nameof(_services), "User service cannot be null");
+			_dialogService = _services.GetRequiredService<IDialogService>();
             apiSurveyService = _services.GetService(typeof(IApiSurveyService)) as IApiSurveyService ?? throw new ArgumentNullException(nameof(_services), "Survey API service cannot be null");// Initialize the API survey service with the survey service
             
            
             CurrentSublinks = new ObservableCollection<SublinkItem>();
+            
         }
 
         public async Task LoadAsync()
         {
             var surveys = await apiSurveyService.GetAllAsync();
             AvailableSurveysToAdd.AddRange(surveys);
-            CurrentUser = await _userService.GetUser(Environment.UserName) ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");            
+            
+            CurrentUser = _userService.CurrentUser ?? throw new ArgumentNullException(nameof(_userService), "User preferences cannot be null");
+            SurveySublinks = await GetSurveyEditorList();
+
             
         }
 
@@ -333,7 +343,7 @@ namespace SDIFrontEnd_WPF
             IEnumerable<SublinkItem> items = category switch
             {
                 MenuCategory.Home => new[] { new SublinkItem("Home", "home", category) },
-                MenuCategory.Surveys => await GetSurveyEditorList(),
+                MenuCategory.Surveys => SurveySublinks, // await GetSurveyEditorList(),
                 MenuCategory.VarNames => GetVarNameLinks(),
                 MenuCategory.Search => GetSearchLinks(),
                 MenuCategory.Praccing => GetPraccingLinks(),
@@ -357,5 +367,29 @@ namespace SDIFrontEnd_WPF
             SelectedNewSurvey = null; // reset drop down
             
         }
+
+        [RelayCommand]
+        private async Task NewSurvey()
+        {
+            var newSurveyVM = _services.GetRequiredService<NewSurveyViewModel>();
+            await newSurveyVM.Load();
+
+            var result = _dialogService.ShowDialog(newSurveyVM);
+
+            if (result.Value)
+            {
+                var survey = newSurveyVM.NewSurvey;
+
+                var newSurvey = new SurveySublinkItem(survey.SurveyCode, "survey_new", MenuCategory.Surveys, survey.SID);
+                CurrentSublinks.Add(newSurvey);
+                SelectedSublink = newSurvey;
+            }
+            else
+            {
+
+            }
+
+		}
+
     }
 }

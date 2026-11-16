@@ -71,16 +71,16 @@
             <StackPanel Margin="0,10,0,0" Visibility="{Binding IsSurveyCategory, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="Open a previously viewed survey or choose another below." TextWrapping="Wrap" HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal">
-                <ComboBox Width="80"
-                  ItemsSource="{Binding AvailableSurveysToAdd}"
-                  SelectedItem="{Binding SelectedNewSurvey, Mode=TwoWay}"
-                  DisplayMemberPath="SurveyCode"
-                          Margin="8"
-                   />
-                <Button Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" Width="20" Height="20">
-                    <Image Source="/Images/add.png"/>
-                </Button>
-                </StackPanel>
+                    <ComboBox Width="80"
+                      ItemsSource="{Binding AvailableSurveysToAdd}"
+                      SelectedItem="{Binding SelectedNewSurvey, Mode=TwoWay}"
+                      DisplayMemberPath="SurveyCode"
+                              Margin="8"
+                       />
+					<Button Command="{Binding AddSelectedSurveyCommand}" Margin="5,0,0,0" Width="20" Height="20">
+						<Image Source="/Images/add.png"/>
+					</Button>
+				</StackPanel>
 				<Button Content="New Survey" Command="{Binding NewSurveyCommand}" Margin="8"/>
             </StackPanel>
         </StackPanel>
