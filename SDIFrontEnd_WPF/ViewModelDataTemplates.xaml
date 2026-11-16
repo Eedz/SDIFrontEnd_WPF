@@ -149,4 +149,8 @@
     <DataTemplate DataType="{x:Type viewmodels:PraccingImportResponseItemViewModel}">
         <views:PraccingImportResponseItemView/>
     </DataTemplate>
+	
+	<DataTemplate DataType="{x:Type viewmodels:NewSurveyViewModel}">
+		<views:NewSurveyView/>
+	</DataTemplate>
 </ResourceDictionary>
