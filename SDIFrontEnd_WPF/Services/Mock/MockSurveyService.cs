@@ -309,5 +309,10 @@ public class MockSurveyService : IApiSurveyService
     {
         throw new NotImplementedException();
     }
+
+    public async Task<Survey> CreateSurveyAsync(Survey survey)
+    {
+        throw new NotImplementedException();
+    }
 }
 

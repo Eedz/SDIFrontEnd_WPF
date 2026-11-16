@@ -10,10 +10,10 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
     private readonly IMapper<Survey, SurveyDto> surveyMapper;
     private readonly IMapper<SurveyQuestion, SurveyQuestionDto> questionMapper;
 
-    public ApiSurveyService(HttpClient http, IMapperFactory mapperFactory) : base (http)
+    public ApiSurveyService(HttpClient http, IMapperFactory mapperFactory) : base(http)
     {
-        this.surveyMapper = mapperFactory.Get<Survey, SurveyDto>(); 
-        questionMapper = mapperFactory.Get<SurveyQuestion, SurveyQuestionDto>(); 
+        this.surveyMapper = mapperFactory.Get<Survey, SurveyDto>();
+        questionMapper = mapperFactory.Get<SurveyQuestion, SurveyQuestionDto>();
 
     }
 
@@ -22,13 +22,13 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         var dtos = await _http.GetFromJsonAsync<List<SurveyDto>>($"{_baseApi}/surveys");
 
         var surveys = dtos.Select(dtos => surveyMapper.MapToEntity(dtos)).ToList();
-        
+
         return surveys;
     }
 
     public async Task<Survey?> GetSurveyByIdAsync(int id)
     {
-        var dto =  await _http.GetFromJsonAsync<SurveyDto>($"{_baseApi}/surveys/{id}");
+        var dto = await _http.GetFromJsonAsync<SurveyDto>($"{_baseApi}/surveys/{id}");
 
         var survey = surveyMapper.MapToEntity(dto);
         return survey;
@@ -67,7 +67,7 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
     {
         var dto = await _http.GetFromJsonAsync<List<DeletedQuestionDto>>($"{_baseApi}/surveys/{id}/deleted");
         if (dto == null) return new List<DeletedQuestion>();
-        var deletedQuestions = dto.Select(x=> new DeletedQuestion()
+        var deletedQuestions = dto.Select(x => new DeletedQuestion()
         {
             ID = x.ID,
             SurveyCode = x.SurveyCode,
@@ -90,10 +90,10 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
                 Notes = new Note() { NoteText = y.NoteText },
                 NoteDate = y.NoteDate,
                 Source = y.Source,
-                NoteType = new CommentType() {  ID = y.NoteType.ID, TypeName = y.NoteType.TypeName }
+                NoteType = new CommentType() { ID = y.NoteType.ID, TypeName = y.NoteType.TypeName }
             }).ToList()
         });
-        
+
         return deletedQuestions.ToList();
     }
 
@@ -149,19 +149,19 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         var dto = surveyMapper.MapToDto(survey);
 
         var response = await _http.PutAsJsonAsync($"{_baseApi}/surveys/{dto.SID}", dto);
-        
+
         response.EnsureSuccessStatusCode();
 
-		var updatedDto = await response.Content.ReadFromJsonAsync<SurveyDto>();
+        var updatedDto = await response.Content.ReadFromJsonAsync<SurveyDto>();
 
         if (updatedDto == null)
-		{
-			throw new Exception("Failed to deserialize the updated survey from the response.");
-		}
+        {
+            throw new Exception("Failed to deserialize the updated survey from the response.");
+        }
 
-		var updatedSurvey = surveyMapper.MapToEntity(updatedDto);
+        var updatedSurvey = surveyMapper.MapToEntity(updatedDto);
 
-		return updatedSurvey;
+        return updatedSurvey;
     }
 
     public async Task DeleteAsync(int id)
@@ -186,16 +186,16 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
         response.EnsureSuccessStatusCode();
         return true;
     }
-     public async Task<bool> UpdateTranslation(Translation translation)
+    public async Task<bool> UpdateTranslation(Translation translation)
     {
         var dto = new TranslationDto()
         {
             ID = translation.ID,
-            QID= translation.QID,
+            QID = translation.QID,
             TranslationText = translation.TranslationText,
             LanguageName = translation.LanguageName.LanguageName,
             Bilingual = translation.Bilingual,
-            
+
         };
 
         var response = await _http.PutAsJsonAsync($"{_baseApi}/questions/{dto.QID}/translations/{dto.ID}", dto);
@@ -217,5 +217,20 @@ public class ApiSurveyService : ApiServiceBase, IApiSurveyService
 
         return response.IsSuccessStatusCode;
     }
+
+    public async Task<Survey> CreateSurveyAsync(Survey survey)
+    {
+        var dto = surveyMapper.MapToDto(survey);
+        var response = await _http.PostAsJsonAsync($"{_baseApi}/surveys", dto);
+        response.EnsureSuccessStatusCode();
+        var createdDto = await response.Content.ReadFromJsonAsync<SurveyDto>();
+        if (createdDto == null)
+        {
+            throw new Exception("Failed to deserialize the created survey from the response.");
+        }
+        var createdSurvey = surveyMapper.MapToEntity(createdDto);
+        return createdSurvey;
+    }
+
 }
 

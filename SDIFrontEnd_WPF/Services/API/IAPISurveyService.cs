@@ -31,5 +31,7 @@ namespace SDIFrontEnd_WPF
 
         Task<bool> UnlockSurvey(int id);
         Task<bool> LockSurvey(int id);
-    }
+
+        Task<Survey> CreateSurveyAsync(Survey survey);
+	}
 }
