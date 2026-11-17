@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using ITCLib;
 using System.Collections.ObjectModel;
 using MvvmLib.ViewModels;
+using System.Text.RegularExpressions;
 
 namespace SDIFrontEnd_WPF.ViewModels
 {
@@ -47,7 +48,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private VariableNameSurveys? selectedUsage;
 
-        
+        public ObservableCollection<string>? UndefinedPrefixes {get;set; } = new();
+
 
         public PrefixListViewModel(IApiVarNameService varnameService, IDialogService dialogService, IApiQuestionService questionService)
         {
@@ -82,7 +84,18 @@ namespace SDIFrontEnd_WPF.ViewModels
             {
                 Records.Add(new VariablePrefixItemViewModel(prefix));
             }
-        }
+
+			var allVars = await _service.GetAllVarNames();
+			
+			var undefinedPrefixes = allVars.Where(v=>Regex.IsMatch(v.VarName, @"^[A-Z]{2}[0-9]{3}")).Select(v => v.VarName.Substring(0, 2)).Distinct().OrderBy(p => p).ToList();
+            foreach (var undefinedPrefix in undefinedPrefixes)
+            {
+                if (!Records.Any(x=>x.Prefix == undefinedPrefix))
+				{
+					UndefinedPrefixes?.Add(undefinedPrefix);
+				}
+			}
+		}
 
         private async Task LoadUsagesAsync()
         {
