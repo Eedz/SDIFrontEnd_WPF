@@ -1,16 +1,18 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xaml.Behaviors;
-using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 
 namespace SDIFrontEnd_WPF
 {
     public class DragDropBehavior : Behavior<ListBox>
     {
-        private static object draggedItem;
-        private static ListBox sourceListBox;
+        private static object? draggedItem;
+        private static ListBox? sourceListBox;
 
         protected override void OnAttached()
         {
@@ -33,6 +35,10 @@ namespace SDIFrontEnd_WPF
         private void ListBox_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             sourceListBox = (ListBox)sender;
+            DependencyObject source = (DependencyObject)e.OriginalSource;
+            // Ignore clicks on scrollbar
+            if (FindParent<ScrollBar>(source) != null)
+                return;
 
             if (sourceListBox.Items.Count==0)
             {
@@ -46,6 +52,20 @@ namespace SDIFrontEnd_WPF
                 DataObject dataObject = new DataObject(draggedItem);
                 DragDrop.DoDragDrop(sourceListBox, dataObject, DragDropEffects.Move);
             }
+        }
+
+        private static T? FindParent<T>(DependencyObject child)
+    where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T result)
+                    return result;
+
+                child = VisualTreeHelper.GetParent(child);
+            }
+
+            return null;
         }
 
         private void ListBox_Drop(object sender, DragEventArgs e)
@@ -96,15 +116,15 @@ namespace SDIFrontEnd_WPF
             }
         }
 
-        private object GetDataFromListBox(ListBox listBox, Point point)
+        private object? GetDataFromListBox(ListBox listBox, Point point)
         {
-            UIElement element = listBox.InputHitTest(point) as UIElement;
+            UIElement? element = listBox.InputHitTest(point) as UIElement;
             if (element == null)
             {
                 return null;
             }
 
-            ListBoxItem listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
+            ListBoxItem? listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
 
             if (listBoxItem == null)
             {
@@ -118,10 +138,10 @@ namespace SDIFrontEnd_WPF
 
         private int GetIndexUnderMouse(ListBox listBox, Point point)
         {
-            UIElement element = listBox.InputHitTest(point) as UIElement;
+            UIElement? element = listBox.InputHitTest(point) as UIElement;
             if (element != null)
             {
-                ListBoxItem listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
+                ListBoxItem? listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
                 if (listBoxItem != null)
                 {
                     return listBox.ItemContainerGenerator.IndexFromContainer(listBoxItem);
