@@ -205,13 +205,13 @@ namespace SDIFrontEnd_WPF.ViewModels
                     baseColumnVm.Options.Content,
                     AddContentColumn);
 
-            //if (propertyName == nameof(Options.RespOptions))
-            //    ToggleSurveyColumn(
-            //        survey,
-            //        baseIndex,
-            //        "resp",
-            //        baseColumnVm.Options.RespOptions,
-            //        AddRespOptionsColumn);
+            if (propertyName == "RespOptions")
+                ToggleSurveyColumn(
+                    survey,
+                    baseIndex,
+                    "resp",
+                    baseColumnVm.Options.RespOptions,
+					AddResponseColumn);
 
             RefreshWindow();
         }
@@ -259,7 +259,7 @@ namespace SDIFrontEnd_WPF.ViewModels
         {
             return new MatrixColumnViewModel(new MatrixColumn(
                 key: $"survey:{survey.SID}:content",
-                header: $"{survey.SurveyCode} content",
+                header: $"{survey.SurveyCode} Content",
                 type: MatrixColumnType.Label,
                 survey: survey,
                 valueProvider: q =>
@@ -270,10 +270,25 @@ namespace SDIFrontEnd_WPF.ViewModels
                 }));
         }
 
+		private MatrixColumnViewModel AddResponseColumn(Survey survey)
+		{
+			return new MatrixColumnViewModel(new MatrixColumn(
+				key: $"survey:{survey.SID}:resp",
+				header: $"{survey.SurveyCode} Response",
+				type: MatrixColumnType.Label,
+				survey: survey,
+				valueProvider: q =>
+				{
+					var sq = survey.Questions
+						.FirstOrDefault(x => x.VarName.RefVarName == q.VarName.RefVarName);
+					return sq?.RespOptionsS.RespList
+                                            .Replace("<br>", "\r\n")
+                                            .Replace("&nbsp;", " ") ?? string.Empty;
+				}));
+		}
 
 
-
-        [RelayCommand]
+		[RelayCommand]
         private async Task AddSurveyAsync()
         {
             if (SelectedSurvey == null || SelectedSurveys.Contains(SelectedSurvey))
@@ -291,7 +306,8 @@ namespace SDIFrontEnd_WPF.ViewModels
                 survey.Questions.Add(q);
 
             RebuildAvailableQuestions();
-        }
+			ExportCommand.NotifyCanExecuteChanged();
+		}
 
         [RelayCommand]
         // TODO if survey column, remove all related columns as well
@@ -401,7 +417,8 @@ namespace SDIFrontEnd_WPF.ViewModels
         private void UpdateScreen()
         {
             RebuildAvailableQuestions();
-        }
+			ExportCommand.NotifyCanExecuteChanged();
+		}
 
         [RelayCommand]
         private void PresetHeadingReport()
