@@ -7,8 +7,8 @@ namespace SurveyImporter_WPF
 {
     public class CommentDragDropBehavior : Behavior<ListBox>
     {
-        private static object draggedItem;
-        private static ListBox sourceListBox;
+        private static object? draggedItem;
+        private static ListBox? sourceListBox;
 
         protected override void OnAttached()
         {
@@ -119,15 +119,15 @@ namespace SurveyImporter_WPF
             }
         }
 
-        private object GetDataFromListBox(ListBox listBox, Point point)
+        private object? GetDataFromListBox(ListBox listBox, Point point)
         {
-            UIElement element = listBox.InputHitTest(point) as UIElement;
+            UIElement? element = listBox.InputHitTest(point) as UIElement;
             if (element == null)
             {
                 return null;
             }
 
-            ListBoxItem listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
+            ListBoxItem? listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
 
             if (listBoxItem == null)
             {
@@ -141,10 +141,10 @@ namespace SurveyImporter_WPF
 
         private int GetIndexUnderMouse(ListBox listBox, Point point)
         {
-            UIElement element = listBox.InputHitTest(point) as UIElement;
+            UIElement? element = listBox.InputHitTest(point) as UIElement;
             if (element != null)
             {
-                ListBoxItem listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
+                ListBoxItem? listBoxItem = listBox.ContainerFromElement(element) as ListBoxItem;
                 if (listBoxItem != null)
                 {
                     return listBox.ItemContainerGenerator.IndexFromContainer(listBoxItem);
