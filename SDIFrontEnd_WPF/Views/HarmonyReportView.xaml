@@ -75,8 +75,7 @@
 
                     <StackPanel Grid.Row="2" Grid.ColumnSpan="4">
                         <TextBlock Text="Prefixes:"/>
-                        <ListBox MinHeight="200" ItemsSource="{Binding PrefixList}"
-                                 behaviors:ListBoxExtensions.BindableSelectedItems="{Binding SelectedPrefixes}"></ListBox>
+                        <ListBox MinHeight="200" ItemsSource="{Binding PrefixList}" SelectedItem="{Binding SelectedPrefix}"/>
                     </StackPanel>
 
                     <DockPanel Grid.Column="4" Grid.RowSpan="3" LastChildFill="True">
