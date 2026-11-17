@@ -32,7 +32,9 @@ namespace SDIFrontEnd_WPF.ViewModels
         [ObservableProperty]
         private VariableName? selectedListVar;
         public List<string> PrefixList { get; set; } = new List<string>();
-        public ObservableCollection<string> SelectedPrefixes { get; set; } = new ObservableCollection<string>();
+
+        [ObservableProperty]
+        private string selectedPrefix;
 
         // Surveys, Waves, Studies
         public List<Survey> SurveyList { get; set; } = new List<Survey>();
@@ -136,6 +138,15 @@ namespace SDIFrontEnd_WPF.ViewModels
             SelectedStudies.CollectionChanged += SelectedStudies_CollectionChanged;
 
             SelectedSurveys.CollectionChanged += SelectedSurveys_CollectionChanged;
+        }
+
+        partial void OnSelectedPrefixChanged(string? oldValue, string newValue)
+        {
+            if (string.IsNullOrEmpty(newValue))
+                return;
+            var matches = VarNameList.Where(v => v.VarName.StartsWith(newValue));
+            foreach (var match in matches) 
+                SelectedVars.Add(match);
         }
 
         private void SelectedSurveys_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
